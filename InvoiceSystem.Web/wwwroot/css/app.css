@@ -1,0 +1,118 @@
+/* app.css — globalne style, layout shell */
+@import url('/css/frontend-variables.css');
+
+/* ============================================================
+   RESET & BASE
+   ============================================================ */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+body {
+    background-color: var(--color-bg-primary);
+    color: var(--color-text-primary);
+    font-family: var(--font-family-base);
+    font-size: var(--font-size-sm);
+    line-height: var(--line-height-base);
+    margin: 0;
+    transition: background-color var(--transition-base), color var(--transition-base);
+}
+
+/* Override DevExtreme dx-viewport — musi wygrać z DX */
+body.dx-viewport,
+html body.dx-viewport {
+    background-color: var(--color-bg-primary) !important;
+    color: var(--color-text-primary) !important;
+}
+
+/* Komponenty CSS ładowane w _Layout.cshtml jako osobne <link> tagi */
+
+/* ============================================================
+   LAYOUT SHELL
+   ============================================================ */
+.app-shell {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.app-shell__main {
+    flex: 1;
+}
+
+/* ============================================================
+   PAGE LAYOUT
+   ============================================================ */
+.page {
+    max-width: var(--content-max-width);
+    margin: 0 auto;
+    padding: var(--spacing-xl) var(--spacing-lg);
+}
+
+.page__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: var(--spacing-xl);
+}
+
+.page__title {
+    font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text-primary);
+    margin: 0 0 var(--spacing-xs);
+    letter-spacing: -0.5px;
+}
+
+.page__subtitle {
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-sm);
+    margin: 0;
+}
+
+/* ============================================================
+   BOOTSTRAP 5 OVERRIDES przez BS variables
+   ============================================================ */
+:root {
+    --bs-body-bg: var(--color-bg-primary);
+    --bs-body-color: var(--color-text-primary);
+    --bs-primary: var(--color-primary);
+    --bs-primary-rgb: var(--color-primary-rgb);
+    --bs-border-color: var(--color-border);
+    --bs-secondary-bg: var(--color-bg-secondary);
+    --bs-tertiary-bg: var(--color-bg-tertiary);
+}
+
+.btn-primary {
+    --bs-btn-bg: var(--color-primary);
+    --bs-btn-border-color: var(--color-primary);
+    --bs-btn-hover-bg: var(--color-primary-hover);
+    --bs-btn-hover-border-color: var(--color-primary-hover);
+    --bs-btn-active-bg: var(--color-primary-hover);
+    font-weight: var(--font-weight-semibold);
+    font-size: var(--font-size-sm);
+}
+
+/* ============================================================
+   TYPOGRAPHY UTILITIES
+   ============================================================ */
+.text-muted {
+    color: var(--color-text-secondary) !important;
+}
+
+.font-mono {
+    font-family: var(--font-family-mono);
+}
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+.app-footer {
+    padding: var(--spacing-md) var(--spacing-lg);
+    border-top: 1px solid var(--color-border);
+    text-align: center;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-xs);
+}

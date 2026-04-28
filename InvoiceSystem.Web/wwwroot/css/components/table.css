@@ -1,0 +1,96 @@
+/* components/table.css — tabele danych + DevExtreme DataGrid override */
+
+/* DevExtreme DataGrid — dopasowanie do design systemu */
+.dx-datagrid {
+    background-color: transparent;
+    color: var(--color-text-primary);
+    font-family: var(--font-family-base);
+    font-size: var(--font-size-sm);
+}
+
+.dx-datagrid-headers {
+    background-color: var(--color-bg-tertiary);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.dx-datagrid-headers .dx-header-row td {
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-text-secondary);
+    background-color: var(--color-bg-tertiary);
+    border-bottom: none;
+}
+
+.dx-datagrid-rowsview .dx-row td {
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-bottom: 1px solid var(--color-border);
+    color: var(--color-text-primary);
+    background-color: var(--color-bg-secondary);
+    vertical-align: middle;
+}
+
+.dx-datagrid-rowsview .dx-row:last-child td {
+    border-bottom: none;
+}
+
+.dx-datagrid-rowsview .dx-row-alt td {
+    background-color: var(--color-bg-secondary);
+}
+
+.dx-datagrid-rowsview .dx-row:hover td {
+    background-color: var(--color-bg-hover);
+}
+
+.dx-datagrid-pager {
+    background-color: var(--color-bg-tertiary);
+    border-top: 1px solid var(--color-border);
+    padding: var(--spacing-sm) var(--spacing-md);
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-xs);
+}
+
+.dx-pager .dx-page-sizes .dx-page-size,
+.dx-pager .dx-page,
+.dx-pager .dx-navigate-button {
+    color: var(--color-text-secondary);
+}
+
+.dx-pager .dx-page-size.dx-selection,
+.dx-pager .dx-page.dx-selection {
+    background-color: var(--color-primary);
+    color: white;
+    border-radius: var(--radius-sm);
+}
+
+.dx-datagrid .dx-toolbar {
+    background-color: var(--color-bg-secondary);
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-bottom: 1px solid var(--color-border);
+}
+
+/* Invoice-specific cell styles */
+.cell-invoice-number {
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-primary);
+}
+
+.cell-amount {
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-success);
+}
+
+.cell-link {
+    color: var(--color-text-muted);
+    text-decoration: none;
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-medium);
+    transition: color var(--transition-fast);
+}
+
+.cell-link:hover {
+    color: var(--color-primary);
+}

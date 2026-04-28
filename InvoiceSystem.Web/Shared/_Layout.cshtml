@@ -1,31 +1,56 @@
 <!DOCTYPE html>
-<html lang="pl">
+<html lang="pl" data-theme="dark">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - InvoiceSystem</title>
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+
+    <!-- Theme — musi być przed wszystkim żeby zapobiec flashowi -->
+    <script src="~/js/theme.js" asp-append-version="true"></script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+
+    <!-- DevExtreme CSS (ciemny motyw) -->
+    <link rel="stylesheet" href="https://cdn3.devexpress.com/jslib/24.1.3/css/dx.common.css" />
+    <link rel="stylesheet" href="https://cdn3.devexpress.com/jslib/24.1.3/css/dx.material.blue.dark.compact.css" />
+
+    <!-- Bootstrap 5 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
+
+    <!-- DevExtreme JS (musi być w head) -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn3.devexpress.com/jslib/24.1.3/js/dx.all.js"></script>
+    <script src="https://cdn3.devexpress.com/jslib/24.1.3/js/dx.aspnet.data.js"></script>
+    <script src="https://cdn3.devexpress.com/jslib/24.1.3/js/dx.aspnet.mvc.js"></script>
+
+    <!-- App CSS -->
+    <link rel="stylesheet" href="~/css/frontend-variables.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/app.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/components/navbar.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/components/card.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/components/badge.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/components/table.css" asp-append-version="true" />
 </head>
-<body>
-    <header>
-        <nav>
-            <div class="container">
-                <a href="/">InvoiceSystem</a>
-            </div>
-        </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
+<body class="dx-viewport">
+    <div class="app-shell">
+
+        @await Html.PartialAsync("Components/_Navbar")
+
+        <main class="app-shell__main">
             @RenderBody()
         </main>
+
+        @await Html.PartialAsync("Components/_Footer")
+
     </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2024 - InvoiceSystem
-        </div>
-    </footer>
-    <script src="~/js/site.js" asp-append-version="true"></script>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- App JS -->
+    <script src="~/js/app.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

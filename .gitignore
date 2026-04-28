@@ -484,3 +484,7 @@ $RECYCLE.BIN/
 *.swp
 
 *README.md
+# SQLite database
+*.db
+*.db-shm
+*.db-wal

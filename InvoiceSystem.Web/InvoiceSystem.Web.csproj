@@ -8,4 +8,8 @@
     <ProjectReference Include="..\InvoiceSystem.Application\InvoiceSystem.Application.csproj" />
     <ProjectReference Include="..\InvoiceSystem.Infrastructure\InvoiceSystem.Infrastructure.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="DevExtreme.AspNet.Core" Version="25.2.6" />
+    <PackageReference Include="DevExtreme.AspNet.Data" Version="5.1.0" />
+  </ItemGroup>
 </Project>

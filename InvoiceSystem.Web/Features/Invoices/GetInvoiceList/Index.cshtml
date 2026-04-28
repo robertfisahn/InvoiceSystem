@@ -1,0 +1,79 @@
+@using InvoiceSystem.Web.Features.Invoices.GetInvoiceList
+@model List<GetInvoiceListViewModel>
+
+@{
+    ViewData["Title"] = "Faktury";
+}
+
+<div class="page">
+
+    <div class="page__header">
+        <div>
+            <h1 class="page__title">Faktury</h1>
+            <p class="page__subtitle">@Model.Count dokumentów w systemie</p>
+        </div>
+        <a href="/invoices/create" class="btn btn-primary btn-sm">
+            + Nowa faktura
+        </a>
+    </div>
+
+    <div class="data-card">
+        @(Html.DevExtreme().DataGrid<GetInvoiceListViewModel>()
+            .ID("gridInvoices")
+            .DataSource(Model)
+            .KeyExpr("Id")
+            .ShowBorders(false)
+            .ShowRowLines(true)
+            .ShowColumnLines(false)
+            .HoverStateEnabled(true)
+            .SearchPanel(s => s.Visible(true).Width(260).Placeholder("Szukaj faktury..."))
+            .HeaderFilter(f => f.Visible(true))
+            .ColumnAutoWidth(false)
+            .Paging(p => p.PageSize(15))
+            .Pager(p => p
+                .ShowPageSizeSelector(true)
+                .AllowedPageSizes(new[] { 10, 15, 20 })
+                .ShowInfo(true)
+                .ShowNavigationButtons(true)
+            )
+            .Columns(columns =>
+            {
+                columns.AddFor(m => m.InvoiceNumber)
+                    .Caption("Numer faktury")
+                    .Width(180)
+                    .CellTemplate(@<text>
+                        <span class="cell-invoice-number"><%- data.InvoiceNumber %></span>
+                    </text>);
+
+                columns.AddFor(m => m.ContractorName)
+                    .Caption("Kontrahent")
+                    .MinWidth(200);
+
+                columns.AddFor(m => m.Date)
+                    .Caption("Data")
+                    .Width(120)
+                    .DataType(GridColumnDataType.Date)
+                    .Format("dd.MM.yyyy");
+
+                columns.AddFor(m => m.TotalAmount)
+                    .Caption("Kwota (PLN)")
+                    .Width(140)
+                    .Alignment(HorizontalAlignment.Right)
+                    .CellTemplate(@<text>
+                        <span class="cell-amount"><%- Number(data.TotalAmount).toLocaleString('pl-PL', {minimumFractionDigits: 2}) %></span>
+                    </text>);
+
+                columns.Add()
+                    .Caption("")
+                    .Width(80)
+                    .Alignment(HorizontalAlignment.Center)
+                    .AllowSorting(false)
+                    .AllowHeaderFiltering(false)
+                    .CellTemplate(@<text>
+                        <a href="/invoices/<%- data.Id %>" class="cell-link">Otwórz</a>
+                    </text>);
+            })
+        )
+    </div>
+
+</div>

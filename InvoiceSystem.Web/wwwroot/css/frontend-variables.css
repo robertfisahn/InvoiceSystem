@@ -1,0 +1,214 @@
+/* ==========================================================================
+   Design Tokens — CSS Custom Properties
+   Dark-first theme z Bootstrap 5
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   DARK THEME (domyślny)
+   -------------------------------------------------------------------------- */
+:root,
+[data-theme="dark"] {
+
+   /* Tła */
+   --color-bg-primary: #0d0d0f;
+   /* główne tło strony */
+   --color-bg-secondary: #16161a;
+   /* tło kart, sidebara */
+   --color-bg-tertiary: #1e1e24;
+   /* tło inputów, tabel */
+   --color-bg-hover: #26262e;
+   /* hover na wierszach */
+   --color-bg-overlay: rgba(0, 0, 0, 0.6);
+
+   /* Tekst */
+   --color-text-primary: #f0f0f5;
+   /* główny tekst */
+   --color-text-secondary: #9898a8;
+   /* opisy, placeholdery */
+   --color-text-muted: #5a5a6e;
+   /* disabled, hints */
+   --color-text-inverse: #0d0d0f;
+   /* tekst na jasnym tle */
+
+   /* Akcenty */
+   --color-primary: #6366f1;
+   /* indigo — główny akcent */
+   --color-primary-hover: #4f46e5;
+   --color-primary-rgb: 99, 102, 241;
+
+   --color-secondary: #8b5cf6;
+   /* fioletowy — secondary */
+   --color-success: #10b981;
+   /* zielony */
+   --color-warning: #f59e0b;
+   /* żółty */
+   --color-danger: #ef4444;
+   /* czerwony */
+   --color-info: #3b82f6;
+   /* niebieski */
+
+   /* Obramowania */
+   --color-border: #2a2a35;
+   --color-border-focus: var(--color-primary);
+
+   /* Statusy faktur */
+   --color-status-draft: #5a5a6e;
+   --color-status-processing: #3b82f6;
+   --color-status-parsed: #8b5cf6;
+   --color-status-confirmed: #10b981;
+   --color-status-failed: #ef4444;
+   --color-status-overdue: #f59e0b;
+
+   /* Cienie */
+   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4);
+   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.5);
+   --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.6);
+
+   /* Bootstrap 5 — nadpisanie przez variables */
+   --bs-body-bg: var(--color-bg-primary);
+   --bs-body-color: var(--color-text-primary);
+   --bs-primary: var(--color-primary);
+   --bs-primary-rgb: var(--color-primary-rgb);
+   --bs-border-color: var(--color-border);
+   --bs-card-bg: var(--color-bg-secondary);
+   --bs-table-bg: var(--color-bg-tertiary);
+   --bs-table-hover-bg: var(--color-bg-hover);
+   --bs-input-bg: var(--color-bg-tertiary);
+   --bs-input-border-color: var(--color-border);
+   --bs-input-focus-border-color: var(--color-border-focus);
+}
+
+/* --------------------------------------------------------------------------
+   LIGHT THEME (opcjonalny)
+   -------------------------------------------------------------------------- */
+[data-theme="light"] {
+
+   /* Tła */
+   --color-bg-primary: #f3f4f6;   /* jasne szare tło strony */
+   --color-bg-secondary: #ffffff;   /* białe karty, navbar */
+   --color-bg-tertiary: #f9fafb;   /* nagłówki tabel, toolbary */
+   --color-bg-hover: #f1f5f9;   /* hover wierszy */
+   --color-bg-overlay: rgba(0, 0, 0, 0.3);
+
+   /* Tekst */
+   --color-text-primary: #1a1a2e;
+   --color-text-secondary: #5a5a7a;
+   --color-text-muted: #9898b0;
+   --color-text-inverse: #f8f8fc;
+
+   /* Akcenty (te same) */
+   --color-primary: #6366f1;
+   --color-primary-hover: #4f46e5;
+   --color-primary-rgb: 99, 102, 241;
+
+   --color-secondary: #8b5cf6;
+   --color-success: #059669;
+   --color-warning: #d97706;
+   --color-danger: #dc2626;
+   --color-info: #2563eb;
+
+   /* Obramowania */
+   --color-border: #e0e0f0;
+   --color-border-focus: var(--color-primary);
+
+   /* Statusy (te same kolory, lekko ciemniejsze) */
+   --color-status-draft: #9898b0;
+   --color-status-processing: #2563eb;
+   --color-status-parsed: #7c3aed;
+   --color-status-confirmed: #059669;
+   --color-status-failed: #dc2626;
+   --color-status-overdue: #d97706;
+
+   /* Cienie */
+   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.12);
+   --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.16);
+
+   /* Bootstrap 5 — nadpisanie */
+   --bs-body-bg: var(--color-bg-primary);
+   --bs-body-color: var(--color-text-primary);
+   --bs-primary: var(--color-primary);
+   --bs-primary-rgb: var(--color-primary-rgb);
+   --bs-border-color: var(--color-border);
+   --bs-card-bg: var(--color-bg-secondary);
+   --bs-table-bg: var(--color-bg-tertiary);
+   --bs-table-hover-bg: var(--color-bg-hover);
+   --bs-input-bg: var(--color-bg-secondary);
+   --bs-input-border-color: var(--color-border);
+   --bs-input-focus-border-color: var(--color-border-focus);
+}
+
+/* --------------------------------------------------------------------------
+   SPACING — odstępy
+   -------------------------------------------------------------------------- */
+:root {
+   --spacing-xs: 4px;
+   --spacing-sm: 8px;
+   --spacing-md: 16px;
+   --spacing-lg: 24px;
+   --spacing-xl: 32px;
+   --spacing-2xl: 48px;
+   --spacing-3xl: 64px;
+}
+
+/* --------------------------------------------------------------------------
+   TYPOGRAPHY — typografia
+   -------------------------------------------------------------------------- */
+:root {
+   --font-family-base: 'Inter', system-ui, -apple-system, sans-serif;
+   --font-family-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+   --font-size-xs: 0.75rem;
+   /* 12px */
+   --font-size-sm: 0.875rem;
+   /* 14px */
+   --font-size-base: 1rem;
+   /* 16px */
+   --font-size-lg: 1.125rem;
+   /* 18px */
+   --font-size-xl: 1.25rem;
+   /* 20px */
+   --font-size-2xl: 1.5rem;
+   /* 24px */
+   --font-size-3xl: 2rem;
+   /* 32px */
+
+   --font-weight-normal: 400;
+   --font-weight-medium: 500;
+   --font-weight-semibold: 600;
+   --font-weight-bold: 700;
+
+   --line-height-tight: 1.25;
+   --line-height-base: 1.5;
+   --line-height-loose: 1.75;
+}
+
+/* --------------------------------------------------------------------------
+   BORDER RADIUS — zaokrąglenia
+   -------------------------------------------------------------------------- */
+:root {
+   --radius-sm: 4px;
+   --radius-md: 8px;
+   --radius-lg: 12px;
+   --radius-xl: 16px;
+   --radius-full: 9999px;
+   /* pill */
+}
+
+/* --------------------------------------------------------------------------
+   TRANSITIONS — animacje
+   -------------------------------------------------------------------------- */
+:root {
+   --transition-fast: 150ms ease;
+   --transition-base: 250ms ease;
+   --transition-slow: 400ms ease;
+}
+
+/* --------------------------------------------------------------------------
+   LAYOUT — wymiary layoutu
+   -------------------------------------------------------------------------- */
+:root {
+   --sidebar-width: 260px;
+   --header-height: 64px;
+   --content-max-width: 1200px;
+}

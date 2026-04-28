@@ -1,0 +1,51 @@
+/* components/badge.css — statusy faktur (BEM) */
+
+.badge-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px var(--spacing-sm);
+    border-radius: var(--radius-full);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    line-height: 1.5;
+}
+
+.badge-status::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: currentColor;
+    flex-shrink: 0;
+}
+
+.badge-status--draft {
+    color: var(--color-status-draft);
+    background-color: rgba(90, 90, 110, 0.15);
+}
+
+.badge-status--processing {
+    color: var(--color-status-processing);
+    background-color: rgba(59, 130, 246, 0.15);
+}
+
+.badge-status--parsed {
+    color: var(--color-status-parsed);
+    background-color: rgba(139, 92, 246, 0.15);
+}
+
+.badge-status--confirmed {
+    color: var(--color-status-confirmed);
+    background-color: rgba(16, 185, 129, 0.15);
+}
+
+.badge-status--failed {
+    color: var(--color-status-failed);
+    background-color: rgba(239, 68, 68, 0.15);
+}
+
+.badge-status--overdue {
+    color: var(--color-status-overdue);
+    background-color: rgba(245, 158, 11, 0.15);
+}
