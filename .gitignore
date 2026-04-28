@@ -488,3 +488,6 @@ $RECYCLE.BIN/
 *.db
 *.db-shm
 *.db-wal
+
+# Build artifacts
+build_error.txt
