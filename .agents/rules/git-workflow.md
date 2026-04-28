@@ -7,7 +7,47 @@ trigger: always_on
 ## Filozofia commitów
 
 Jeden commit = jedna logiczna zmiana.
-Commit ma opisywać CO i DLACZEGO — nie kiedy.
+
+### Zasada VSA — backend i frontend razem
+
+W Vertical Slice Architecture **jeden feature = jeden commit**.
+Handler bez widoku to niekompletny feature — nie rozdzielamy.
+
+```bash
+# ✅ Jeden commit na cały feature (6 plików = norma)
+feat: CreateInvoice — Command, Handler, Validator, ViewModel, Controller, Razor View
+
+# ❌ Sztuczne rozdzielanie — nie rób tego
+feat: CreateInvoice backend
+feat: CreateInvoice frontend
+```
+
+Ile plików na jeden feature w VSA:
+```
+CreateInvoiceController.cs    1
+CreateInvoiceCommand.cs       2
+CreateInvoiceHandler.cs       3
+CreateInvoiceValidator.cs     4
+CreateInvoiceViewModel.cs     5
+Create.cshtml                 6
+```
+Czasem 7-8 jeśli dochodzi migracja lub nowa encja — ale nigdy 30+.
+
+### Co idzie osobno (nie razem z featurem)
+
+```bash
+# Nowa encja lub konfiguracja = osobny commit PRZED featurem
+chore: add Invoice entity and DbContext configuration
+
+# Migracja = osobny commit PRZED featurem
+chore: add CreateInvoices migration
+
+# Porządki, usuwanie plików = osobny commit
+chore: remove unused lib/ folder, switch Bootstrap to CDN
+
+# Dokumentacja = osobny commit
+docs: add FRONTEND-ARCHITECTURE.md
+```
 
 ---
 
