@@ -5,7 +5,10 @@
     const DEFAULT_THEME = 'dark';
 
     function getTheme() {
-        return localStorage.getItem(STORAGE_KEY) ?? DEFAULT_THEME;
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) return saved;
+        
+        return DEFAULT_THEME;
     }
 
     function applyTheme(theme) {

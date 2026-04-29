@@ -7,6 +7,18 @@
             <a href="/invoices" class="navbar__link">Faktury</a>
         </div>
         <div class="navbar__actions">
+            @if (User.Identity?.IsAuthenticated == true)
+            {
+                <span class="navbar__user">
+                    @User.Identity.Name
+                </span>
+                <form action="/auth/logout" method="post" style="display:inline">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="navbar__logout-btn" title="Wyloguj się">
+                        🚪
+                    </button>
+                </form>
+            }
             <button class="theme-toggle"
                     id="theme-toggle-btn"
                     onclick="toggleTheme()"

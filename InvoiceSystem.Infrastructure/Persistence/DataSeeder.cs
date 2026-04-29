@@ -1,4 +1,5 @@
 using InvoiceSystem.Domain.Entities;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace InvoiceSystem.Infrastructure.Persistence;
@@ -6,6 +7,31 @@ namespace InvoiceSystem.Infrastructure.Persistence;
 public static class DataSeeder
 {
     public static async Task SeedAsync(AppDbContext context)
+    {
+        await SeedInvoicesAsync(context);
+    }
+
+    public static async Task SeedUsersAsync(UserManager<AppUser> userManager)
+    {
+        if (await userManager.FindByNameAsync("admin") == null)
+        {
+            var admin = new AppUser
+            {
+                UserName = "admin",
+                Email = "admin@system.pl",
+                FullName = "Administrator Systemu",
+                EmailConfirmed = true
+            };
+            
+            var result = await userManager.CreateAsync(admin, "Admin123!");
+            if (!result.Succeeded)
+            {
+                throw new Exception($"Błąd podczas tworzenia admina: {string.Join(", ", result.Errors.Select(e => e.Description))}");
+            }
+        }
+    }
+
+    private static async Task SeedInvoicesAsync(AppDbContext context)
     {
         if (await context.Invoices.AnyAsync()) return;
 
@@ -39,7 +65,7 @@ public static class DataSeeder
             CreateInvoice("INV/2026/016", contractors[3], new DateTime(2026, 4, 11), "Testy penetracyjne", 1, 8900m),
             CreateInvoice("INV/2026/017", contractors[4], new DateTime(2026, 4, 14), "Wsparcie techniczne L2", 10, 350m),
             CreateInvoice("INV/2026/018", contractors[5], new DateTime(2026, 4, 15), "Hosting serwerów dedicowanych", 1, 2800m),
-            CreateInvoice("INV/2026/019", contractors[0], new DateTime(2026, 4, 16), "Zarządzanie infrastrukturą cloud", 1, 4200m),
+            CreateInvoice("INV/2026/019", contractors[0], new DateTime(2026, 4, 16), "Zarządzanie infrastruktukurą cloud", 1, 4200m),
             CreateInvoice("INV/2026/020", contractors[1], new DateTime(2026, 4, 17), "Wdrożenie Observability stack", 1, 7100m),
             CreateInvoice("INV/2026/021", contractors[2], new DateTime(2026, 4, 18), "Budowa API Gateway", 1, 5800m),
             CreateInvoice("INV/2026/022", contractors[3], new DateTime(2026, 4, 19), "Projekt ERD bazy danych", 1, 3400m),

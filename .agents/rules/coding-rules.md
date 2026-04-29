@@ -2,9 +2,18 @@
 trigger: always_on
 ---
 
-# Zasady Kodowania — Standardy .NET i C#
+# Zasady Kodowania — InvoiceSystem
 
-## Język i nazewnictwo
+## 🏢 Standard Komercyjny (MANDATORY)
+
+Wszystkie projekty traktujemy jako systemy **komercyjne/enterprise**. 
+1. **Zakaz używania zwrotów**: "portfolio project", "demo", "zadanie rekrutacyjne", "projekt do nauki".
+2. **Jakość**: Kod, dokumentacja i UI muszą spełniać najwyższe standardy rynkowe.
+3. **Poważne podejście**: Stopki, nazwy i opisy muszą brzmieć profesjonalnie (np. "System Zarządzania Fakturami", a nie "Moja Apka").
+
+---
+
+## Czystość Kodu i nazewnictwo
 
 - **Kod** — wszystkie identyfikatory (klasy, metody, zmienne) i nazwy plików w języku **angielskim**
 - **Routing** — adresy URL w języku angielskim (np. `/invoices`, `/invoices/create`)
