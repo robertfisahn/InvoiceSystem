@@ -1,0 +1,148 @@
+@using InvoiceSystem.Web.Features.Invoices.CreateInvoice
+@model CreateInvoiceViewModel
+@{
+    ViewData["Title"] = "Nowa Faktura";
+}
+
+<div class="page">
+    <div class="page__header">
+        <div>
+            <h1 class="page__title">Nowa Faktura</h1>
+            <p class="page__subtitle">Wprowadź dane dokumentu i pozycje</p>
+        </div>
+        <a href="/invoices" class="btn btn-outline-secondary btn-sm">Anuluj</a>
+    </div>
+
+    <form asp-action="Index" method="post" id="invoiceForm">
+        @Html.AntiForgeryToken()
+        
+        <div class="row">
+            <!-- Nagłówek Faktury -->
+            <div class="col-md-4">
+                <div class="data-card mb-4">
+                    <h3 class="card-title">Dane podstawowe</h3>
+                    
+                    <div class="form-group mb-3">
+                        <label class="form-label">Kontrahent</label>
+                        <select name="Command.ContractorId" class="form-control @(ViewData.ModelState["Command.ContractorId"]?.Errors.Count > 0 ? "is-invalid" : "")">
+                            <option value="">-- Wybierz kontrahenta --</option>
+                            @foreach(var c in Model.Contractors)
+                            {
+                                <option value="@c.Id" selected="@(Model.Command.ContractorId == c.Id ? "selected" : null)">@c.Name</option>
+                            }
+                        </select>
+                        <span class="text-danger small">@Html.ValidationMessage("Command.ContractorId")</span>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label class="form-label">Numer faktury</label>
+                        <input name="Command.InvoiceNumber" value="@Model.Command.InvoiceNumber" class="form-control @(ViewData.ModelState["Command.InvoiceNumber"]?.Errors.Count > 0 ? "is-invalid" : "")" placeholder="np. FV/2026/04/001" />
+                        <span class="text-danger small">@Html.ValidationMessage("Command.InvoiceNumber")</span>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label class="form-label">Data wystawienia</label>
+                        <input name="Command.Date" type="date" value="@Model.Command.Date.ToString("yyyy-MM-dd")" class="form-control @(ViewData.ModelState["Command.Date"]?.Errors.Count > 0 ? "is-invalid" : "")" />
+                        <span class="text-danger small">@Html.ValidationMessage("Command.Date")</span>
+                    </div>
+                </div>
+                
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger mb-4"></div>
+
+                <button type="submit" class="btn btn-primary w-100 py-2">
+                    Wystaw fakturę
+                </button>
+            </div>
+
+            <!-- Pozycje Faktury -->
+            <div class="col-md-8">
+                <div class="data-card">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h3 class="card-title m-0">Pozycje faktury</h3>
+                        <button type="button" class="btn btn-outline-primary btn-sm" onclick="addItem()">
+                            + Dodaj pozycję
+                        </button>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover" id="itemsTable">
+                            <thead>
+                                <tr>
+                                    <th>Nazwa produktu / usługi</th>
+                                    <th style="width: 100px;">Ilość</th>
+                                    <th style="width: 150px;">Cena netto</th>
+                                    <th style="width: 50px;"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="itemsContainer">
+                                @if (Model.Command.Items.Count > 0)
+                                {
+                                    for (int i = 0; i < Model.Command.Items.Count; i++)
+                                    {
+                                        <tr class="item-row">
+                                            <td>
+                                                <input name="Command.Items[@i].Name" value="@Model.Command.Items[i].Name" class="form-control @(ViewData.ModelState[$"Command.Items[{i}].Name"]?.Errors.Count > 0 ? "is-invalid" : "")" />
+                                                <span class="text-danger small">@Html.ValidationMessage($"Command.Items[{i}].Name")</span>
+                                            </td>
+                                            <td>
+                                                <input name="Command.Items[@i].Quantity" type="number" step="0.01" value="@Model.Command.Items[i].Quantity.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)" class="form-control" />
+                                            </td>
+                                            <td>
+                                                <input name="Command.Items[@i].UnitPrice" type="number" step="0.01" value="@Model.Command.Items[i].UnitPrice.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)" class="form-control" />
+                                            </td>
+                                            <td>
+                                                <button type="button" class="btn btn-link text-danger p-0" onclick="removeItem(this)">
+                                                    &times;
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        let itemIndex = @Model.Command.Items.Count;
+
+        function addItem() {
+            const container = document.getElementById('itemsContainer');
+            const row = document.createElement('tr');
+            row.className = 'item-row';
+            row.innerHTML = `
+                <td>
+                    <input name="Command.Items[${itemIndex}].Name" class="form-control" placeholder="Nazwa usługi..." required />
+                </td>
+                <td>
+                    <input name="Command.Items[${itemIndex}].Quantity" type="number" step="0.01" value="1.00" class="form-control" required />
+                </td>
+                <td>
+                    <input name="Command.Items[${itemIndex}].UnitPrice" type="number" step="0.01" value="0.00" class="form-control" required />
+                </td>
+                <td>
+                    <button type="button" class="btn btn-link text-danger p-0" onclick="removeItem(this)">
+                        &times;
+                    </button>
+                </td>
+            `;
+            container.appendChild(row);
+            itemIndex++;
+        }
+
+        function removeItem(btn) {
+            const row = btn.closest('tr');
+            row.remove();
+        }
+
+        // Dodaj pierwszy wiersz jeśli pusto i nie ma błędów walidacji (które mogłyby być w Items)
+        if (itemIndex === 0) {
+            addItem();
+        }
+    </script>
+}

@@ -19,6 +19,7 @@ Ten dokument jest **bezwzględnie wiążący** dla AI.
 4. **Feature Isolation**: Zakaz współdzielenia ViewModeli i bezpośrednich odwołań między różnymi feature'ami.
 5. **No Shortcut Rule**: Zakaz stosowania `TODO`, `mocków` oraz "stubów". Kod musi być produkcyjny.
 6. **Architectural Violation**: Jeśli AI musi złamać zasadę – **musi** najpierw poinformować użytkownika.
+7. **Security by Default**: Wszystkie ficzery (poza Loginem) muszą być zabezpieczone. Ponieważ w `Program.cs` działa globalny `AuthorizeFilter`, zakazane jest dodawanie `[AllowAnonymous]` bez wyraźnej zgody użytkownika.
 
 ---
 
