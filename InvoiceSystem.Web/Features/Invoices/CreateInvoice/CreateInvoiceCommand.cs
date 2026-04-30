@@ -1,7 +1,6 @@
 using InvoiceSystem.Infrastructure.Persistence;
 using InvoiceSystem.Domain.Entities;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace InvoiceSystem.Web.Features.Invoices.CreateInvoice;
 
@@ -18,32 +17,10 @@ public record CreateInvoiceItemCommand(string Name, decimal Quantity, decimal Un
 
 public record CreateInvoiceResult(bool Success, int? InvoiceId = null, string? Error = null);
 
-// --- QUERY (Dane do formularza) ---
-public record GetCreateInvoiceQuery : IRequest<CreateInvoiceViewModel>;
-
-public record CreateInvoiceViewModel
+// --- HANDLER ---
+public class CreateInvoiceCommandHandler(AppDbContext db) 
+    : IRequestHandler<CreateInvoiceCommand, CreateInvoiceResult>
 {
-    public List<ContractorLookupDto> Contractors { get; init; } = [];
-    public CreateInvoiceCommand Command { get; init; } = new();
-}
-
-public record ContractorLookupDto(int Id, string Name);
-
-// --- HANDLERY ---
-public class CreateInvoiceHandler(AppDbContext db) 
-    : IRequestHandler<GetCreateInvoiceQuery, CreateInvoiceViewModel>,
-      IRequestHandler<CreateInvoiceCommand, CreateInvoiceResult>
-{
-    public async Task<CreateInvoiceViewModel> Handle(GetCreateInvoiceQuery request, CancellationToken ct)
-    {
-        var contractors = await db.Contractors
-            .OrderBy(c => c.Name)
-            .Select(c => new ContractorLookupDto(c.Id, c.Name))
-            .ToListAsync(ct);
-
-        return new CreateInvoiceViewModel { Contractors = contractors };
-    }
-
     public async Task<CreateInvoiceResult> Handle(CreateInvoiceCommand request, CancellationToken ct)
     {
         try
