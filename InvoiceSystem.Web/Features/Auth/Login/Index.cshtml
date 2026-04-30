@@ -5,11 +5,13 @@
 }
 
 <!DOCTYPE html>
-<html lang="pl" data-theme="dark">
+<html lang="pl">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - InvoiceSystem</title>
+
+    <script src="~/js/theme.js" asp-append-version="true"></script>
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -161,6 +163,15 @@
     </style>
 </head>
 <body>
+
+    <div class="theme-toggle-container" style="position: absolute; top: 1.5rem; right: 1.5rem;">
+        <button id="theme-toggle-btn" 
+                class="btn btn-outline-secondary btn-sm" 
+                onclick="toggleTheme()"
+                title="Przełącz motyw">
+            ☀️
+        </button>
+    </div>
 
     <div class="login-container">
         <div class="login-card">
