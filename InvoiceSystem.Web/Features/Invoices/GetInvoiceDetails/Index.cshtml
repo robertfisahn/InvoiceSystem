@@ -1,0 +1,139 @@
+@model InvoiceSystem.Web.Features.Invoices.GetInvoiceDetails.GetInvoiceDetailsViewModel
+@{
+    ViewData["Title"] = $"Faktura {Model.InvoiceNumber}";
+}
+
+<div class="page">
+    <div class="page__header no-print">
+        <div>
+            <h1 class="page__title">Podgląd faktury</h1>
+            <p class="page__subtitle">Szczegóły dokumentu @Model.InvoiceNumber</p>
+        </div>
+        <div class="d-flex gap-2">
+            <button onclick="window.print()" class="btn btn-outline-primary">
+                Drukuj
+            </button>
+            <a href="/invoices" class="btn btn-outline-secondary">Powrót</a>
+        </div>
+    </div>
+
+    <div class="invoice-document shadow-lg">
+        <!-- Header -->
+        <div class="d-flex justify-content-between mb-5">
+            <div>
+                <h2 class="invoice-logo">Invoice<span>System</span></h2>
+                <p class="text-muted small">System Zarządzania Fakturami</p>
+            </div>
+            <div class="text-end">
+                <h1 class="h3 mb-0">FAKTURA</h1>
+                <p class="fw-bold">Nr: @Model.InvoiceNumber</p>
+                <p class="small text-muted">Data wystawienia: @Model.Date.ToShortDateString()</p>
+            </div>
+        </div>
+
+        <hr class="my-4" />
+
+        <!-- Contractor Info -->
+        <div class="row mb-5">
+            <div class="col-6">
+                <label class="text-muted small text-uppercase fw-bold d-block mb-2">Sprzedawca</label>
+                <strong>InvoiceSystem Enterprise</strong><br />
+                ul. Technologiczna 12<br />
+                80-001 Gdańsk<br />
+                NIP: 1234567890
+            </div>
+            <div class="col-6 text-end">
+                <label class="text-muted small text-uppercase fw-bold d-block mb-2">Nabywca</label>
+                <strong>@Model.Contractor.Name</strong><br />
+                @Model.Contractor.Address<br />
+                NIP: @Model.Contractor.TaxId
+            </div>
+        </div>
+
+        <!-- Items Table -->
+        <table class="table table-bordered mb-5">
+            <thead class="table-light">
+                <tr>
+                    <th style="width: 50px;">Lp.</th>
+                    <th>Nazwa towaru lub usługi</th>
+                    <th class="text-end" style="width: 100px;">Ilość</th>
+                    <th class="text-end" style="width: 150px;">Cena netto</th>
+                    <th class="text-end" style="width: 150px;">Wartość netto</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (int i = 0; i < Model.Items.Count; i++)
+                {
+                    var item = Model.Items[i];
+                    <tr>
+                        <td>@(i + 1)</td>
+                        <td>@item.Name</td>
+                        <td class="text-end">@item.Quantity.ToString("F2")</td>
+                        <td class="text-end">@item.UnitPrice.ToString("N2") PLN</td>
+                        <td class="text-end">@item.TotalPrice.ToString("N2") PLN</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <!-- Summary -->
+        <div class="row justify-content-end">
+            <div class="col-5">
+                <div class="d-flex justify-content-between py-2 border-bottom">
+                    <span class="text-muted">Suma netto:</span>
+                    <strong>@Model.TotalNet.ToString("N2") PLN</strong>
+                </div>
+                <div class="d-flex justify-content-between py-3">
+                    <span class="h5 m-0">RAZEM:</span>
+                    <span class="h5 fw-bold m-0">@Model.TotalGross.ToString("N2") PLN</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="mt-5 pt-5 text-center text-muted small border-top">
+            Faktura wygenerowana automatycznie w systemie InvoiceSystem.
+        </div>
+    </div>
+</div>
+
+<style>
+    .invoice-document {
+        background: white;
+        color: #1a1a1a;
+        padding: 4rem;
+        border-radius: 8px;
+        max-width: 900px;
+        margin: 2rem auto;
+        font-family: 'Inter', sans-serif;
+    }
+    
+    .invoice-logo { 
+        font-weight: 800; 
+        letter-spacing: -1px; 
+        margin: 0; 
+        color: #1a1a1a;
+    }
+    .invoice-logo span { color: #6366f1; }
+
+    .table-light th {
+        background-color: #f8f9fa;
+        color: #4b5563;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    @@media print {
+        .no-print { display: none !important; }
+        .invoice-document { 
+            box-shadow: none !important; 
+            padding: 0; 
+            margin: 0; 
+            max-width: 100%;
+            border-radius: 0;
+        }
+        body { background: white !important; }
+        .page { padding: 0 !important; }
+    }
+</style>
