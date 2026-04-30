@@ -10,7 +10,7 @@ Zamiast tradycyjnych folderów `Controllers/`, `Models/`, `Views/` używamy fold
 Każdy podfolder reprezentuje pojedynczą funkcjonalność biznesową — **pionową kromkę**.
 
 Dzielimy kod pionowo:
-- Kontroler, Command/Query, Handler, Validator, ViewModel i Widok Razor znajdują się w jednym folderze ficzera.
+- Kontroler, Commandy/Query, Handlery, Walidatory, ViewModele i Widok Razor znajdują się w jednym folderze ficzera.
 
 ---
 
@@ -104,7 +104,7 @@ Zalety: łatwe debugowanie, wydajność (brak refleksji), bezpieczeństwo typów
 ## Feature Contract
 
 Każdy feature **musi** zawierać komplet plików zdefiniowanych w `workflow.md`.
-Brakujący element (np. brak walidatora dla commandu) oznacza niekompletny feature.
+Każdy proces (Command/Query) musi mieć swój dedykowany Handler.
 
 ---
 
