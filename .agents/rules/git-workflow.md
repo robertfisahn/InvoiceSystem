@@ -109,6 +109,14 @@ git push origin main; git push gitlab main
 
 ---
 
+## 🔍 Weryfikacja (Mandatory)
+
+Po każdym `git push`, AI **MUSI** wykonać:
+1. `git log --oneline -3` — aby upewnić się, że commity faktycznie weszły do historii.
+2. Poinformować użytkownika o statusie wysyłki (na oba remote).
+
+---
+
 ## Nie rób tego na main
 
 - Nie rób `git push --force` na `main` jeśli commit już poszedł na remote
