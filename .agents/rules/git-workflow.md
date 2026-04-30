@@ -63,14 +63,15 @@ docs: add FRONTEND-ARCHITECTURE.md
 
 | Typ | Kiedy używać |
 |-----|-------------|
-| `feat:` | Nowy ficzer (np. `feat: GetInvoiceList`) |
-| `fix:` | Naprawa błędu |
-| `chore:` | Porządki, usuwanie plików, zmiany konfiguracji |
-| `refactor:` | Zmiana kodu bez zmiany zachowania |
-| `docs:` | Zmiany w dokumentacji, README |
-| `style:` | Zmiany CSS/formatowanie bez logiki |
+| `feat:` | Nowy ficzer (np. `feat: GetInvoiceList`) — dodaje nową wartość dla użytkownika |
+| `fix:` | Naprawa błędu — coś nie działało i teraz działa |
+| `refactor:` | Zmiana kodu bez zmiany zachowania (np. rozbicie handlera na dwa, zmiana nazwy zmiennych) |
 
-### Przykłady:
+> [!IMPORTANT]
+> **Zasada Krytyczna**: Jeśli dodajesz nową funkcjonalność, użyj `feat:`. Jeśli tylko poprawiasz strukturę istniejącego kodu (nawet jeśli to nowy kod, ale już był w repo), **ZAWSZE** użyj `refactor:`. 
+> Sprawdź wiadomość dwa razy przed `push`, ponieważ na GitLabie branch `main` jest chroniony i nie pozwala na poprawki historii (`--force`).
+
+---
 
 ```bash
 # ✅ Dobry commit
