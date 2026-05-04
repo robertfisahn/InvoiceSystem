@@ -66,9 +66,11 @@ docs: add FRONTEND-ARCHITECTURE.md
 | `feat:` | Nowy ficzer (np. `feat: GetInvoiceList`) — dodaje nową wartość dla użytkownika |
 | `fix:` | Naprawa błędu — coś nie działało i teraz działa |
 | `refactor:` | Zmiana kodu bez zmiany zachowania (np. rozbicie handlera na dwa, zmiana nazwy zmiennych) |
+| `chore:` | Zadania techniczne bez wartości dla użytkownika — encje, migracje, konfiguracja, usuwanie plików |
+| `docs:` | Wyłącznie zmiany w dokumentacji (np. README, pliki `.md`) |
 
 > [!IMPORTANT]
-> **Zasada Krytyczna**: Jeśli dodajesz nową funkcjonalność, użyj `feat:`. Jeśli tylko poprawiasz strukturę istniejącego kodu (nawet jeśli to nowy kod, ale już był w repo), **ZAWSZE** użyj `refactor:`. 
+> **Zasada Krytyczna**: Jeśli dodajesz nową funkcjonalność, użyj `feat:`. Jeśli tylko poprawiasz strukturę istniejącego kodu (nawet jeśli to nowy kod, ale już był w repo), **ZAWSZE** użyj `refactor:`.
 > Sprawdź wiadomość dwa razy przed `push`, ponieważ na GitLabie branch `main` jest chroniony i nie pozwala na poprawki historii (`--force`).
 
 ---
@@ -89,15 +91,6 @@ git commit -m "wip"
 
 ---
 
-## Kiedy commitować
-
-- Po **każdym ukończonym logicznym kroku** — nie na koniec dnia
-- Ficzer gotowy (backend + frontend) → commit
-- Porządki/usunięcie plików → osobny commit
-- Poprawka buga → osobny commit
-
----
-
 ## Push — na oba remote
 
 Projekt ma dwa remote: **GitHub** (`origin`) i **GitLab** (`gitlab`).
@@ -111,18 +104,30 @@ git push origin main; git push gitlab main
 
 ## 🔍 Weryfikacja (Mandatory)
 
-Po każdym zadaniu, AI **MUSI** wykonać:
+Po każdym zadaniu AI **MUSI** wykonać:
 1. `git log --oneline -3` — aby upewnić się, że commity faktycznie weszły do historii.
-2. Poinformować użytkownika o statusie wysyłki (na oba remote).
+2. Poinformować użytkownika o lokalnym statusie commitów (push jeszcze nie nastąpił — wymaga zgody użytkownika).
 
 ---
 
-## 🛑 Zasada "Zero Junk Commits" (Mandatory)
+## 🛑 Zasada "User-Triggered Push Only" (CRITICAL)
 
-1. **Zakaz Pushowania Poprawek**: Jeśli zadanie wymaga poprawki (bo UI nie działa, jest błąd itp.), AI **NIE MOŻE** robić nowego commita i pusha. 
-2. **Commit --amend**: Wszystkie poprawki do bieżącego zadania muszą być "wciągnięte" do ostatniego commita (`git commit --amend`).
-3. **Push tylko na koniec**: `git push` wykonujemy **TYLKO RAZ**, gdy ficzer jest w 100% zweryfikowany wizualnie (screen) i funkcjonalnie.
-4. **Czysta Historia**: Na serwerze ma być widoczny jeden, czysty `feat:` lub `refactor:` na zadanie.
+1. **Zakaz Automatycznego Pushowania**: AI **NIGDY** nie wykonuje `git push` samodzielnie po skończonym zadaniu.
+2. **Lokalne Commity**: Wszystkie zmiany są commitowane wyłącznie lokalnie. Jeśli zadanie wymaga poprawek **przed pushem**, AI używa `git commit --amend`, aby utrzymać porządek (jeden feature = jeden commit). `--amend` jest dozwolony **wyłącznie dopóki commit nie trafił jeszcze na remote** — po pushu historia jest nienaruszalna.
+3. **Procedura Końcowa**:
+   - AI kończy pracę nad ficzerem/fixem.
+   - AI prezentuje efekty (zrzuty ekranu, opis zmian).
+   - AI pyta użytkownika o zgodę na push.
+4. **Zgoda Użytkownika**: Push na `origin` i `gitlab` następuje **TYLKO** po wyraźnym poleceniu użytkownika (np. "Wysyłaj", "Pushuj").
+5. **Czysta Historia**: Na serwerze ma być widoczny jeden, czysty i zweryfikowany przez człowieka commit na zadanie.
+
+---
+
+## 🚫 Zasada czystości staging area
+
+Przed każdym `git add` AI **MUSI** sprawdzić `git status`.
+Jeśli widoczne są pliki spoza zakresu zadania (np. przypadkowo wygenerowane pliki, artefakty buildów, pliki tymczasowe) — **nie dodaje ich** bez wyraźnej zgody użytkownika.
+Używa `git add <konkretny_plik>` zamiast `git add .` gdy istnieje ryzyko dodania niechcianych plików.
 
 ---
 
@@ -140,6 +145,5 @@ Po każdym zadaniu, AI **MUSI** wykonać:
 git status                    # co jest zmienione
 git diff                      # co dokładnie zmieniłem
 git log --oneline -10         # ostatnie 10 commitów
-git add -p                    # dodaj zmiany kawałek po kawałku (staged)
 git push origin main; git push gitlab main   # push na oba
 ```
