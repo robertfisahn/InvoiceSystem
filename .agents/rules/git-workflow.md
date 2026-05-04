@@ -111,9 +111,18 @@ git push origin main; git push gitlab main
 
 ## 🔍 Weryfikacja (Mandatory)
 
-Po każdym `git push`, AI **MUSI** wykonać:
+Po każdym zadaniu, AI **MUSI** wykonać:
 1. `git log --oneline -3` — aby upewnić się, że commity faktycznie weszły do historii.
 2. Poinformować użytkownika o statusie wysyłki (na oba remote).
+
+---
+
+## 🛑 Zasada "Zero Junk Commits" (Mandatory)
+
+1. **Zakaz Pushowania Poprawek**: Jeśli zadanie wymaga poprawki (bo UI nie działa, jest błąd itp.), AI **NIE MOŻE** robić nowego commita i pusha. 
+2. **Commit --amend**: Wszystkie poprawki do bieżącego zadania muszą być "wciągnięte" do ostatniego commita (`git commit --amend`).
+3. **Push tylko na koniec**: `git push` wykonujemy **TYLKO RAZ**, gdy ficzer jest w 100% zweryfikowany wizualnie (screen) i funkcjonalnie.
+4. **Czysta Historia**: Na serwerze ma być widoczny jeden, czysty `feat:` lub `refactor:` na zadanie.
 
 ---
 

@@ -111,11 +111,12 @@
         font-family: 'Inter', sans-serif;
         display: flex;
         flex-direction: column;
-        min-height: 800px; /* Minimalna wysokość dla podglądu na ekranie */
+        min-height: 842px; /* A4 on screen approx */
+        position: relative; /* Dla pozycjonowania stopki */
     }
 
     .invoice-content-wrap {
-        flex: 1; /* Zajmuje całą dostępną przestrzeń, spychając stopkę */
+        /* Kontener na treść */
     }
     
     .invoice-footer {
@@ -145,18 +146,34 @@
 
     @@media print {
         .no-print { display: none !important; }
+        
+        body, html { 
+            margin: 0 !important; 
+            padding: 0 !important; 
+            height: 297mm !important;
+        }
+
+        .page { 
+            padding: 0 !important; 
+            margin: 0 !important; 
+        }
+
         .invoice-document { 
             box-shadow: none !important; 
-            padding: 0; 
-            margin: 0; 
-            max-width: 100%;
+            padding: 20mm !important; 
+            margin: 0 !important; 
+            width: 210mm !important;
+            height: 297mm !important;
             border-radius: 0;
-            min-height: 297mm; /* Wysokość A4 — wymusza stopkę na dole strony */
+            position: relative;
         }
-        body { background: white !important; }
-        .page { padding: 0 !important; }
+
         .invoice-footer {
-            margin-top: auto; /* Na wydruku dopycha do samego dołu kartki */
+            position: absolute;
+            bottom: 20mm;
+            left: 20mm;
+            right: 20mm;
+            margin: 0;
         }
     }
 </style>
