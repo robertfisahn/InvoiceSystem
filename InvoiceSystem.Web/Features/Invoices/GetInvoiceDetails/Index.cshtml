@@ -18,80 +18,83 @@
     </div>
 
     <div class="invoice-document shadow-lg">
-        <!-- Header -->
-        <div class="d-flex justify-content-between mb-5">
-            <div>
-                <h2 class="invoice-logo">Invoice<span>System</span></h2>
-                <p class="text-muted small">System Zarządzania Fakturami</p>
+        <!-- Main Content Wrapper to push footer down -->
+        <div class="invoice-content-wrap">
+            <!-- Header -->
+            <div class="d-flex justify-content-between mb-5">
+                <div>
+                    <h2 class="invoice-logo">Invoice<span>System</span></h2>
+                    <p class="text-muted small">System Zarządzania Fakturami</p>
+                </div>
+                <div class="text-end">
+                    <h1 class="h3 mb-0">FAKTURA</h1>
+                    <p class="fw-bold">Nr: @Model.InvoiceNumber</p>
+                    <p class="small text-muted">Data wystawienia: @Model.Date.ToShortDateString()</p>
+                </div>
             </div>
-            <div class="text-end">
-                <h1 class="h3 mb-0">FAKTURA</h1>
-                <p class="fw-bold">Nr: @Model.InvoiceNumber</p>
-                <p class="small text-muted">Data wystawienia: @Model.Date.ToShortDateString()</p>
-            </div>
-        </div>
 
-        <hr class="my-4" />
+            <hr class="my-4" />
 
-        <!-- Contractor Info -->
-        <div class="row mb-5">
-            <div class="col-6">
-                <label class="text-muted small text-uppercase fw-bold d-block mb-2">Sprzedawca</label>
-                <strong>InvoiceSystem Enterprise</strong><br />
-                ul. Technologiczna 12<br />
-                80-001 Gdańsk<br />
-                NIP: 1234567890
+            <!-- Contractor Info -->
+            <div class="row mb-5">
+                <div class="col-6">
+                    <label class="text-muted small text-uppercase fw-bold d-block mb-2">Sprzedawca</label>
+                    <strong>InvoiceSystem Enterprise</strong><br />
+                    ul. Technologiczna 12<br />
+                    80-001 Gdańsk<br />
+                    NIP: 1234567890
+                </div>
+                <div class="col-6 text-end">
+                    <label class="text-muted small text-uppercase fw-bold d-block mb-2">Nabywca</label>
+                    <strong>@Model.Contractor.Name</strong><br />
+                    @Model.Contractor.Address<br />
+                    NIP: @Model.Contractor.TaxId
+                </div>
             </div>
-            <div class="col-6 text-end">
-                <label class="text-muted small text-uppercase fw-bold d-block mb-2">Nabywca</label>
-                <strong>@Model.Contractor.Name</strong><br />
-                @Model.Contractor.Address<br />
-                NIP: @Model.Contractor.TaxId
-            </div>
-        </div>
 
-        <!-- Items Table -->
-        <table class="table table-bordered mb-5">
-            <thead class="table-light">
-                <tr>
-                    <th style="width: 50px;">Lp.</th>
-                    <th>Nazwa towaru lub usługi</th>
-                    <th class="text-end" style="width: 100px;">Ilość</th>
-                    <th class="text-end" style="width: 150px;">Cena netto</th>
-                    <th class="text-end" style="width: 150px;">Wartość netto</th>
-                </tr>
-            </thead>
-            <tbody>
-                @for (int i = 0; i < Model.Items.Count; i++)
-                {
-                    var item = Model.Items[i];
+            <!-- Items Table -->
+            <table class="table table-bordered mb-5">
+                <thead class="table-light">
                     <tr>
-                        <td>@(i + 1)</td>
-                        <td>@item.Name</td>
-                        <td class="text-end">@item.Quantity.ToString("F2")</td>
-                        <td class="text-end">@item.UnitPrice.ToString("N2") PLN</td>
-                        <td class="text-end">@item.TotalPrice.ToString("N2") PLN</td>
+                        <th style="width: 50px;">Lp.</th>
+                        <th>Nazwa towaru lub usługi</th>
+                        <th class="text-end" style="width: 100px;">Ilość</th>
+                        <th class="text-end" style="width: 150px;">Cena netto</th>
+                        <th class="text-end" style="width: 150px;">Wartość netto</th>
                     </tr>
-                }
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    @for (int i = 0; i < Model.Items.Count; i++)
+                    {
+                        var item = Model.Items[i];
+                        <tr>
+                            <td>@(i + 1)</td>
+                            <td>@item.Name</td>
+                            <td class="text-end">@item.Quantity.ToString("F2")</td>
+                            <td class="text-end">@item.UnitPrice.ToString("N2") PLN</td>
+                            <td class="text-end">@item.TotalPrice.ToString("N2") PLN</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
 
-        <!-- Summary -->
-        <div class="row justify-content-end">
-            <div class="col-5">
-                <div class="d-flex justify-content-between py-2 border-bottom">
-                    <span class="text-muted">Suma netto:</span>
-                    <strong>@Model.TotalNet.ToString("N2") PLN</strong>
-                </div>
-                <div class="d-flex justify-content-between py-3">
-                    <span class="h5 m-0">RAZEM:</span>
-                    <span class="h5 fw-bold m-0">@Model.TotalGross.ToString("N2") PLN</span>
+            <!-- Summary -->
+            <div class="row justify-content-end">
+                <div class="col-5">
+                    <div class="d-flex justify-content-between py-2 border-bottom">
+                        <span class="text-muted">Suma netto:</span>
+                        <strong>@Model.TotalNet.ToString("N2") PLN</strong>
+                    </div>
+                    <div class="d-flex justify-content-between py-3">
+                        <span class="h5 m-0">RAZEM:</span>
+                        <span class="h5 fw-bold m-0">@Model.TotalGross.ToString("N2") PLN</span>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Footer -->
-        <div class="mt-5 pt-5 text-center text-muted small border-top">
+        <!-- Footer — pushed to bottom by flexbox -->
+        <div class="invoice-footer">
             Faktura wygenerowana automatycznie w systemie InvoiceSystem.
         </div>
     </div>
@@ -106,6 +109,22 @@
         max-width: 900px;
         margin: 2rem auto;
         font-family: 'Inter', sans-serif;
+        display: flex;
+        flex-direction: column;
+        min-height: 800px; /* Minimalna wysokość dla podglądu na ekranie */
+    }
+
+    .invoice-content-wrap {
+        flex: 1; /* Zajmuje całą dostępną przestrzeń, spychając stopkę */
+    }
+    
+    .invoice-footer {
+        margin-top: 3rem;
+        padding-top: 2rem;
+        text-align: center;
+        color: #9ca3af;
+        font-size: 0.75rem;
+        border-top: 1px solid #f3f4f6;
     }
     
     .invoice-logo { 
@@ -132,8 +151,12 @@
             margin: 0; 
             max-width: 100%;
             border-radius: 0;
+            min-height: 297mm; /* Wysokość A4 — wymusza stopkę na dole strony */
         }
         body { background: white !important; }
         .page { padding: 0 !important; }
+        .invoice-footer {
+            margin-top: auto; /* Na wydruku dopycha do samego dołu kartki */
+        }
     }
 </style>
