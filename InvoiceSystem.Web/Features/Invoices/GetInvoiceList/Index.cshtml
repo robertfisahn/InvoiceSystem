@@ -70,7 +70,10 @@
                     .AllowSorting(false)
                     .AllowHeaderFiltering(false)
                     .CellTemplate(@<text>
-                        <a href="/invoices/<%- data.Id %>" class="cell-link">Otwórz</a>
+                        <div class="d-flex gap-2 justify-content-center">
+                            <a href="/invoices/<%- data.Id %>" class="cell-link">Otwórz</a>
+                            <a href="/invoices/update/<%- data.Id %>" class="cell-link text-warning">Edytuj</a>
+                        </div>
                     </text>);
             })
         )
