@@ -37,13 +37,17 @@
 <body class="dx-viewport">
     <div class="app-shell">
 
-        @await Html.PartialAsync("Components/_Navbar")
+        <div class="no-print">
+            @await Html.PartialAsync("Components/_Navbar")
+        </div>
 
         <main class="app-shell__main">
             @RenderBody()
         </main>
 
-        @await Html.PartialAsync("Components/_Footer")
+        <div class="no-print">
+            @await Html.PartialAsync("Components/_Footer")
+        </div>
 
     </div>
 
