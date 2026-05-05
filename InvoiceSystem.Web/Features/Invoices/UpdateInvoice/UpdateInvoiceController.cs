@@ -22,19 +22,30 @@ public class UpdateInvoiceController(IMediator mediator) : Controller
         // Re-assign ID to ensure it's correct from the URL
         var command = viewModel.Command with { Id = id };
         
-        var result = await mediator.Send(command);
-
-        if (result.Success)
+        try
         {
-            return RedirectToAction("Index", "GetInvoiceDetails", new { id });
-        }
+            var result = await mediator.Send(command);
 
-        ModelState.AddModelError("", result.Error ?? "Wystąpił błąd podczas aktualizacji.");
+            if (result.Success)
+            {
+                return RedirectToAction("Index", "GetInvoiceDetails", new { id });
+            }
+
+            ModelState.AddModelError("", result.Error ?? "Wystąpił błąd podczas aktualizacji.");
+        }
+        catch (FluentValidation.ValidationException ex)
+        {
+            foreach (var error in ex.Errors)
+            {
+                ModelState.AddModelError($"Command.{error.PropertyName}", error.ErrorMessage);
+            }
+        }
         
         // Reload data for the view
         var fullViewModel = await mediator.Send(new GetInvoiceForUpdateQuery(id));
         if (fullViewModel == null) return NotFound();
 
+        // Preserve current items from command to keep user input
         return View(fullViewModel with { Command = command });
     }
 }

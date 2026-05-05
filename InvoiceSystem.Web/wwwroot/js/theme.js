@@ -15,6 +15,14 @@
         document.documentElement.setAttribute('data-theme', theme);
         localStorage.setItem(STORAGE_KEY, theme);
 
+        // Przełącz motyw DevExtreme (dark ↔ light)
+        const dxDark = document.getElementById('dx-theme-dark');
+        const dxLight = document.getElementById('dx-theme-light');
+        if (dxDark && dxLight) {
+            dxDark.disabled = (theme !== 'dark');
+            dxLight.disabled = (theme !== 'light');
+        }
+
         // Aktualizuj ikonę przycisku jeśli istnieje
         const btn = document.getElementById('theme-toggle-btn');
         if (btn) {

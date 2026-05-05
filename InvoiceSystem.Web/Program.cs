@@ -54,11 +54,20 @@ builder.Services.Configure<RazorViewEngineOptions>(options =>
     options.ViewLocationExpanders.Add(new FeatureViewLocationExpander());
 });
 
-// Tutaj będziemy dodawać zależności z innych warstw
-// builder.Services.AddApplication();
-// builder.Services.AddInfrastructure(builder.Configuration);
+// Localization
+builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
+builder.Services.Configure<RequestLocalizationOptions>(options =>
+{
+    var supportedCultures = new[] { "pl-PL", "en-US" };
+    options.SetDefaultCulture(supportedCultures[0])
+        .AddSupportedCultures(supportedCultures)
+        .AddSupportedUICultures(supportedCultures);
+});
 
 var app = builder.Build();
+
+// Localization middleware
+app.UseRequestLocalization();
 
 // Seed database
 using (var scope = app.Services.CreateScope())

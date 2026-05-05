@@ -1,16 +1,19 @@
 /* components/table.css — tabele danych + DevExtreme DataGrid override */
 
-/* DevExtreme DataGrid — dopasowanie do design systemu */
+/* DevExtreme DataGrid — dopasowanie do design systemu
+   WAŻNE: !important jest konieczne, bo nadpisujemy natywne style
+   DevExtreme Material (zarówno dark jak i light). Zmienne CSS
+   automatycznie zmieniają kolor w zależności od motywu. */
 .dx-datagrid {
-    background-color: transparent;
-    color: var(--color-text-primary);
+    background-color: transparent !important;
+    color: var(--color-text-primary) !important;
     font-family: var(--font-family-base);
     font-size: var(--font-size-sm);
 }
 
 .dx-datagrid-headers {
-    background-color: var(--color-bg-tertiary);
-    border-bottom: 1px solid var(--color-border);
+    background-color: var(--color-bg-tertiary) !important;
+    border-bottom: 1px solid var(--color-border) !important;
 }
 
 .dx-datagrid-headers .dx-header-row td {
@@ -18,56 +21,56 @@
     font-weight: var(--font-weight-semibold);
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    color: var(--color-text-secondary);
-    background-color: var(--color-bg-tertiary);
+    color: var(--color-text-secondary) !important;
+    background-color: var(--color-bg-tertiary) !important;
     border-bottom: none;
 }
 
 .dx-datagrid-rowsview .dx-row td {
     padding: var(--spacing-sm) var(--spacing-md);
-    border-bottom: 1px solid var(--color-border);
-    color: var(--color-text-primary);
-    background-color: var(--color-bg-secondary);
+    border-bottom: 1px solid var(--color-border) !important;
+    color: var(--color-text-primary) !important;
+    background-color: var(--color-bg-secondary) !important;
     vertical-align: middle;
 }
 
 .dx-datagrid-rowsview .dx-row:last-child td {
-    border-bottom: none;
+    border-bottom: none !important;
 }
 
 .dx-datagrid-rowsview .dx-row-alt td {
-    background-color: var(--color-bg-secondary);
+    background-color: var(--color-bg-secondary) !important;
 }
 
 .dx-datagrid-rowsview .dx-row:hover td {
-    background-color: var(--color-bg-hover);
+    background-color: var(--color-bg-hover) !important;
 }
 
 .dx-datagrid-pager {
-    background-color: var(--color-bg-tertiary);
-    border-top: 1px solid var(--color-border);
+    background-color: var(--color-bg-tertiary) !important;
+    border-top: 1px solid var(--color-border) !important;
     padding: var(--spacing-sm) var(--spacing-md);
-    color: var(--color-text-secondary);
+    color: var(--color-text-secondary) !important;
     font-size: var(--font-size-xs);
 }
 
 .dx-pager .dx-page-sizes .dx-page-size,
 .dx-pager .dx-page,
 .dx-pager .dx-navigate-button {
-    color: var(--color-text-secondary);
+    color: var(--color-text-secondary) !important;
 }
 
 .dx-pager .dx-page-size.dx-selection,
 .dx-pager .dx-page.dx-selection {
-    background-color: var(--color-primary);
-    color: white;
+    background-color: var(--color-primary) !important;
+    color: white !important;
     border-radius: var(--radius-sm);
 }
 
 .dx-datagrid .dx-toolbar {
-    background-color: var(--color-bg-secondary);
+    background-color: var(--color-bg-secondary) !important;
     padding: var(--spacing-sm) var(--spacing-md);
-    border-bottom: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-border) !important;
 }
 
 /* Invoice-specific cell styles */
@@ -75,12 +78,12 @@
     font-family: var(--font-family-mono);
     font-size: var(--font-size-xs);
     font-weight: var(--font-weight-semibold);
-    color: var(--color-primary);
+    color: var(--color-primary) !important;
 }
 
 .cell-amount {
     font-weight: var(--font-weight-semibold);
-    color: var(--color-success);
+    color: var(--color-success) !important;
 }
 
 .cell-link {
@@ -93,4 +96,88 @@
 
 .cell-link:hover {
     color: var(--color-primary);
+}
+
+/* ============================================================
+   INVOICE TABLE — formularz pozycji faktury (Create / Update)
+   ============================================================ */
+.invoice-table {
+    width: 100%;
+    margin-bottom: var(--spacing-sm);
+    color: var(--color-text-primary);
+    border-collapse: collapse;
+}
+
+.invoice-table thead th {
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: var(--spacing-sm) var(--spacing-sm);
+    border-bottom: 1px solid var(--color-border);
+    text-align: left;
+}
+
+.invoice-table tbody td {
+    padding: var(--spacing-sm);
+    vertical-align: top;
+}
+
+/* =================================================================
+   SEARCH PANEL — wymuszenie widoczności w obu motywach
+   DevExtreme Material Light ustawia rgba(0,0,0,0.04) jako tło
+   i rgba(0,0,0,0.6) jako kolor ikony — oba prawie niewidoczne.
+   ================================================================= */
+
+/* Tło i obramowanie panelu wyszukiwania */
+.dx-datagrid .dx-datagrid-search-panel {
+    background-color: var(--color-bg-tertiary) !important;
+    border: 1px solid var(--color-border) !important;
+    border-radius: var(--radius-md) !important;
+}
+
+/* Ukryj natywną kreskę Material Design (underline) — mamy własny border */
+.dx-datagrid .dx-datagrid-search-panel .dx-texteditor-borders,
+.dx-datagrid .dx-datagrid-search-panel::after,
+.dx-datagrid .dx-datagrid-search-panel::before,
+.dx-datagrid .dx-datagrid-search-panel .dx-texteditor-container::after {
+    display: none !important;
+    border: none !important;
+    border-bottom: none !important;
+}
+
+/* Light Theme — mocniejszy kontrast */
+[data-theme="light"] .dx-datagrid .dx-datagrid-search-panel {
+    background-color: #ffffff !important;
+    border: 1px solid #b0b0c0 !important;
+}
+
+/* Kolor wpisywanego tekstu */
+.dx-datagrid .dx-datagrid-search-panel .dx-texteditor-input {
+    color: var(--color-text-primary) !important;
+}
+
+/* Placeholder "Szukaj faktury..." */
+.dx-datagrid .dx-datagrid-search-panel .dx-placeholder::before {
+    color: var(--color-text-muted) !important;
+}
+
+[data-theme="light"] .dx-datagrid .dx-datagrid-search-panel .dx-placeholder::before {
+    color: #666680 !important;
+}
+
+/* Ikona lupy — DXIcons font */
+.dx-datagrid .dx-datagrid-search-panel .dx-icon-search::before {
+    color: var(--color-text-secondary) !important;
+}
+
+[data-theme="light"] .dx-datagrid .dx-datagrid-search-panel .dx-icon-search::before {
+    color: #333355 !important;
+}
+
+/* Focus state */
+.dx-datagrid .dx-datagrid-search-panel.dx-state-focused {
+    border-color: var(--color-primary) !important;
+    box-shadow: 0 0 0 2px rgba(var(--color-primary-rgb), 0.15) !important;
 }
