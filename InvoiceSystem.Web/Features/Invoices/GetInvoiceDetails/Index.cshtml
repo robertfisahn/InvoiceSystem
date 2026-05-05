@@ -16,9 +16,16 @@
             <button onclick="window.print()" class="btn btn-outline-primary">
                 Drukuj
             </button>
+            <button type="button" class="btn btn-outline-danger" onclick="deleteInvoice(@Model.Id)">
+                Usuń
+            </button>
             <a href="/invoices" class="btn btn-outline-secondary">Powrót</a>
         </div>
     </div>
+
+    <form id="deleteForm" method="post" style="display:none;">
+        @Html.AntiForgeryToken()
+    </form>
 
     <div class="invoice-document shadow-lg">
         <!-- Main Content Wrapper to push footer down -->
@@ -203,3 +210,27 @@
         }
     }
 </style>
+
+@section Scripts {
+    <script>
+        function deleteInvoice(id) {
+            const dialog = DevExpress.ui.dialog.custom({
+                title: "Potwierdzenie usunięcia",
+                messageHtml: "Czy na pewno chcesz usunąć tę fakturę? Operacja jest nieodwracalna.",
+                buttons: [
+                    { text: "Tak", onClick: () => true, elementAttr: { class: "dx-button-danger" } },
+                    { text: "Nie", onClick: () => false }
+                ],
+                dragEnabled: false
+            });
+
+            dialog.show().done(function(dialogResult) {
+                if (dialogResult) {
+                    const form = document.getElementById('deleteForm');
+                    form.action = '/invoices/delete/' + id;
+                    form.submit();
+                }
+            });
+        }
+    </script>
+}

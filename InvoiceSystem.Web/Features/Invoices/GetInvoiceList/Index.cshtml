@@ -65,7 +65,7 @@
 
                 columns.Add()
                     .Caption("Akcje")
-                    .Width(140)
+                    .Width(180)
                     .Alignment(HorizontalAlignment.Center)
                     .AllowSorting(false)
                     .AllowHeaderFiltering(false)
@@ -73,10 +73,39 @@
                         <div class="d-flex gap-2 justify-content-center">
                             <a href="/invoices/<%- data.Id %>" class="btn btn-xs btn-outline-primary py-0 px-2" style="font-size: 11px;">Otwórz</a>
                             <a href="/invoices/update/<%- data.Id %>" class="btn btn-xs btn-outline-warning py-0 px-2" style="font-size: 11px;">Edytuj</a>
+                            <button type="button" class="btn btn-xs btn-outline-danger py-0 px-2" style="font-size: 11px;" onclick="deleteInvoice(<%- data.Id %>)">Usuń</button>
                         </div>
                     </text>);
             })
         )
     </div>
 
+    <form id="deleteForm" method="post" style="display:none;">
+        @Html.AntiForgeryToken()
+    </form>
+
 </div>
+
+@section Scripts {
+    <script>
+        function deleteInvoice(id) {
+            const dialog = DevExpress.ui.dialog.custom({
+                title: "Potwierdzenie usunięcia",
+                messageHtml: "Czy na pewno chcesz usunąć tę fakturę? Operacja jest nieodwracalna.",
+                buttons: [
+                    { text: "Tak", onClick: () => true, elementAttr: { class: "dx-button-danger" } },
+                    { text: "Nie", onClick: () => false }
+                ],
+                dragEnabled: false
+            });
+
+            dialog.show().done(function(dialogResult) {
+                if (dialogResult) {
+                    const form = document.getElementById('deleteForm');
+                    form.action = '/invoices/delete/' + id;
+                    form.submit();
+                }
+            });
+        }
+    </script>
+}
