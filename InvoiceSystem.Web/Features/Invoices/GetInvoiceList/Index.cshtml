@@ -47,32 +47,32 @@
 
                 columns.AddFor(m => m.ContractorName)
                     .Caption("Kontrahent")
-                    .MinWidth(200);
+                    .MinWidth(150);
 
                 columns.AddFor(m => m.Date)
                     .Caption("Data")
-                    .Width(120)
+                    .Width(110)
                     .DataType(GridColumnDataType.Date)
                     .Format("dd.MM.yyyy");
 
                 columns.AddFor(m => m.TotalAmount)
-                    .Caption("Kwota (PLN)")
-                    .Width(140)
+                    .Caption("Kwota")
+                    .Width(120)
                     .Alignment(HorizontalAlignment.Right)
                     .CellTemplate(@<text>
                         <span class="cell-amount"><%- Number(data.TotalAmount).toLocaleString('pl-PL', {minimumFractionDigits: 2}) %></span>
                     </text>);
 
                 columns.Add()
-                    .Caption("")
-                    .Width(80)
+                    .Caption("Akcje")
+                    .Width(140)
                     .Alignment(HorizontalAlignment.Center)
                     .AllowSorting(false)
                     .AllowHeaderFiltering(false)
                     .CellTemplate(@<text>
                         <div class="d-flex gap-2 justify-content-center">
-                            <a href="/invoices/<%- data.Id %>" class="cell-link">Otwórz</a>
-                            <a href="/invoices/update/<%- data.Id %>" class="cell-link text-warning">Edytuj</a>
+                            <a href="/invoices/<%- data.Id %>" class="btn btn-xs btn-outline-primary py-0 px-2" style="font-size: 11px;">Otwórz</a>
+                            <a href="/invoices/update/<%- data.Id %>" class="btn btn-xs btn-outline-warning py-0 px-2" style="font-size: 11px;">Edytuj</a>
                         </div>
                     </text>);
             })

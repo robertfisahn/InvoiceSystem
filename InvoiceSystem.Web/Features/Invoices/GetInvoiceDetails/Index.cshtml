@@ -105,8 +105,8 @@
 
 <style>
     .invoice-document {
-        background: white;
-        color: #1a1a1a;
+        background: white !important; /* Zawsze biały papier */
+        color: #1a1a1a !important;   /* Zawsze ciemny tekst */
         padding: 4rem;
         border-radius: 8px;
         max-width: 900px;
@@ -116,6 +116,29 @@
         flex-direction: column;
         min-height: 842px; /* A4 on screen approx */
         position: relative; /* Dla pozycjonowania stopki */
+    }
+
+    /* Wymuszamy aby tabela w dokumencie była jasna */
+    .invoice-document table {
+        background-color: transparent !important;
+        border-color: #dee2e6 !important;
+    }
+    
+    .invoice-document table td, 
+    .invoice-document table th {
+        background-color: transparent !important;
+        color: #1a1a1a !important;
+        border-color: #dee2e6 !important;
+    }
+
+    .invoice-document .table-light th {
+        background-color: #f8f9fa !important;
+        color: #4b5563 !important;
+    }
+
+    .invoice-document hr {
+        color: #dee2e6;
+        opacity: 1;
     }
 
     .invoice-content-wrap {
