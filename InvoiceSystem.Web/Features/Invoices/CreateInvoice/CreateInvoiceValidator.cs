@@ -10,10 +10,6 @@ public class CreateInvoiceValidator : AbstractValidator<CreateInvoiceCommand>
             .GreaterThan(0)
             .WithMessage("Wybierz kontrahenta.");
 
-        RuleFor(x => x.InvoiceNumber)
-            .NotEmpty()
-            .WithMessage("Numer faktury jest wymagany.");
-
         RuleFor(x => x.Date)
             .NotEmpty()
             .WithMessage("Data jest wymagana.");

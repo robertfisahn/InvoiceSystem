@@ -1,6 +1,7 @@
 using InvoiceSystem.Infrastructure.Persistence;
 using InvoiceSystem.Domain.Entities;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 namespace InvoiceSystem.Web.Features.Invoices.CreateInvoice;
 
@@ -8,7 +9,6 @@ namespace InvoiceSystem.Web.Features.Invoices.CreateInvoice;
 public record CreateInvoiceCommand : IRequest<CreateInvoiceResult>
 {
     public int ContractorId { get; init; }
-    public string InvoiceNumber { get; init; } = string.Empty;
     public DateTime Date { get; init; } = DateTime.Today;
     public List<CreateInvoiceItemCommand> Items { get; init; } = [];
 }
@@ -23,30 +23,52 @@ public class CreateInvoiceCommandHandler(AppDbContext db)
 {
     public async Task<CreateInvoiceResult> Handle(CreateInvoiceCommand request, CancellationToken ct)
     {
-        try
+        // Automatyczne generowanie numeru faktury: FV/YYYY/MM/NNN
+        var invoiceNumber = await GenerateInvoiceNumberAsync(request.Date, ct);
+
+        var invoice = new Invoice
         {
-            var invoice = new Invoice
+            InvoiceNumber = invoiceNumber,
+            Date = request.Date,
+            ContractorId = request.ContractorId,
+            Items = request.Items.Select(i => new InvoiceItem
             {
-                InvoiceNumber = request.InvoiceNumber,
-                Date = request.Date,
-                ContractorId = request.ContractorId,
-                Items = request.Items.Select(i => new InvoiceItem
-                {
-                    Name = i.Name,
-                    Quantity = i.Quantity,
-                    UnitPrice = i.UnitPrice,
-                    TotalPrice = i.Quantity * i.UnitPrice
-                }).ToList()
-            };
+                Name = i.Name,
+                Quantity = i.Quantity,
+                UnitPrice = i.UnitPrice,
+                TotalPrice = i.Quantity * i.UnitPrice
+            }).ToList()
+        };
 
-            db.Invoices.Add(invoice);
-            await db.SaveChangesAsync(ct);
+        db.Invoices.Add(invoice);
+        await db.SaveChangesAsync(ct);
 
-            return new CreateInvoiceResult(true, invoice.Id);
-        }
-        catch (Exception ex)
+        return new CreateInvoiceResult(true, invoice.Id);
+    }
+
+    /// <summary>
+    /// Generuje kolejny numer faktury w formacie INV/YYYY/NNN.
+    /// Numeracja jest sekwencyjna w ramach roku.
+    /// </summary>
+    private async Task<string> GenerateInvoiceNumberAsync(DateTime date, CancellationToken ct)
+    {
+        var prefix = $"INV/{date:yyyy}/";
+
+        var lastNumber = await db.Invoices
+            .Where(i => i.InvoiceNumber.StartsWith(prefix))
+            .OrderByDescending(i => i.InvoiceNumber)
+            .Select(i => i.InvoiceNumber)
+            .FirstOrDefaultAsync(ct);
+
+        int nextSequence = 1;
+        if (lastNumber is not null)
         {
-            return new CreateInvoiceResult(false, null, ex.Message);
+            var lastPart = lastNumber.Replace(prefix, "");
+            if (int.TryParse(lastPart, out var parsed))
+                nextSequence = parsed + 1;
         }
+
+        return $"{prefix}{nextSequence:D3}";
     }
 }
+
