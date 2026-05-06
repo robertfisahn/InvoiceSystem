@@ -1,0 +1,64 @@
+/* =====================================================
+   DARK THEME — warstwowy kontrast (Enterprise Navy)
+   Każda warstwa ma swój odcień — widać hierarchię
+   ===================================================== */
+:root[data-theme="dark"] {
+    /* Warstwy tła — od najciemniejszego do najjaśniejszego */
+    --bg-base:       #020612; /* Topbar i Sidebar — absolutna czerń-granat */
+    --bg-primary:    #060d1a; /* Main Content Area — ciemny granat */
+    --bg-secondary:  #0c1628; /* Karty, Tabela — widocznie jaśniejszy */
+    --bg-tertiary:   #111e35; /* Nagłówki tabeli, hover, sub-sekcje */
+    --bg-sidebar:    #020612;
+    --topbar-bg:     #020612;
+
+    /* Tekst */
+    --text-primary:  #f0f6ff;
+    --text-secondary:#6b82a8;
+    --text-muted:    #3d5478;
+
+    /* Akcent — Indigo */
+    --accent:        #6366f1;
+    --accent-hover:  #818cf8;
+    --accent-soft:   rgba(99, 102, 241, 0.12);
+
+    /* Granice — widoczny ale subtelny podział warstw */
+    --border:        rgba(99, 130, 180, 0.1);
+    --border-strong: rgba(99, 130, 180, 0.2);
+
+    /* Shadow */
+    --shadow:        0 4px 24px rgba(0, 0, 0, 0.4);
+    --shadow-sm:     0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* =====================================================
+   LIGHT THEME — czyste, biznesowe
+   ===================================================== */
+:root[data-theme="light"] {
+    --bg-base:       #0f172a; /* Sidebar — ciemny dla kontrastu */
+    --bg-primary:    #f1f5f9; /* Main Content — lekki błękit-szary */
+    --bg-secondary:  #ffffff; /* Karty — białe, wyróżniają się */
+    --bg-tertiary:   #f8fafc; /* Nagłówki tabeli */
+    --bg-sidebar:    #0f172a;
+    --topbar-bg:     #ffffff;
+
+    --text-primary:  #0f172a;
+    --text-secondary:#64748b;
+    --text-muted:    #94a3b8;
+
+    --accent:        #6366f1;
+    --accent-hover:  #4f46e5;
+    --accent-soft:   rgba(99, 102, 241, 0.08);
+
+    --border:        #e2e8f0;
+    --border-strong: #cbd5e1;
+
+    --shadow:        0 4px 16px rgba(15, 23, 42, 0.08);
+    --shadow-sm:     0 1px 4px rgba(15, 23, 42, 0.06);
+}
+
+/* Globalne stałe */
+:root {
+    --topbar-height: 64px;
+    --sidebar-width: 240px;
+    --sidebar-collapsed-width: 64px;
+}

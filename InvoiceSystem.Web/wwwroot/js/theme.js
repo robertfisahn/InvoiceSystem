@@ -1,44 +1,25 @@
-// theme.js — logika dark/light mode
+const THEME_STATE_KEY = 'theme-mode';
 
-(function () {
-    const STORAGE_KEY = 'invoice-theme';
-    const DEFAULT_THEME = 'dark';
+$(function() {
+    const savedTheme = localStorage.getItem(THEME_STATE_KEY) || 'dark';
+    applyTheme(savedTheme);
 
-    function getTheme() {
-        const saved = localStorage.getItem(STORAGE_KEY);
-        if (saved) return saved;
+    $('#themeToggle').on('click', function() {
+        const currentTheme = $('html').attr('data-theme');
+        const nextTheme = currentTheme === 'dark' ? 'light' : 'dark';
         
-        return DEFAULT_THEME;
+        applyTheme(nextTheme);
+        localStorage.setItem(THEME_STATE_KEY, nextTheme);
+    });
+});
+
+function applyTheme(theme) {
+    $('html').attr('data-theme', theme);
+    
+    const icon = $('#themeIcon');
+    if (theme === 'dark') {
+        icon.removeClass('bi-moon').addClass('bi-brightness-high');
+    } else {
+        icon.removeClass('bi-brightness-high').addClass('bi-moon');
     }
-
-    function applyTheme(theme) {
-        document.documentElement.setAttribute('data-theme', theme);
-        localStorage.setItem(STORAGE_KEY, theme);
-
-        // Przełącz motyw DevExtreme (dark ↔ light)
-        const dxDark = document.getElementById('dx-theme-dark');
-        const dxLight = document.getElementById('dx-theme-light');
-        if (dxDark && dxLight) {
-            dxDark.disabled = (theme !== 'dark');
-            dxLight.disabled = (theme !== 'light');
-        }
-
-        // Aktualizuj ikonę przycisku jeśli istnieje
-        const btn = document.getElementById('theme-toggle-btn');
-        if (btn) {
-            btn.setAttribute('title', theme === 'dark' ? 'Przełącz na jasny' : 'Przełącz na ciemny');
-            btn.textContent = theme === 'dark' ? '☀️' : '🌙';
-        }
-    }
-
-    function toggleTheme() {
-        const current = document.documentElement.getAttribute('data-theme') ?? DEFAULT_THEME;
-        applyTheme(current === 'dark' ? 'light' : 'dark');
-    }
-
-    // Zaaplikuj motyw natychmiast (przed renderowaniem) — zapobiega flashowi
-    applyTheme(getTheme());
-
-    // Eksportuj na obiekt window żeby przycisk mógł wywołać
-    window.toggleTheme = toggleTheme;
-})();
+}

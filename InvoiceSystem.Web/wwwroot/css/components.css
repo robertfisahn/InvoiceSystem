@@ -1,0 +1,311 @@
+/* Sidebar Menu */
+.sidebar-menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.menu-group-label {
+    padding: 1.5rem 1rem 0.5rem;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: rgba(255,255,255,0.4);
+    font-weight: 700;
+}
+
+.sidebar-collapsed .menu-group-label {
+    visibility: hidden;
+    height: 20px;
+}
+
+.sidebar-menu li a {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1.25rem;
+    color: rgba(255,255,255,0.7);
+    text-decoration: none;
+    transition: all 0.2s;
+    border-left: 3px solid transparent;
+    white-space: nowrap;
+}
+
+.sidebar-menu li a i {
+    font-size: 1.25rem;
+    width: 24px;
+    margin-right: 1rem;
+    text-align: center;
+}
+
+.sidebar-menu li a:hover {
+    background-color: rgba(255,255,255,0.05);
+    color: #fff;
+}
+
+.sidebar-menu li.active a {
+    background-color: rgba(99, 102, 241, 0.15);
+    color: var(--accent);
+    border-left-color: var(--accent);
+}
+
+.sidebar-collapsed .menu-label {
+    display: none;
+}
+
+/* ========================
+   SIDEBAR FOOTER — toggle
+   ======================== */
+.sidebar-footer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    justify-content: flex-end;
+}
+
+.sidebar-toggle-btn {
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.4);
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+    font-size: 1.1rem;
+}
+
+.sidebar-toggle-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+}
+
+/* Płynna rotacja ikony */
+#sidebarToggleIcon {
+    display: inline-block;
+    transition: transform 0.25s ease;
+}
+
+/* Gdy zwinięty — centrujemy przycisk */
+.sidebar-collapsed .sidebar-footer {
+    justify-content: center;
+}
+
+/* ========================
+   CUSTOM MODAL SYSTEM
+   ======================== */
+.modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(8px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.modal-backdrop.show {
+    display: flex;
+    opacity: 1;
+}
+
+.app-modal {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-strong);
+    border-radius: 20px;
+    width: 100%;
+    max-width: 400px;
+    padding: 2rem;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    transform: scale(0.9);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.modal-backdrop.show .app-modal {
+    transform: scale(1);
+}
+
+.modal-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.modal-icon-danger {
+    width: 56px;
+    height: 56px;
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.modal-title {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin: 0;
+    line-height: 1.2;
+}
+
+.modal-body {
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    line-height: 1.5;
+    margin-bottom: 2rem;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.modal-actions button,
+.modal-actions a {
+    flex: 1;
+    justify-content: center;
+}
+
+/* Badges */
+.badge-status {
+    padding: 0.35em 0.65em;
+    font-size: 0.75em;
+    font-weight: 700;
+    border-radius: 50rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.badge-draft     { background: #fef3c7; color: #92400e; }
+.badge-issued    { background: #dbeafe; color: #1e40af; }
+.badge-paid      { background: #dcfce7; color: #166534; }
+.badge-overdue   { background: #fee2e2; color: #991b1b; }
+.badge-cancelled { background: #f3f4f6; color: #374151; }
+
+/* Notifications Badge */
+.topbar-notifications { position: relative; }
+.topbar-notifications .badge {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    background-color: #ef4444;
+    color: white;
+    font-size: 0.65rem;
+    padding: 2px 5px;
+    border-radius: 10px;
+    min-width: 18px;
+    border: 2px solid var(--topbar-bg);
+}
+
+/* ========================
+   PRIMARY ACTION BUTTON
+   ======================== */
+.btn-primary-accent {
+    background: linear-gradient(135deg, var(--accent) 0%, #4f46e5 100%);
+    color: #ffffff !important;
+    border: none;
+    padding: 0.5rem 1.25rem;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.875rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    text-decoration: none !important;
+    cursor: pointer;
+}
+
+.btn-primary-accent:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(99, 102, 241, 0.35);
+    filter: brightness(1.1);
+}
+
+.btn-primary-accent:active {
+    transform: translateY(0);
+}
+
+.btn-primary-accent i {
+    font-size: 1.1rem;
+}
+
+/* ========================
+   SECONDARY / OUTLINE BUTTON
+   ======================== */
+.btn-secondary-outline {
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--text-primary);
+    border: 1px solid var(--border-strong);
+    padding: 0.5rem 1.25rem;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.875rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s;
+    text-decoration: none !important;
+    cursor: pointer;
+}
+
+.btn-secondary-outline:hover {
+    background-color: var(--accent-soft);
+    color: var(--accent);
+    border-color: var(--accent);
+    transform: translateY(-1px);
+}
+
+[data-theme="light"] .btn-secondary-outline {
+    background: #ffffff;
+    border-color: #cbd5e1;
+}
+
+/* ========================
+   GHOST BUTTON (Anuluj / Back)
+   ======================== */
+.btn-ghost {
+    background: transparent;
+    color: var(--text-secondary);
+    border: 1px solid transparent;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.875rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s;
+    text-decoration: none !important;
+    cursor: pointer;
+}
+
+.btn-ghost:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+    color: var(--text-primary);
+}
+
+[data-theme="light"] .btn-ghost:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}

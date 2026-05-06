@@ -1,60 +1,89 @@
-/* components/card.css — karty (BEM) */
+/* components/card.css — karty z hierarchią warstw */
 
 .data-card {
-    background-color: var(--color-bg-secondary);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-lg);
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-strong);
+    border-radius: 12px;
     box-shadow: var(--shadow-sm);
-    padding: var(--spacing-lg);
+    overflow: hidden;
 }
 
 .data-card__header {
-    padding: var(--spacing-md) var(--spacing-lg);
-    border-bottom: 1px solid var(--color-border);
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--border);
     display: flex;
     justify-content: space-between;
     align-items: center;
+    background-color: var(--bg-secondary);
 }
 
 .data-card__title {
-    font-size: var(--font-size-sm);
-    font-weight: var(--font-weight-semibold);
-    color: var(--color-text-primary);
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--text-primary);
     margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
 .data-card__body {
-    padding: var(--spacing-md) var(--spacing-lg);
+    padding: 1.5rem;
 }
 
-/* Stat card — dashboard */
+/* ========================
+   STAT CARD — Dashboard
+   ======================== */
 .stat-card {
-    background-color: var(--color-bg-secondary);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-lg);
-    padding: var(--spacing-lg);
-    transition: box-shadow var(--transition-fast);
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-strong);
+    border-radius: 12px;
+    padding: 1.5rem;
+    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+    position: relative;
+    overflow: hidden;
 }
 
 .stat-card:hover {
-    box-shadow: var(--shadow-md);
+    transform: translateY(-3px);
+    box-shadow: var(--shadow);
+    border-color: var(--accent);
+}
+
+/* Delikatna linia akcentu na górze karty */
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent), transparent);
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.stat-card:hover::before {
+    opacity: 1;
 }
 
 .stat-card__icon {
     font-size: 1.75rem;
-    margin-bottom: var(--spacing-sm);
+    margin-bottom: 0.75rem;
 }
 
 .stat-card__value {
-    font-size: var(--font-size-3xl);
-    font-weight: var(--font-weight-bold);
-    color: var(--color-text-primary);
-    letter-spacing: -1px;
-    line-height: var(--line-height-tight);
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    letter-spacing: -0.04em;
+    line-height: 1;
 }
 
 .stat-card__label {
-    color: var(--color-text-secondary);
-    font-size: var(--font-size-sm);
-    margin-top: var(--spacing-xs);
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    margin-top: 0.35rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
 }

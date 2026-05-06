@@ -1,0 +1,152 @@
+<header class="app-topbar">
+    <a class="topbar-brand" asp-controller="GetInvoiceList" asp-action="Index">
+        <div style="background: var(--accent); color: white; width: 32px; height: 32px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: 800;">IS</div>
+        <span class="ms-2 d-none d-sm-inline" style="font-weight: 700; font-size: 1.1rem; letter-spacing: -0.02em;">Invoice<span style="color: var(--accent);">System</span></span>
+    </a>
+
+    <div class="topbar-actions">
+        <!-- Theme Toggle -->
+        <button id="themeToggle" class="topbar-btn" title="Przełącz motyw">
+            <i class="bi bi-brightness-high" id="themeIcon"></i>
+        </button>
+
+        <!-- Powiadomienia -->
+        <div class="topbar-notifications">
+            <button class="topbar-btn">
+                <i class="bi bi-bell"></i>
+                <span class="topbar-badge">3</span>
+            </button>
+        </div>
+
+        <!-- Profil Użytkownika (Tylko Avatar) -->
+        <div class="dropdown">
+            <button class="topbar-user-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <div class="user-avatar">RF</div>
+                <i class="bi bi-chevron-down" style="font-size: 0.7rem; opacity: 0.5;"></i>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end shadow-lg">
+                <li><a class="dropdown-item py-2 px-3" href="#"><i class="bi bi-person me-2"></i> Mój profil</a></li>
+                <li><a class="dropdown-item py-2 px-3" href="#"><i class="bi bi-gear me-2"></i> Ustawienia</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li>
+                    <form asp-controller="Logout" asp-action="Index" method="post">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="dropdown-item py-2 px-3 text-danger">
+                            <i class="bi bi-box-arrow-right me-2"></i> Wyloguj się
+                        </button>
+                    </form>
+                </li>
+            </ul>
+        </div>
+    </div>
+</header>
+
+<style>
+    .app-topbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 1.5rem;
+        height: var(--topbar-height);
+        background-color: var(--bg-secondary);
+        border-bottom: 1px solid var(--border);
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 1000;
+    }
+
+    .topbar-actions {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .topbar-btn {
+        background: transparent;
+        border: none;
+        color: var(--text-secondary);
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        transition: all 0.2s;
+        cursor: pointer;
+        position: relative;
+    }
+
+    .topbar-btn:hover {
+        background: rgba(255, 255, 255, 0.05);
+        color: var(--text-primary);
+    }
+
+    .topbar-badge {
+        position: absolute;
+        top: 6px;
+        right: 6px;
+        background: #ef4444;
+        color: white;
+        font-size: 0.65rem;
+        font-weight: 700;
+        min-width: 16px;
+        height: 16px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px solid var(--bg-secondary);
+    }
+
+    .topbar-user-btn {
+        background: transparent;
+        border: none;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 4px;
+        margin-left: 8px;
+        cursor: pointer;
+    }
+
+    .user-avatar {
+        width: 32px;
+        height: 32px;
+        background: linear-gradient(135deg, var(--accent) 0%, #4f46e5 100%);
+        color: white;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 0.75rem;
+        box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+    }
+
+    .dropdown-menu {
+        background: var(--bg-tertiary);
+        border: 1px solid var(--border-strong);
+        border-radius: 12px;
+        padding: 0.5rem;
+        min-width: 200px;
+    }
+
+    .dropdown-item {
+        color: var(--text-primary) !important;
+        border-radius: 6px;
+        font-size: 0.85rem;
+    }
+
+    .dropdown-item:hover {
+        background: var(--accent-soft) !important;
+        color: var(--accent) !important;
+    }
+
+    .dropdown-divider {
+        border-top-color: var(--border);
+        margin: 0.5rem 0;
+    }
+</style>

@@ -3,32 +3,25 @@
     ViewData["Title"] = $"Faktura {Model.InvoiceNumber}";
 }
 
-<div class="page">
-    <div class="page__header no-print">
-        <div>
-            <h1 class="page__title">Podgląd faktury</h1>
-            <p class="page__subtitle">Szczegóły dokumentu @Model.InvoiceNumber</p>
-        </div>
-        <div class="d-flex gap-2">
-            <a href="/invoices/update/@Model.Id" class="btn btn-outline-warning">
-                Edytuj
-            </a>
-            <button onclick="window.print()" class="btn btn-outline-primary">
-                Drukuj
-            </button>
-            <button type="button" class="btn btn-outline-danger" onclick="deleteInvoice(@Model.Id)">
-                Usuń
-            </button>
-            <a href="/invoices" class="btn btn-outline-secondary">Powrót</a>
-        </div>
+@section PageActions {
+    <div class="d-flex gap-2">
+        <a href="/invoices/update/@Model.Id" class="btn-secondary-outline">
+            <i class="bi bi-pencil me-1"></i> Edytuj
+        </a>
+        <button onclick="printInvoice()" class="btn-secondary-outline">
+            <i class="bi bi-printer me-1"></i> Drukuj
+        </button>
+        <button type="button" class="btn-action-delete-large" onclick="showDeleteModal('@Model.Id', '@Model.InvoiceNumber')">
+            <i class="bi bi-trash me-1"></i> Usuń
+        </button>
+        <a href="/invoices" class="btn-primary-accent">
+            <i class="bi bi-arrow-left me-1"></i> Powrót
+        </a>
     </div>
+}
 
-    <form id="deleteForm" method="post" style="display:none;">
-        @Html.AntiForgeryToken()
-    </form>
-
-    <div class="invoice-document shadow-lg">
-        <!-- Main Content Wrapper to push footer down -->
+<div class="page-body">
+    <div class="invoice-document shadow-lg" id="invoiceDoc">
         <div class="invoice-content-wrap">
             <!-- Header -->
             <div class="d-flex justify-content-between mb-5">
@@ -97,23 +90,24 @@
                     </div>
                     <div class="d-flex justify-content-between py-3">
                         <span class="h5 m-0">RAZEM:</span>
-                        <span class="h5 fw-bold m-0">@Model.TotalGross.ToString("N2") PLN</span>
+                        <span class="h5 fw-bold m-0 text-primary">@Model.TotalGross.ToString("N2") PLN</span>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Footer — pushed to bottom by flexbox -->
         <div class="invoice-footer">
-            Faktura wygenerowana automatycznie w systemie InvoiceSystem.
+            Faktura wygenerowana automatycznie w systemie InvoiceSystem. Dziękujemy!
         </div>
     </div>
 </div>
 
+@await Html.PartialAsync("Components/_DeleteModal")
+
 <style>
     .invoice-document {
-        background: white !important; /* Zawsze biały papier */
-        color: #1a1a1a !important;   /* Zawsze ciemny tekst */
+        background: white !important;
+        color: #1a1a1a !important;
         padding: 4rem;
         border-radius: 8px;
         max-width: 900px;
@@ -121,37 +115,15 @@
         font-family: 'Inter', sans-serif;
         display: flex;
         flex-direction: column;
-        min-height: 842px; /* A4 on screen approx */
-        position: relative; /* Dla pozycjonowania stopki */
-    }
-
-    /* Wymuszamy aby tabela w dokumencie była jasna */
-    .invoice-document table {
-        background-color: transparent !important;
-        border-color: #dee2e6 !important;
+        min-height: 297mm; /* Wymuszamy A4 dla podglądu */
     }
     
+    .invoice-content-wrap { flex: 1; }
+
+    .invoice-document table { background-color: transparent !important; }
     .invoice-document table td, 
-    .invoice-document table th {
-        background-color: transparent !important;
-        color: #1a1a1a !important;
-        border-color: #dee2e6 !important;
-    }
+    .invoice-document table th { color: #1a1a1a !important; border-color: #dee2e6 !important; }
 
-    .invoice-document .table-light th {
-        background-color: #f8f9fa !important;
-        color: #4b5563 !important;
-    }
-
-    .invoice-document hr {
-        color: #dee2e6;
-        opacity: 1;
-    }
-
-    .invoice-content-wrap {
-        /* Kontener na treść */
-    }
-    
     .invoice-footer {
         margin-top: 3rem;
         padding-top: 2rem;
@@ -161,76 +133,113 @@
         border-top: 1px solid #f3f4f6;
     }
     
-    .invoice-logo { 
-        font-weight: 800; 
-        letter-spacing: -1px; 
-        margin: 0; 
-        color: #1a1a1a;
-    }
+    .invoice-logo { font-weight: 800; letter-spacing: -1px; margin: 0; color: #1a1a1a; }
     .invoice-logo span { color: #6366f1; }
 
-    .table-light th {
-        background-color: #f8f9fa;
-        color: #4b5563;
-        font-size: 0.75rem;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
+    .btn-action-delete-large {
+        background: rgba(239, 68, 68, 0.05);
+        color: #ef4444;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+        padding: 0.5rem 1.25rem;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.875rem;
+        transition: all 0.2s;
     }
+    .btn-action-delete-large:hover { background: #ef4444; color: white; transform: translateY(-1px); }
 
+    /* PRINT ENGINE */
     @@media print {
-        .no-print { display: none !important; }
-        
-        body, html { 
-            margin: 0 !important; 
-            padding: 0 !important; 
-            height: 297mm !important;
+        @@page {
+            margin: 15mm;
+            size: A4;
         }
 
-        .page { 
-            padding: 0 !important; 
-            margin: 0 !important; 
+        html, body {
+            background: white !important;
+            height: auto !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            overflow: hidden !important; /* Usuwa suwaki na wydruku */
         }
 
-        .invoice-document { 
-            box-shadow: none !important; 
-            padding: 20mm !important; 
-            margin: 0 !important; 
-            width: 210mm !important;
-            height: 297mm !important;
-            border-radius: 0;
-            position: relative;
+        .no-print, .app-topbar, .app-sidebar, .page-header, .page-header-actions, .modal-backdrop {
+            display: none !important;
+        }
+
+        .app-wrapper, .app-content, .content-body, .page-body {
+            background: white !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            display: block !important;
+            height: auto !important;
+            width: 100% !important;
+            overflow: hidden !important; /* Blokada suwaków na każdym poziomie */
+        }
+
+        .invoice-document {
+            box-shadow: none !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            width: 100% !important;
+            border: none !important;
+            display: flex !important;
+            flex-direction: column !important;
+            overflow: hidden !important; /* Tu też blokujemy */
         }
 
         .invoice-footer {
-            position: absolute;
-            bottom: 20mm;
-            left: 20mm;
-            right: 20mm;
-            margin: 0;
+            margin-top: auto !important;
+            padding-bottom: 2mm; /* Mniejszy padding dla pewności */
+            border-top: 1px solid #eee;
+            text-align: center;
         }
+
+        tr {
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+        }
+    }
+
+    /* Blur UI elements when printing */
+    .is-printing .app-topbar,
+    .is-printing .app-sidebar,
+    .is-printing .page-header {
+        filter: blur(8px);
+        opacity: 0.6;
+        transition: all 0.3s ease;
     }
 </style>
 
 @section Scripts {
     <script>
-        function deleteInvoice(id) {
-            const dialog = DevExpress.ui.dialog.custom({
-                title: "Potwierdzenie usunięcia",
-                messageHtml: "Czy na pewno chcesz usunąć tę fakturę? Operacja jest nieodwracalna.",
-                buttons: [
-                    { text: "Tak", onClick: () => true, elementAttr: { class: "dx-button-danger" } },
-                    { text: "Nie", onClick: () => false }
-                ],
-                dragEnabled: false
-            });
+        function printInvoice() {
+            const doc = document.getElementById('invoiceDoc');
+            
+            // 1. Reset wysokości
+            doc.style.minHeight = 'auto';
+            
+            // 2. Obliczanie wysokości roboczej A4 (297mm - 30mm marginesów = 267mm)
+            // Dodajemy 3mm bufora bezpieczeństwa (264mm), żeby uniknąć pustych stron
+            const safetyBufferMm = 264; 
+            const pxToMm = 0.2645833333;
+            
+            // 3. Pobranie aktualnej wysokości kontenera
+            const currentHeightMm = doc.scrollHeight * pxToMm;
+            
+            // 4. Obliczanie ile stron potrzebujemy
+            const pagesCount = Math.ceil(currentHeightMm / safetyBufferMm);
+            
+            // 5. Ustawienie wysokości kontenera
+            doc.style.minHeight = (pagesCount * safetyBufferMm) + 'mm';
 
-            dialog.show().done(function(dialogResult) {
-                if (dialogResult) {
-                    const form = document.getElementById('deleteForm');
-                    form.action = '/invoices/delete/' + id;
-                    form.submit();
-                }
-            });
+            // 6. Druk
+            document.body.classList.add('is-printing');
+            setTimeout(() => {
+                window.print();
+                document.body.classList.remove('is-printing');
+                doc.style.minHeight = '297mm'; // Przywrócenie dla UI
+            }, 300);
         }
     </script>
 }

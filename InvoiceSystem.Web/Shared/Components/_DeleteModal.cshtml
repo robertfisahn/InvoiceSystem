@@ -1,0 +1,20 @@
+<!-- Shared Delete Confirmation Modal -->
+<div class="modal-backdrop" id="deleteModalBackdrop">
+    <div class="app-modal">
+        <div class="modal-header">
+            <div class="modal-icon-danger"><i class="bi bi-exclamation-triangle"></i></div>
+            <h3 class="modal-title">Usuwanie faktury</h3>
+        </div>
+        <div class="modal-body">
+            Czy na pewno chcesz usunąć fakturę <strong id="modalInvoiceNumber"></strong>?<br>
+            Tej operacji nie można cofnąć.
+        </div>
+        <div class="modal-actions">
+            <button type="button" class="btn-secondary-outline" onclick="hideDeleteModal()">Anuluj</button>
+            <form id="deleteModalForm" method="post" action="">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn btn-danger w-100" style="padding: 0.5rem 1.25rem; border-radius: 8px; font-weight: 600;">Usuń fakturę</button>
+            </form>
+        </div>
+    </div>
+</div>

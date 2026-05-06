@@ -1,0 +1,196 @@
+* {
+    box-sizing: border-box;
+}
+
+html {
+    background-color: var(--bg-primary);
+    overflow: hidden; /* Wyłącza scrollbar na poziomie okna */
+    height: 100%;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: 'Inter', sans-serif;
+    height: 100%;
+}
+
+/* DevExtreme nadpisuje tło — wymuszamy nasze */
+body.dx-viewport,
+.dx-viewport {
+    background-color: var(--bg-primary) !important;
+}
+
+/* Ukrywamy pomarańczowy pasek licencyjny DevExpress (Evaluation Version) */
+[class*="dx-license"], 
+.dx-license,
+div[style*="background-color: rgb(255, 152, 0)"], 
+div[style*="background-color: #ff9800"] {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
+/* ========================
+   TOPBAR
+   ======================== */
+.app-topbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: var(--topbar-height);
+    background-color: var(--topbar-bg);
+    border-bottom: 1px solid var(--border-strong);
+    display: flex;
+    align-items: center;
+    padding: 0 1.5rem;
+    z-index: 1000;
+}
+
+.topbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    text-decoration: none;
+    color: var(--text-primary);
+    font-weight: 700;
+    font-size: 1.1rem;
+    min-width: 200px;
+}
+
+.topbar-spacer { flex: 1; }
+
+.topbar-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 1.25rem;
+    padding: 0.5rem;
+    cursor: pointer;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s, color 0.2s;
+}
+
+.topbar-btn:hover {
+    background-color: var(--accent-soft);
+    color: var(--accent);
+}
+
+/* ========================
+   APP WRAPPER & SIDEBAR
+   ======================== */
+.app-wrapper {
+    display: flex;
+    height: 100%; /* Zmienione z min-height na height */
+    padding-top: var(--topbar-height);
+    background-color: var(--bg-primary);
+}
+
+.app-sidebar {
+    position: fixed;
+    top: var(--topbar-height);
+    left: 0;
+    bottom: 0;
+    width: var(--sidebar-width);
+    background-color: var(--bg-sidebar);
+    border-right: 1px solid var(--border-strong);
+    color: #fff;
+    transition: width 0.25s ease;
+    z-index: 999;
+    overflow-x: hidden;
+}
+
+.sidebar-collapsed .app-sidebar {
+    width: var(--sidebar-collapsed-width);
+}
+
+/* ========================
+   MAIN CONTENT
+   ======================== */
+.app-content {
+    flex: 1;
+    margin-left: var(--sidebar-width);
+    padding: 12px 24px 60px;
+    transition: margin-left 0.25s ease;
+    background-color: var(--bg-primary);
+    height: calc(100vh - var(--topbar-height));
+    overflow-y: auto;
+    
+    /* Custom Scrollbar — modern look */
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-strong) transparent;
+}
+
+.app-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.app-content::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.app-content::-webkit-scrollbar-thumb {
+    background-color: var(--border-strong);
+    border-radius: 10px;
+}
+
+.app-content::-webkit-scrollbar-thumb:hover {
+    background-color: var(--accent);
+}
+
+.sidebar-collapsed .app-content {
+    margin-left: var(--sidebar-collapsed-width);
+}
+
+/* ========================
+   PAGE HEADER
+   ======================== */
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding: 0;
+    background-color: transparent;
+    border: none;
+    box-shadow: none;
+}
+
+.page-title {
+    margin: 0;
+    font-size: 1.25rem;  /* Zmniejszony tytuł — mieści się bez scrolla */
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--text-primary);
+}
+
+.page-header-left .breadcrumb {
+    background: transparent !important;
+    padding: 0;
+    margin-top: 2px;
+    margin-bottom: 0;
+    font-size: 0.8rem;
+}
+
+/* ========================
+   MOBILE
+   ======================== */
+@media (max-width: 767px) {
+    .app-sidebar {
+        transform: translateX(-100%);
+    }
+    .sidebar-open .app-sidebar {
+        transform: translateX(0);
+    }
+    .app-content {
+        margin-left: 0 !important;
+    }
+}

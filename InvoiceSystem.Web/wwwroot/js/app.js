@@ -1,12 +1,23 @@
-// app.js — inicjalizacja aplikacji
+// Global Modal Logic
+function showDeleteModal(id, number, deleteUrlPrefix = '/invoices/delete/') {
+    const modalNumber = document.getElementById('modalInvoiceNumber');
+    const modalForm = document.getElementById('deleteModalForm');
+    const backdrop = document.getElementById('deleteModalBackdrop');
 
-// DOMContentLoaded — Bootstrap init i inne globalne akcje UI
-document.addEventListener('DOMContentLoaded', function () {
-    // Zaznacz aktywny link w nawigacji
-    const currentPath = window.location.pathname;
-    document.querySelectorAll('.navbar__link').forEach(link => {
-        if (link.getAttribute('href') === currentPath) {
-            link.classList.add('navbar__link--active');
-        }
-    });
+    if (modalNumber) modalNumber.innerText = number;
+    if (modalForm) modalForm.action = deleteUrlPrefix + id;
+    if (backdrop) backdrop.classList.add('show');
+}
+
+function hideDeleteModal() {
+    const backdrop = document.getElementById('deleteModalBackdrop');
+    if (backdrop) backdrop.classList.remove('show');
+}
+
+// Close modal on outside click
+window.addEventListener('click', function(event) {
+    const backdrop = document.getElementById('deleteModalBackdrop');
+    if (event.target === backdrop) {
+        hideDeleteModal();
+    }
 });

@@ -1,0 +1,54 @@
+<nav class="app-sidebar" id="appSidebar">
+    <ul class="sidebar-menu">
+        <li class="menu-group-label">Główne</li>
+        <li class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" ? "active" : "")">
+            <a href="/">
+                <i class="bi bi-grid-1x2"></i>
+                <span class="menu-label">Dashboard</span>
+            </a>
+        </li>
+
+        <li class="menu-group-label">Dokumenty</li>
+        <li class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "GetInvoiceList" ? "active" : "")">
+            <a href="/invoices">
+                <i class="bi bi-file-earmark-text"></i>
+                <span class="menu-label">Faktury</span>
+            </a>
+        </li>
+        <li class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "CreateInvoice" ? "active" : "")">
+            <a href="/invoices/create">
+                <i class="bi bi-file-earmark-plus"></i>
+                <span class="menu-label">Nowa faktura</span>
+            </a>
+        </li>
+        <li>
+            <a href="#">
+                <i class="bi bi-cloud-arrow-up"></i>
+                <span class="menu-label">Import (OCR)</span>
+            </a>
+        </li>
+
+        <li class="menu-group-label">Kontrahenci</li>
+        <li>
+            <a href="#">
+                <i class="bi bi-building"></i>
+                <span class="menu-label">Lista firm</span>
+            </a>
+        </li>
+
+        <li class="menu-group-label">System</li>
+        <li>
+            <a href="#">
+                <i class="bi bi-gear"></i>
+                <span class="menu-label">Ustawienia</span>
+            </a>
+        </li>
+    </ul>
+
+    <!-- Przycisk toggle na dole sidebara -->
+    <div class="sidebar-footer">
+        <button id="sidebarToggle" class="sidebar-toggle-btn" title="Zwiń / rozwiń menu">
+            <i class="bi bi-chevron-right" id="sidebarToggleIcon"></i>
+        </button>
+    </div>
+</nav>

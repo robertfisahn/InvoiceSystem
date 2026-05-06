@@ -11,8 +11,8 @@ Główny moduł obsługujący cykl życia dokumentu.
 | `GetInvoiceList` | Lista faktur w formie tabeli z paginacją i filtrowaniem. | Query |
 | `GetInvoiceDetails` | Podgląd szczegółowy faktury (dane kontrahenta, pozycje, płatności). | Query |
 | `CreateInvoice` | Ręczny formularz dodawania nowej faktury (wybór kontrahenta z listy). | Command |
-| `UpdateInvoice` | Edycja danych faktury (zmiana daty, numeru, pozycji). | Command |
-| `DeleteInvoice` | Usunięcie faktury z systemu wraz z powiązanymi pozycjami. | Command |
+| `UpdateInvoice` | ✅ Edycja danych faktury (zmiana daty, pozycji). | Command |
+| `DeleteInvoice` | ✅ Usunięcie faktury z systemu wraz z powiązanymi pozycjami. | Command |
 | `DownloadInvoiceFile` | Pobranie/wyświetlenie oryginalnego pliku dokumentu (PDF/obraz). | Query |
 
 ## 2. Moduł: OCR & AI (Automatyzacja Przetwarzania)
