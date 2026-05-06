@@ -2,29 +2,30 @@
 
 Zaawansowany system do kompleksowego zarządzania fakturami, zbudowany w architekturze **Vertical Slice Architecture (VSA)**. Aplikacja stanowi solidny fundament dla systemów klasy ERP/Back-office w ekosystemie .NET 9.
 
-🏗️ [Architektura Projektu](docs/FRONTEND-ARCHITECTURE.md) | 📘 [Shared Guides](SHARED_GUIDES/ASPNET_AUTH_GUIDE.md)
-
 ---
 
 <details open>
 <summary>🚀 <strong>Demo Wizualne — Jak to wygląda?</strong></summary>
 <br>
 
-#### 🔐 System Logowania (ASP.NET Core Identity)
-Stylowy, ciemny motyw z pełną walidacją po stronie serwera.
-![Login Screen](docs/images/login_screen.png)
+#### 🔐 System Logowania (Modern Navy Style)
+Stylowy, ciemny motyw z autorską walidacją i wysokim kontrastem.
+![Login Screen](docs/img/login_preview.png)
 
-#### 📊 Lista Faktur
-Interaktywna tabela (DevExtreme) z filtrowaniem, sortowaniem i paginacją.
-![Invoice List](docs/images/invoice_list.png)
+#### 🧾 Lista Faktur (Application Shell)
+Nowoczesny układ z bocznym paskiem nawigacji i tabelą danych w stylu Navy.
+![Invoice List](docs/img/list_preview.png)
 
-#### 📝 Wystawianie Faktury
-Dynamiczny formularz z automatycznym wyliczaniem kwot i walidacją.
-![Create Invoice](docs/images/create_invoice.png)
+#### 📝 Wystawianie Faktury (Dynamic Forms)
+Intuicyjny proces dodawania pozycji z automatycznym wyliczaniem kwot i walidacją.
+![Create Invoice](docs/img/create_preview.png)
 
-#### 📄 Podgląd Faktury (Paper Preview)
-Profesjonalny widok dokumentu zoptymalizowany do druku (ukrywanie interfejsu systemowego).
-![Invoice Details](docs/images/invoice_details.png)
+#### 📄 Podgląd Faktury (A4 Print Engine)
+ Profesjonalny podgląd arkusza A4 z autorskim systemem pozycjonowania stopki.
+![Invoice Details](docs/img/details_preview.png)
+
+#### 🌗 System Motywów i UX
+Inteligentne przełączanie trybów Dark/Light z pełną synchronizacją komponentów DevExtreme i autorskimi powiadomieniami "dymkowymi".
 
 </details>
 
@@ -36,10 +37,14 @@ Profesjonalny widok dokumentu zoptymalizowany do druku (ukrywanie interfejsu sys
 
 - **Backend**: .NET 9 (C# 13), MediatR, FluentValidation, Entity Framework Core
 - **Database**: SQLite (Development)
-- **Frontend**: Razor Views, Bootstrap 5, DevExtreme, CSS Variables (Theme Support)
-- **Architektura**: Vertical Slice Architecture (VSA) — ficzery odseparowane od siebie.
-- **Auth**: ASP.NET Core Identity (Cookie-based)
+- **Frontend**: Razor
 
+### 🎨 Modern UI & Frontend Architecture
+Projekt przeszedł gruntowną modernizację warstwy prezentacji, stawiając na lekkość i profesjonalny wygląd:
+- **Pure CSS Strategy**: Całkowite odejście od ciężkich bibliotek (DevExpress) na rzecz **Vanilla CSS + BEM + CSS Variables**.
+- **A4 Print Engine**: Autorski system generowania dokumentów A4, zapewniający idealne pozycjonowanie stopki i podział stron.
+- **Vertical Slice UI**: Style i skrypty są blisko logiki biznesowej, a reużywalne elementy (jak modale) są wydzielone do `Shared/Components`.
+- **Navy Design System**: Nowoczesny, ciemny motyw z dbałością o kontrast i typografię (Inter).
 </details>
 
 ---

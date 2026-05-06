@@ -1,167 +1,56 @@
-# Frontend Architecture — InvoiceSystem
+# Frontend Architecture — InvoiceSystem (Pure CSS Approach)
 
-## Koncepcja: Application Shell + Feature-Based Views
-
-Frontend działa jak **powłoka aplikacji (Application Shell)** — stabilny szkielet który nigdy się nie zmienia, plus zmienne widoki ficzerów wstrzykiwane w `<main>`.
+System wykorzystuje nowoczesną, lekką architekturę frontendową opartą na standardach **Vanilla CSS**, **CSS Custom Properties** oraz wzorcu **Application Shell**. Całkowicie wyeliminowano ciężkie biblioteki zewnętrzne (jak DevExtreme czy Tailwind) na rzecz pełnej kontroli nad kodem.
 
 ---
 
-## Diagram przepływu ładowania
+## 🏛 1. Application Shell Architecture
 
-```mermaid
-graph TD
-    Browser["🌐 Przeglądarka\nhttp://localhost:5215/invoices"]
-    Browser --> Layout
+Aplikacja jest zbudowana wokół stabilnej powłoki, która nie zmienia się między przejściami stron. Tylko zawartość kontenera `<main>` jest dynamicznie wstrzykiwana przez serwer Razor.
 
-    subgraph "Razor Engine (serwer)"
-        Layout["_Layout.cshtml\n(Application Shell)"]
-        Layout --> Navbar["Components/_Navbar.cshtml"]
-        Layout --> Body["@RenderBody()"]
-        Layout --> Footer["Components/_Footer.cshtml"]
-        Body --> View["Features/Invoices/\nGetInvoiceList/Index.cshtml"]
-    end
-
-    subgraph "CSS — kolejność ładowania"
-        V1["① frontend-variables.css\nDesign Tokens\n(kolory, spacing, radii)"]
-        V2["② app.css\nGlobalne style\n(body, shell, utilities)"]
-        V3["③ components/navbar.css"]
-        V4["③ components/card.css"]
-        V5["③ components/badge.css"]
-        V6["③ components/table.css"]
-        V1 --> V2
-        V2 --> V3
-        V2 --> V4
-        V2 --> V5
-        V2 --> V6
-    end
-
-    subgraph "JS — kolejność ładowania"
-        J1["① theme.js\nWczytaj motyw z localStorage\n(PRZED renderem — brak flash)"]
-        J2["② dx.all.js\nDevExtreme biblioteka"]
-        J3["③ app.js\nAktywny link w nav\nGlobalne inicjalizacje"]
-        J1 --> J2
-        J2 --> J3
-    end
-```
+- **`_Layout.cshtml`**: Główny szkielet definiujący strukturę HTML5 i importy.
+- **`_Sidebar.cshtml`**: Boczna nawigacja z logicznym podziałem na moduły.
+- **`_TopBar.cshtml`**: Górna belka akcji z dynamicznym wstrzykiwaniem przycisków przez `@RenderSection("PageActions")`.
+- **`page-body`**: Główny kontener treści zoptymalizowany pod kątem czytelności i marginesów.
 
 ---
 
-## Hierarchia plików (nadrzędne → podrzędne)
+## 🎨 2. Design System & CSS Variables
 
-```mermaid
-graph LR
-    subgraph "Warstwa 0 — Design Tokens"
-        FV["frontend-variables.css\n⬛ Wszystkie zmienne CSS\n(--color-*, --spacing-*, --radius-*)"]
-    end
+Zamiast hardkodowanych kolorów, projekt wykorzystuje **Design Tokens** zdefiniowane w `wwwroot/css/variables.css`.
 
-    subgraph "Warstwa 1 — Global Shell"
-        APP["app.css\nImportuje tokeny\nStyle dla body, .page, .app-shell"]
-        LAYOUT["_Layout.cshtml\nHTML szkielet\nŁączy CSS + JS + komponenty"]
-    end
+- **`--bg-primary`**: Podstawa ciemnego motywu Navy.
+- **`--accent-primary`**: Główny kolor interakcji (fiolet indygo).
+- **`--text-primary`**: Wysoki kontrast dla czytelności danych.
+- **`--radius-md`**: Spójne zaokrąglenia (8px) dla wszystkich kart i przycisków.
 
-    subgraph "Warstwa 2 — Komponenty CSS"
-        NAV_CSS["components/navbar.css\n.navbar, .navbar__*, .theme-toggle"]
-        CARD_CSS["components/card.css\n.data-card, .stat-card"]
-        BADGE_CSS["components/badge.css\n.badge-status--*"]
-        TABLE_CSS["components/table.css\n.dx-datagrid overrides\n.cell-invoice-number, .cell-amount"]
-    end
-
-    subgraph "Warstwa 2 — Komponenty Razor"
-        NAVBAR["Shared/Components/_Navbar.cshtml\nHTML nawigacji\nUżywa klas z navbar.css"]
-        FOOTER["Shared/Components/_Footer.cshtml\nHTML stopki"]
-    end
-
-    subgraph "Warstwa 3 — Widoki ficzerów"
-        VIEW1["Features/Invoices/GetInvoiceList/\nIndex.cshtml\nUżywa: .page, .data-card,\n.cell-*, DevExtreme DataGrid"]
-    end
-
-    FV --> APP
-    APP --> LAYOUT
-    NAV_CSS --> NAVBAR
-    LAYOUT --> NAVBAR
-    LAYOUT --> FOOTER
-    LAYOUT --> VIEW1
-    CARD_CSS --> VIEW1
-    TABLE_CSS --> VIEW1
-```
+Dzięki takiemu podejściu, zmiana kolorystyki całego systemu odbywa się w jednym pliku, bez konieczności edycji widoków.
 
 ---
 
-## Jak działa przełączanie motywu
+## 🖨 3. A4 Print Engine (Smart Stretch)
 
-```mermaid
-sequenceDiagram
-    participant U as Użytkownik
-    participant BTN as ☀️ Przycisk
-    participant JS as theme.js
-    participant HTML as &lt;html data-theme&gt;
-    participant CSS as frontend-variables.css
+Unikalną cechą projektu jest autorski silnik druku faktur, który rozwiązuje problemy natywnej paginacji przeglądarek.
 
-    Note over JS: Przy ładowaniu strony
-    JS->>JS: localStorage.getItem('invoice-theme')
-    JS->>HTML: setAttribute('data-theme', 'dark')
-    HTML->>CSS: [data-theme="dark"] aktywny
-    CSS-->>U: Ciemne tło, jasny tekst
-
-    Note over U: Klik w przycisk
-    U->>BTN: onClick="toggleTheme()"
-    BTN->>JS: window.toggleTheme()
-    JS->>HTML: setAttribute('data-theme', 'light')
-    JS->>JS: localStorage.setItem('invoice-theme', 'light')
-    HTML->>CSS: [data-theme="light"] aktywny
-    CSS-->>U: Jasne tło (#f3f4f6), ciemny tekst
-```
+### Mechanizm działania:
+1.  **CSS Media Query (`@media print`)**: Ukrywa UI systemu (`.no-print`) i konfiguruje systemowe marginesy strony (`15mm`).
+2.  **JavaScript Stretching**: Funkcja `printInvoice()` oblicza wysokość dokumentu i "rozciąga" go do wielokrotności strony A4 (264mm obszaru roboczego).
+3.  **Flexbox Anchoring**: Wykorzystanie `margin-top: auto` sprawia, że stopka faktury jest zawsze przyklejona do dolnej krawędzi ostatniej strony wydruku.
 
 ---
 
-## Struktura plików — pełna mapa
+## 🧩 4. Reusable Components (DRY)
 
-```
-InvoiceSystem.Web/
-│
-├── _ViewStart.cshtml          ← Razor: domyślny layout dla wszystkich widoków
-├── _ViewImports.cshtml        ← Razor: globalne using + tag helpers
-│
-├── Shared/
-│   ├── _Layout.cshtml         ← APPLICATION SHELL (główny plik HTML)
-│   └── Components/
-│       ├── _Navbar.cshtml     ← Komponent nawigacji
-│       └── _Footer.cshtml     ← Komponent stopki
-│
-├── Features/
-│   └── Invoices/
-│       └── GetInvoiceList/
-│           └── Index.cshtml   ← Widok ficzera (wstrzykiwany w <main>)
-│
-└── wwwroot/
-    ├── css/
-    │   ├── frontend-variables.css  ← [1] Design Tokens (zawsze pierwszy)
-    │   ├── app.css                 ← [2] Globalne style + shell
-    │   └── components/
-    │       ├── navbar.css          ← [3] Style nawigacji
-    │       ├── card.css            ← [3] Style kart
-    │       ├── badge.css           ← [3] Style statusów
-    │       └── table.css           ← [3] Style tabeli + DevExtreme
-    └── js/
-        ├── theme.js               ← [1] Motyw (MUSI być przed renderem)
-        └── app.js                 ← [2] Inicjalizacje UI
-```
+Wspólne elementy UI są wydzielone do `Shared/Components/`, co pozwala na ich reużycie bez duplikacji kodu:
+- **`_DeleteModal.cshtml`**: Centralna obsługa usuwania z bezpiecznym potwierdzeniem.
+- **`_Badge.cshtml`**: Kolorowe statusy (Draft, Paid, Overdue) oparte o klasy BEM.
+- **`_Alert.cshtml`**: Powiadomienia systemowe oparte o motyw Navy.
 
 ---
 
-## Co jest nadrzędne, co podrzędne?
-
-| Poziom | Plik | Rola |
-|--------|------|------|
-| **ROOT** | `frontend-variables.css` | Jedyne źródło prawdy dla kolorów i wartości |
-| **SHELL** | `_Layout.cshtml` + `app.css` | Stabilny szkielet — nigdy się nie zmienia |
-| **KOMPONENTY** | `_Navbar`, `_Footer`, `*.css` w `components/` | Reużywalne kawałki UI |
-| **FEATURE** | `Features/{Moduł}/{Akcja}/Index.cshtml` | Zmieniana zawartość `<main>` per ficzer |
-
-> **Zasada:** każdy nowy ficzer dodaje **tylko nowy widok** w `Features/`. Nigdy nie modyfikuje `_Layout.cshtml` ani plików shell.
-
----
-
-## Dlaczego `site.css` i `site.js` są w projekcie?
-
-To pozostałości po domyślnym szablonie ASP.NET — są **puste i nieużywane**. Można je usunąć lub zostawić bez wpływu na działanie.
+## 🛠 5. Standardy Kodowania UI
+- **BEM (Block Element Modifier)**: Przejrzyste nazewnictwo klas (np. `.invoice-card__header--highlight`).
+- **Stylizacja Hybrydowa**: 
+  - Globalne style (layout, komponenty, zmienne) znajdują się w plikach `.css`.
+  - Style unikalne dla ficzera (np. A4 Print Engine w detalach faktury) są umieszczone bezpośrednio w widoku Razor. Pozwala to na zachowanie zasad **Vertical Slice Architecture**, gdzie cała logika i prezentacja modułu są w jednym miejscu.
+- **Dark-First**: System jest natywnie zaprojektowany w ciemnych barwach.
