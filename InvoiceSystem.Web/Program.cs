@@ -64,6 +64,9 @@ builder.Services.Configure<RequestLocalizationOptions>(options =>
         .AddSupportedUICultures(supportedCultures);
 });
 
+builder.Services.AddHttpClient<OllamaService>();
+builder.Services.AddScoped<OllamaService>();
+
 var app = builder.Build();
 
 // Localization middleware

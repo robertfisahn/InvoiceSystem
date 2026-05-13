@@ -1,5 +1,7 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.Json;
+using InvoiceSystem.Web.Features.Invoices.Import;
 
 namespace InvoiceSystem.Web.Features.Invoices.CreateInvoice;
 
@@ -9,6 +11,34 @@ public class CreateInvoiceController(IMediator mediator) : Controller
     public async Task<IActionResult> Index()
     {
         var viewModel = await mediator.Send(new GetCreateInvoiceQuery());
+        
+        if (TempData["ExtractedInvoiceData"] is string jsonData)
+        {
+            try 
+            {
+                var extracted = JsonSerializer.Deserialize<ExtractedInvoiceData>(jsonData, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                if (extracted != null)
+                {
+                    var command = new CreateInvoiceCommand
+                    {
+                        InvoiceNumber = extracted.InvoiceNumber,
+                        Date = DateTime.TryParse(extracted.Date, out var d) ? d : DateTime.Now,
+                        FilePath = TempData["UploadedFilePath"]?.ToString(),
+                        Items = extracted.Items.Select(i => new CreateInvoiceItemCommand 
+                        { 
+                            Name = i.Name, 
+                            Quantity = i.Quantity, 
+                            Price = i.Price 
+                        }).ToList()
+                    };
+                    
+                    viewModel = viewModel with { Command = command };
+                    ViewBag.InfoMessage = "Dane zostały automatycznie wyodrębnione przez AI. Proszę o weryfikację.";
+                }
+            }
+            catch { /* Ignorujemy błędy parsowania, najwyżej formularz będzie pusty */ }
+        }
+
         return View(viewModel);
     }
 

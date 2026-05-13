@@ -21,8 +21,8 @@
                 <span class="menu-label">Nowa faktura</span>
             </a>
         </li>
-        <li>
-            <a href="#">
+        <li class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "ImportInvoice" ? "active" : "")">
+            <a href="/invoices/import">
                 <i class="bi bi-cloud-arrow-up"></i>
                 <span class="menu-label">Import (OCR)</span>
             </a>

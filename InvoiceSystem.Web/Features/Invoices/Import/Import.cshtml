@@ -1,0 +1,200 @@
+@{
+    ViewData["Title"] = "Importuj Fakturę (AI OCR)";
+}
+
+<div class="page-header no-print">
+    <div class="page-header-left">
+        <h2 class="page-title">Inteligentny Import Faktur</h2>
+        <p class="text-muted small">Wgraj dokument (PDF, Image), a nasze AI automatycznie wyodrębni dane.</p>
+    </div>
+</div>
+
+<div class="row justify-content-center mt-4">
+    <div class="col-md-8">
+        <div class="card shadow-sm border-0 bg-dark-card p-4">
+            @if (ViewBag.ErrorMessage != null)
+            {
+                <div class="alert alert-danger mb-4">
+                    <i class="bi bi-exclamation-triangle me-2"></i> @ViewBag.ErrorMessage
+                </div>
+            }
+
+            <form asp-action="Index" method="post" enctype="multipart/form-data" id="importForm">
+                <div class="upload-area" id="dropZone">
+                    <div class="upload-area__icon mb-3">
+                        <i class="bi bi-cloud-arrow-up display-1 text-primary opacity-50"></i>
+                    </div>
+                    <div class="upload-area__text mb-2">
+                        <h4 class="fw-bold">Przeciągnij plik tutaj</h4>
+                        <p class="text-muted">Lub kliknij, aby wybrać z dysku</p>
+                    </div>
+                    <div class="upload-area__hint small text-muted mb-3">
+                        Dozwolone formaty: <strong>PDF, JPG, PNG</strong> (max. 10MB)
+                    </div>
+                    <input type="file" name="file" class="upload-area__input" id="fileInput" accept=".pdf,.jpg,.jpeg,.png" required />
+                    
+                    <div class="selected-file d-none mt-3 p-3 bg-dark rounded border border-secondary">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-file-earmark-pdf h3 me-3 text-primary" id="fileIcon"></i>
+                                <div class="text-start">
+                                    <div class="fw-bold text-light" id="fileName">faktura.pdf</div>
+                                    <div class="text-muted small" id="fileSize">1.2 MB</div>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-outline-danger" id="removeFile">
+                                <i class="bi bi-x-lg"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center mt-4">
+                    <button type="submit" class="btn btn-primary btn-lg px-5 py-3 shadow" id="submitBtn" disabled>
+                        <i class="bi bi-magic me-2"></i> Rozpocznij Analizę AI
+                    </button>
+                </div>
+            </form>
+
+            <div class="mt-5">
+                <h5 class="text-light mb-3">Dlaczego warto używać importu AI?</h5>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <div class="p-3 bg-dark rounded h-100 border-start border-3 border-primary">
+                            <i class="bi bi-lightning-charge text-warning h4"></i>
+                            <div class="fw-bold mt-2">Błyskawicznie</div>
+                            <p class="small text-muted mb-0">Zamiast 5 minut klepania danych, wystarczy 10 sekund analizy.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3 bg-dark rounded h-100 border-start border-3 border-info">
+                            <i class="bi bi-check2-circle text-success h4"></i>
+                            <div class="fw-bold mt-2">Bez błędów</div>
+                            <p class="small text-muted mb-0">AI eliminuje literówki w NIP-ach i kwotach.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3 bg-dark rounded h-100 border-start border-3 border-purple">
+                            <i class="bi bi-shield-lock text-purple h4"></i>
+                            <div class="fw-bold mt-2">Prywatnie</div>
+                            <p class="small text-muted mb-0">Dane są przetwarzane lokalnie przez model Ollama.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .bg-dark-card { background-color: #1e1e2d; }
+    .text-purple { color: #a855f7; }
+    .border-purple { border-color: #a855f7 !important; }
+
+    .upload-area {
+        border: 2px dashed rgba(99, 102, 241, 0.3);
+        border-radius: 16px;
+        padding: 60px 40px;
+        text-align: center;
+        transition: all 0.3s ease;
+        position: relative;
+        cursor: pointer;
+        background: rgba(99, 102, 241, 0.02);
+    }
+
+    .upload-area:hover, .upload-area.drag-over {
+        border-color: #6366f1;
+        background: rgba(99, 102, 241, 0.08);
+        transform: translateY(-2px);
+    }
+
+    .upload-area__input {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        opacity: 0;
+        cursor: pointer;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+        border: none;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .btn-primary:hover:not(:disabled) {
+        transform: scale(1.05);
+        box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3);
+    }
+
+    .btn-primary:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+</style>
+
+<script>
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileInput');
+    const submitBtn = document.getElementById('submitBtn');
+    const selectedFileDiv = document.querySelector('.selected-file');
+    const fileNameDisplay = document.getElementById('fileName');
+    const fileSizeDisplay = document.getElementById('fileSize');
+    const removeFileBtn = document.getElementById('removeFile');
+    const uploadIcon = document.querySelector('.upload-area__icon');
+    const uploadText = document.querySelector('.upload-area__text');
+    const uploadHint = document.querySelector('.upload-area__hint');
+
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, preventDefaults, false);
+    });
+
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+        dropZone.addEventListener(eventName, () => dropZone.classList.add('drag-over'), false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, () => dropZone.classList.remove('drag-over'), false);
+    });
+
+    fileInput.addEventListener('change', function(e) {
+        handleFiles(this.files);
+    });
+
+    function handleFiles(files) {
+        if (files.length > 0) {
+            const file = files[0];
+            fileNameDisplay.textContent = file.name;
+            fileSizeDisplay.textContent = (file.size / (1024 * 1024)).toFixed(2) + ' MB';
+            
+            // Toggle visibility
+            selectedFileDiv.classList.remove('d-none');
+            uploadIcon.classList.add('d-none');
+            uploadText.classList.add('d-none');
+            uploadHint.classList.add('d-none');
+            submitBtn.disabled = false;
+        }
+    }
+
+    removeFileBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        fileInput.value = '';
+        selectedFileDiv.classList.add('d-none');
+        uploadIcon.classList.remove('d-none');
+        uploadText.classList.remove('d-none');
+        uploadHint.classList.remove('d-none');
+        submitBtn.disabled = true;
+    });
+
+    document.getElementById('importForm').onsubmit = function() {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Analizowanie dokumentu...';
+    };
+</script>
