@@ -66,6 +66,7 @@ builder.Services.Configure<RequestLocalizationOptions>(options =>
 
 builder.Services.Configure<StorageSettings>(builder.Configuration.GetSection("Storage"));
 builder.Services.AddScoped<IFileStorageService, FileStorageService>();
+builder.Services.AddScoped<IFileValidationService, FileValidationService>();
 
 var app = builder.Build();
 

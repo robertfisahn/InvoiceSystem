@@ -5,48 +5,41 @@ namespace InvoiceSystem.Web.Features.Invoices.Import;
 
 public class ImportInvoiceHandler(
     IFileStorageService storageService,
+    IFileValidationService validationService,
     ILogger<ImportInvoiceHandler> logger) 
     : IRequestHandler<ImportInvoiceCommand, ImportInvoiceResponse>
 {
-    private const long MaxFileSize = 10 * 1024 * 1024; // 10MB
-    private readonly string[] _allowedExtensions = { ".pdf", ".jpg", ".jpeg", ".png" };
-
     public async Task<ImportInvoiceResponse> Handle(ImportInvoiceCommand request, CancellationToken cancellationToken)
     {
-        // 1. Walidacja
-        if (request.File == null || request.File.Length == 0)
+        // 1. Walidacja formatu i rozmiaru
+        var validation = validationService.ValidateInvoiceUpload(request.File);
+        if (!validation.IsValid)
         {
-            logger.LogWarning("Próba uploadu pustego pliku.");
-            return new ImportInvoiceResponse(false, "Błąd: Nie wybrano pliku.");
+            logger.LogWarning("Nieudana walidacja pliku: {Message}", validation.Message);
+            return new ImportInvoiceResponse(false, validation.Message);
         }
 
-        if (request.File.Length > MaxFileSize)
-        {
-            logger.LogWarning("Plik przekracza limit rozmiaru: {Size} bytes", request.File.Length);
-            return new ImportInvoiceResponse(false, "Błąd: Plik jest zbyt duży (maksymalnie 10MB).");
-        }
-
-        var extension = Path.GetExtension(request.File.FileName).ToLower();
-        if (!_allowedExtensions.Contains(extension))
-        {
-            logger.LogWarning("Nieobsługiwany format pliku: {Extension}", extension);
-            return new ImportInvoiceResponse(false, "Błąd: Nieobsługiwany format pliku. Dozwolone: PDF, JPG, PNG.");
-        }
-
-        // 2. Proces zapisu przez dedykowany serwis
         try 
         {
-            var fileName = $"{Guid.NewGuid()}{extension}";
-            
             using var stream = request.File.OpenReadStream();
-            var savedFileName = await storageService.SaveFileAsync(stream, fileName, cancellationToken);
+            
+            // 2. Wyliczanie Hashu (Detekcja duplikatów w przyszłości przez DB)
+            var fileHash = await validationService.CalculateHashAsync(stream, cancellationToken);
+            logger.LogInformation("Przetwarzanie pliku o hashu: {Hash}", fileHash);
 
-            return new ImportInvoiceResponse(true, "Plik został pomyślnie zabezpieczony.", savedFileName);
+            // 3. Zapis fizyczny w strukturze datowej
+            var extension = Path.GetExtension(request.File.FileName).ToLower();
+            var secureFileName = $"{Guid.NewGuid()}{extension}";
+            
+            stream.Position = 0; // Reset strumienia po hashowaniu
+            var relativePath = await storageService.SaveFileAsync(stream, secureFileName, cancellationToken);
+
+            return new ImportInvoiceResponse(true, "Dokument został pomyślnie przetworzony i zabezpieczony.", relativePath);
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Wystąpił krytyczny błąd podczas importu pliku.");
-            return new ImportInvoiceResponse(false, "Wystąpił błąd systemowy podczas zapisu pliku.");
+            logger.LogError(ex, "Błąd krytyczny podczas importu dokumentu.");
+            return new ImportInvoiceResponse(false, "Wystąpił błąd systemowy podczas przetwarzania dokumentu.");
         }
     }
 }

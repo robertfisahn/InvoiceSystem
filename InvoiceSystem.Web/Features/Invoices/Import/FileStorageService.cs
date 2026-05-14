@@ -4,11 +4,6 @@ using System.IO;
 
 namespace InvoiceSystem.Web.Features.Invoices.Import;
 
-public class StorageSettings
-{
-    public string RootPath { get; set; } = "App_Data/Storage/Incoming";
-}
-
 public interface IFileStorageService
 {
     Task<string> SaveFileAsync(Stream content, string fileName, CancellationToken ct);
@@ -21,26 +16,26 @@ public class FileStorageService(
 {
     public async Task<string> SaveFileAsync(Stream content, string fileName, CancellationToken ct)
     {
-        // Budujemy pełną ścieżkę na podstawie ContentRootPath (Private Storage)
-        var fullRootPath = Path.Combine(environment.ContentRootPath, settings.Value.RootPath);
+        // Struktura datowa: YYYY/MM/DD
+        var datePath = DateTime.UtcNow.ToString("yyyy/MM/dd").Replace("/", Path.DirectorySeparatorChar.ToString());
+        var relativePath = Path.Combine(settings.Value.RootPath, datePath);
+        var fullRootPath = Path.Combine(environment.ContentRootPath, relativePath);
 
         if (!Directory.Exists(fullRootPath))
         {
-            logger.LogInformation("Tworzenie brakującego katalogu storage: {Path}", fullRootPath);
             Directory.CreateDirectory(fullRootPath);
         }
 
         var fullPath = Path.Combine(fullRootPath, fileName);
         
-        logger.LogDebug("Zapisywanie pliku: {FileName}", fileName);
-
         using (var fileStream = new FileStream(fullPath, FileMode.Create))
         {
             await content.CopyToAsync(fileStream, ct);
         }
 
-        logger.LogInformation("Plik zapisany pomyślnie: {FileName}", fileName);
+        logger.LogInformation("Plik zapisany w strukturze datowej: {Path}", fullPath);
         
-        return fileName;
+        // Zwracamy relatywną ścieżkę do zapisu w bazie
+        return Path.Combine(datePath, fileName);
     }
 }
