@@ -1,10 +1,11 @@
 using MediatR;
-using Microsoft.AspNetCore.Hosting;
-using System.IO;
+using Microsoft.Extensions.Logging;
 
 namespace InvoiceSystem.Web.Features.Invoices.Import;
 
-public class ImportInvoiceHandler(IWebHostEnvironment environment) 
+public class ImportInvoiceHandler(
+    IFileStorageService storageService,
+    ILogger<ImportInvoiceHandler> logger) 
     : IRequestHandler<ImportInvoiceCommand, ImportInvoiceResponse>
 {
     private const long MaxFileSize = 10 * 1024 * 1024; // 10MB
@@ -12,50 +13,40 @@ public class ImportInvoiceHandler(IWebHostEnvironment environment)
 
     public async Task<ImportInvoiceResponse> Handle(ImportInvoiceCommand request, CancellationToken cancellationToken)
     {
-        // 1. Walidacja podstawowa
+        // 1. Walidacja
         if (request.File == null || request.File.Length == 0)
         {
+            logger.LogWarning("Próba uploadu pustego pliku.");
             return new ImportInvoiceResponse(false, "Błąd: Nie wybrano pliku.");
         }
 
         if (request.File.Length > MaxFileSize)
         {
+            logger.LogWarning("Plik przekracza limit rozmiaru: {Size} bytes", request.File.Length);
             return new ImportInvoiceResponse(false, "Błąd: Plik jest zbyt duży (maksymalnie 10MB).");
         }
 
         var extension = Path.GetExtension(request.File.FileName).ToLower();
         if (!_allowedExtensions.Contains(extension))
         {
+            logger.LogWarning("Nieobsługiwany format pliku: {Extension}", extension);
             return new ImportInvoiceResponse(false, "Błąd: Nieobsługiwany format pliku. Dozwolone: PDF, JPG, PNG.");
         }
 
-        // 2. Przygotowanie PRIVATE STORAGE (poza wwwroot)
-        // Używamy ContentRootPath zamiast WebRootPath
-        var storagePath = Path.Combine(environment.ContentRootPath, "App_Data", "Storage", "Incoming");
-        
-        if (!Directory.Exists(storagePath))
-        {
-            Directory.CreateDirectory(storagePath);
-        }
-
-        // 3. Generowanie bezpiecznej nazwy pliku
-        var fileName = $"{Guid.NewGuid()}{extension}";
-        var fullPath = Path.Combine(storagePath, fileName);
-
-        // 4. Zapis fizyczny
+        // 2. Proces zapisu przez dedykowany serwis
         try 
         {
-            using (var stream = new FileStream(fullPath, FileMode.Create))
-            {
-                await request.File.CopyToAsync(stream, cancellationToken);
-            }
+            var fileName = $"{Guid.NewGuid()}{extension}";
+            
+            using var stream = request.File.OpenReadStream();
+            var savedFileName = await storageService.SaveFileAsync(stream, fileName, cancellationToken);
+
+            return new ImportInvoiceResponse(true, "Plik został pomyślnie zabezpieczony.", savedFileName);
         }
         catch (Exception ex)
         {
-            // W prawdziwym systemie tutaj byłby ILogger
-            return new ImportInvoiceResponse(false, $"Błąd podczas zapisu pliku: {ex.Message}");
+            logger.LogError(ex, "Wystąpił krytyczny błąd podczas importu pliku.");
+            return new ImportInvoiceResponse(false, "Wystąpił błąd systemowy podczas zapisu pliku.");
         }
-
-        return new ImportInvoiceResponse(true, "Plik został pomyślnie przesłany i zabezpieczony.", fileName);
     }
 }

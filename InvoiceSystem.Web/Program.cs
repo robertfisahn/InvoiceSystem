@@ -64,6 +64,9 @@ builder.Services.Configure<RequestLocalizationOptions>(options =>
         .AddSupportedUICultures(supportedCultures);
 });
 
+builder.Services.Configure<StorageSettings>(builder.Configuration.GetSection("Storage"));
+builder.Services.AddScoped<IFileStorageService, FileStorageService>();
+
 var app = builder.Build();
 
 // Localization middleware
