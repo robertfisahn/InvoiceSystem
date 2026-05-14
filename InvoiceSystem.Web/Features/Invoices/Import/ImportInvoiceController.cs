@@ -21,15 +21,8 @@ public class ImportInvoiceController(IMediator mediator) : Controller
         if (result.Success)
         {
             TempData["SuccessMessage"] = result.Message;
-            
-            if (!string.IsNullOrEmpty(result.ExtractedData))
-            {
-                TempData["ExtractedInvoiceData"] = result.ExtractedData;
-                TempData["UploadedFilePath"] = result.FilePath;
-                return RedirectToAction("Index", "CreateInvoice");
-            }
-
-            return RedirectToAction("Index");
+            TempData["UploadedFileName"] = result.FilePath; // Teraz to tylko nazwa pliku w Private Storage
+            return RedirectToAction("Index", "CreateInvoice");
         }
 
         ViewBag.ErrorMessage = result.Message;

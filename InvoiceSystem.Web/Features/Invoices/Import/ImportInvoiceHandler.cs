@@ -1,72 +1,61 @@
 using MediatR;
 using Microsoft.AspNetCore.Hosting;
-using UglyToad.PdfPig;
 using System.IO;
-using System.Text.Json;
 
 namespace InvoiceSystem.Web.Features.Invoices.Import;
 
-public class ImportInvoiceHandler(IWebHostEnvironment environment, OllamaService ollamaService) 
+public class ImportInvoiceHandler(IWebHostEnvironment environment) 
     : IRequestHandler<ImportInvoiceCommand, ImportInvoiceResponse>
 {
+    private const long MaxFileSize = 10 * 1024 * 1024; // 10MB
+    private readonly string[] _allowedExtensions = { ".pdf", ".jpg", ".jpeg", ".png" };
+
     public async Task<ImportInvoiceResponse> Handle(ImportInvoiceCommand request, CancellationToken cancellationToken)
     {
+        // 1. Walidacja podstawowa
         if (request.File == null || request.File.Length == 0)
         {
-            return new ImportInvoiceResponse(false, "Nie wybrano pliku.");
+            return new ImportInvoiceResponse(false, "Błąd: Nie wybrano pliku.");
+        }
+
+        if (request.File.Length > MaxFileSize)
+        {
+            return new ImportInvoiceResponse(false, "Błąd: Plik jest zbyt duży (maksymalnie 10MB).");
         }
 
         var extension = Path.GetExtension(request.File.FileName).ToLower();
-        var uploadsDir = Path.Combine(environment.WebRootPath, "uploads", "incoming");
-        if (!Directory.Exists(uploadsDir)) Directory.CreateDirectory(uploadsDir);
-
-        var fileName = $"{Guid.NewGuid()}{extension}";
-        var filePath = Path.Combine(uploadsDir, fileName);
-
-        using (var stream = new FileStream(filePath, FileMode.Create))
+        if (!_allowedExtensions.Contains(extension))
         {
-            await request.File.CopyToAsync(stream, cancellationToken);
+            return new ImportInvoiceResponse(false, "Błąd: Nieobsługiwany format pliku. Dozwolone: PDF, JPG, PNG.");
         }
 
-        // KROK 2: Wyciąganie tekstu (OCR / PDF Text)
-        string rawText = "";
-        if (extension == ".pdf")
-        {
-            try 
-            {
-                using var pdf = PdfDocument.Open(filePath);
-                foreach (var page in pdf.GetPages())
-                {
-                    rawText += page.Text + " ";
-                }
-            }
-            catch (Exception ex)
-            {
-                return new ImportInvoiceResponse(false, $"Błąd odczytu PDF: {ex.Message}");
-            }
-        }
-        else 
-        {
-            // Dla obrazków w przyszłości dodamy model wizyjny (Multimodal)
-            return new ImportInvoiceResponse(true, "Przesłano obrazek. Analiza obrazków będzie dostępna wkrótce.", $"/uploads/incoming/{fileName}");
-        }
-
-        if (string.IsNullOrWhiteSpace(rawText))
-        {
-            return new ImportInvoiceResponse(false, "Nie udało się wyodrębnić tekstu z dokumentu.");
-        }
-
-        // KROK 3: Analiza przez AI (Ollama)
-        var jsonResult = await ollamaService.ExtractInvoiceDataJson(rawText);
+        // 2. Przygotowanie PRIVATE STORAGE (poza wwwroot)
+        // Używamy ContentRootPath zamiast WebRootPath
+        var storagePath = Path.Combine(environment.ContentRootPath, "App_Data", "Storage", "Incoming");
         
-        if (string.IsNullOrEmpty(jsonResult))
+        if (!Directory.Exists(storagePath))
         {
-            return new ImportInvoiceResponse(true, "Plik przesłany, ale AI nie zwróciło danych. Wypełnij formularz ręcznie.", $"/uploads/incoming/{fileName}");
+            Directory.CreateDirectory(storagePath);
         }
 
-        return new ImportInvoiceResponse(true, "Analiza zakończona sukcesem!", $"/uploads/incoming/{fileName}") 
-        { 
-            ExtractedData = jsonResult 
-        };
+        // 3. Generowanie bezpiecznej nazwy pliku
+        var fileName = $"{Guid.NewGuid()}{extension}";
+        var fullPath = Path.Combine(storagePath, fileName);
+
+        // 4. Zapis fizyczny
+        try 
+        {
+            using (var stream = new FileStream(fullPath, FileMode.Create))
+            {
+                await request.File.CopyToAsync(stream, cancellationToken);
+            }
+        }
+        catch (Exception ex)
+        {
+            // W prawdziwym systemie tutaj byłby ILogger
+            return new ImportInvoiceResponse(false, $"Błąd podczas zapisu pliku: {ex.Message}");
+        }
+
+        return new ImportInvoiceResponse(true, "Plik został pomyślnie przesłany i zabezpieczony.", fileName);
     }
 }

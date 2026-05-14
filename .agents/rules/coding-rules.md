@@ -160,16 +160,19 @@ Jeśli `Domain` importuje cokolwiek z EF Core lub HTTP — to błąd architekton
 
 ---
 
-## DTO vs ViewModel
+## Zaawansowane standardy .NET
 
-Encja nigdy nie trafia do widoku. ViewModel nigdy nie trafia do bazy.
+### Wydajność i Pamięć
+- **StringBuilder**: Przy agregacji tekstu z wielu źródeł (np. stron PDF) zawsze używaj `StringBuilder`. Unikaj `+=` w pętlach dla typów string.
+- **Asynchroniczność**: Operacje trwające > 1s (I/O, AI) muszą być oddelegowane do background workera, aby nie blokować wątku HTTP.
 
----
+### Zarządzanie Stanem i Dane
+- **No TempData for Data**: Nie przesyłaj danych biznesowych przez `TempData`. Używaj bazy danych, cache lub sesji i przekazuj tylko unikalny ID procesu.
+- **Efficient DTOs**: Model wyjściowy musi być precyzyjny. Zawieraj tylko te dane, które są niezbędne (np. NIP, kwoty, daty). Nie dodawaj pól "na zapas", których system nie będzie używał.
 
-## Konfiguracja — IOptions\<T\>
-
-Nie czytaj ustawień bezpośrednio z `IConfiguration` — używaj silnie typowanych klas opcji.
-Każda sekcja konfiguracji ma swoją klasę `{Nazwa}Settings` w warstwie `Application` lub `Infrastructure`.
+### Konfiguracja i Diagnostyka
+- **Centralized Config**: Wszystkie parametry zewnętrzne (URL, nazwy modeli) muszą znajdować się w `appsettings.json` i być wstrzykiwane przez `IOptions<T>`.
+- **Structured Logging**: Loguj nie tylko błędy, ale i kluczowe etapy procesu biznesowego z metrykami czasu trwania.
 
 ---
 
