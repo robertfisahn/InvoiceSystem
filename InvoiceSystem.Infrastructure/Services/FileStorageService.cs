@@ -1,25 +1,18 @@
+using InvoiceSystem.Application.Common.Interfaces;
+using InvoiceSystem.Application.Common.Models;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using System.IO;
 
-namespace InvoiceSystem.Web.Features.Invoices.Import;
-
-public interface IFileStorageService
-{
-    Task<string> SaveFileAsync(Stream content, string fileName, CancellationToken ct);
-}
+namespace InvoiceSystem.Infrastructure.Services;
 
 public class FileStorageService(
     IOptions<StorageSettings> settings, 
-    IWebHostEnvironment environment,
     ILogger<FileStorageService> logger) : IFileStorageService
 {
     public async Task<string> SaveFileAsync(Stream content, string fileName, CancellationToken ct)
     {
-        // Struktura datowa: YYYY/MM/DD
         var datePath = DateTime.UtcNow.ToString("yyyy/MM/dd").Replace("/", Path.DirectorySeparatorChar.ToString());
-        var relativePath = Path.Combine(settings.Value.RootPath, datePath);
-        var fullRootPath = Path.Combine(environment.ContentRootPath, relativePath);
+        var fullRootPath = Path.Combine(settings.Value.RootPath, datePath);
 
         if (!Directory.Exists(fullRootPath))
         {
@@ -35,7 +28,6 @@ public class FileStorageService(
 
         logger.LogInformation("Plik zapisany w strukturze datowej: {Path}", fullPath);
         
-        // Zwracamy relatywną ścieżkę do zapisu w bazie
         return Path.Combine(datePath, fileName);
     }
 }

@@ -10,6 +10,7 @@ public record CreateInvoiceCommand : IRequest<CreateInvoiceResult>
 {
     public int ContractorId { get; init; }
     public DateTime Date { get; init; } = DateTime.Today;
+    public string? FilePath { get; init; }
     public List<CreateInvoiceItemCommand> Items { get; init; } = [];
 }
 
@@ -31,6 +32,7 @@ public class CreateInvoiceCommandHandler(AppDbContext db)
             InvoiceNumber = invoiceNumber,
             Date = request.Date,
             ContractorId = request.ContractorId,
+            FilePath = request.FilePath,
             Items = request.Items.Select(i => new InvoiceItem
             {
                 Name = i.Name,

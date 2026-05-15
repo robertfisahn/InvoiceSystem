@@ -16,16 +16,24 @@ public class ImportInvoiceController(IMediator mediator) : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Index(IFormFile file)
     {
-        var result = await mediator.Send(new ImportInvoiceCommand(file));
-        
-        if (result.Success)
+        try
         {
-            TempData["SuccessMessage"] = result.Message;
-            TempData["UploadedFileName"] = result.FilePath; // Teraz to tylko nazwa pliku w Private Storage
-            return RedirectToAction("Index", "CreateInvoice");
+            var result = await mediator.Send(new ImportInvoiceCommand(file));
+            
+            if (result.Success)
+            {
+                TempData["SuccessMessage"] = result.Message;
+                TempData["UploadedFileName"] = result.FilePath;
+                return RedirectToAction("Index", "CreateInvoice");
+            }
+
+            ViewBag.ErrorMessage = result.Message;
+        }
+        catch (FluentValidation.ValidationException ex)
+        {
+            ViewBag.ErrorMessage = string.Join("<br/>", ex.Errors.Select(e => e.ErrorMessage));
         }
 
-        ViewBag.ErrorMessage = result.Message;
         return View("Import");
     }
 }

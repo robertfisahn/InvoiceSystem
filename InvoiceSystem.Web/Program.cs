@@ -64,9 +64,12 @@ builder.Services.Configure<RequestLocalizationOptions>(options =>
         .AddSupportedUICultures(supportedCultures);
 });
 
-builder.Services.Configure<StorageSettings>(builder.Configuration.GetSection("Storage"));
-builder.Services.AddScoped<IFileStorageService, FileStorageService>();
-builder.Services.AddScoped<IFileValidationService, FileValidationService>();
+builder.Services.Configure<InvoiceSystem.Application.Common.Models.StorageSettings>(options => {
+    var configPath = builder.Configuration.GetSection("Storage").GetValue<string>("RootPath") ?? "App_Data/Storage/Incoming";
+    options.RootPath = Path.Combine(builder.Environment.ContentRootPath, configPath);
+});
+builder.Services.AddScoped<InvoiceSystem.Application.Common.Interfaces.IFileStorageService, InvoiceSystem.Infrastructure.Services.FileStorageService>();
+builder.Services.AddScoped<InvoiceSystem.Application.Common.Interfaces.IFileHashService, InvoiceSystem.Infrastructure.Services.FileHashService>();
 
 var app = builder.Build();
 

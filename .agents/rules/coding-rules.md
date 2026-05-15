@@ -174,6 +174,10 @@ Jeśli `Domain` importuje cokolwiek z EF Core lub HTTP — to błąd architekton
 - **Centralized Config**: Wszystkie parametry zewnętrzne (URL, nazwy modeli) muszą znajdować się w `appsettings.json` i być wstrzykiwane przez `IOptions<T>`.
 - **Structured Logging**: Loguj nie tylko błędy, ale i kluczowe etapy procesu biznesowego z metrykami czasu trwania.
 
+### Weryfikacja i Stabilność (MANDATORY)
+- **Build-Before-Push**: Każda zmiana kodu MUSI zostać poprzedzona udaną kompilacją `dotnet build`. Zakaz pushowania kodu, który się nie buduje.
+- **Smoke Testing**: Po wdrożeniu ficzera, AI (lub deweloper) musi sprawdzić podstawowe ścieżki (tzw. Happy Path), aby upewnić się, że nowa logika nie zepsuła istniejącej.
+
 ---
 
 ## Interfejsy dla serwisów zewnętrznych

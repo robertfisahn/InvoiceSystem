@@ -1,33 +1,26 @@
 using MediatR;
 using Microsoft.Extensions.Logging;
+using InvoiceSystem.Application.Common.Interfaces;
 
 namespace InvoiceSystem.Web.Features.Invoices.Import;
 
 public class ImportInvoiceHandler(
     IFileStorageService storageService,
-    IFileValidationService validationService,
+    IFileHashService hashService,
     ILogger<ImportInvoiceHandler> logger) 
     : IRequestHandler<ImportInvoiceCommand, ImportInvoiceResponse>
 {
     public async Task<ImportInvoiceResponse> Handle(ImportInvoiceCommand request, CancellationToken cancellationToken)
     {
-        // 1. Walidacja formatu i rozmiaru
-        var validation = validationService.ValidateInvoiceUpload(request.File);
-        if (!validation.IsValid)
-        {
-            logger.LogWarning("Nieudana walidacja pliku: {Message}", validation.Message);
-            return new ImportInvoiceResponse(false, validation.Message);
-        }
-
         try 
         {
             using var stream = request.File.OpenReadStream();
             
-            // 2. Wyliczanie Hashu (Detekcja duplikatów w przyszłości przez DB)
-            var fileHash = await validationService.CalculateHashAsync(stream, cancellationToken);
+            // 1. Wyliczanie Hashu (Detekcja duplikatów w przyszłości przez DB)
+            var fileHash = await hashService.CalculateHashAsync(stream, cancellationToken);
             logger.LogInformation("Przetwarzanie pliku o hashu: {Hash}", fileHash);
 
-            // 3. Zapis fizyczny w strukturze datowej
+            // 2. Zapis fizyczny w strukturze datowej
             var extension = Path.GetExtension(request.File.FileName).ToLower();
             var secureFileName = $"{Guid.NewGuid()}{extension}";
             
