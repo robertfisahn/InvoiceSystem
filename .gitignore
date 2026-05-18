@@ -6,6 +6,10 @@
 # dotenv files
 .env
 
+# docs
+docs 
+docs-migration-checklist.md
+
 # User-specific files
 *.rsuser
 *.suo

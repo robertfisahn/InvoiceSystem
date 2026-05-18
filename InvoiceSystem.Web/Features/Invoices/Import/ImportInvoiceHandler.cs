@@ -1,6 +1,6 @@
 using MediatR;
 using Microsoft.Extensions.Logging;
-using InvoiceSystem.Application.Common.Interfaces;
+using InvoiceSystem.Web.Shared.Interfaces;
 
 namespace InvoiceSystem.Web.Features.Invoices.Import;
 

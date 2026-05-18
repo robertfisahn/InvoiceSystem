@@ -2,7 +2,7 @@ using MediatR;
 
 namespace InvoiceSystem.Web.Features.Invoices.UpdateInvoice;
 
-public record UpdateInvoiceCommand : IRequest<UpdateInvoiceResult>
+public record UpdateInvoiceCommand : IRequest<Unit>
 {
     public int Id { get; init; }
     public int ContractorId { get; init; }
@@ -18,5 +18,3 @@ public record UpdateInvoiceItemCommand
     public decimal Quantity { get; init; }
     public decimal UnitPrice { get; init; }
 }
-
-public record UpdateInvoiceResult(bool Success, string? Error = null);

@@ -1,7 +1,7 @@
 using MediatR;
 using FluentValidation;
 using Microsoft.AspNetCore.Identity;
-using InvoiceSystem.Domain.Entities;
+using InvoiceSystem.Web.Domain.Entities;
 
 namespace InvoiceSystem.Web.Features.Auth.Login;
 

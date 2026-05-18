@@ -1,18 +1,24 @@
-using InvoiceSystem.Application;
-using InvoiceSystem.Domain.Entities;
-using InvoiceSystem.Infrastructure.Persistence;
+using InvoiceSystem.Web.Domain.Entities;
+using InvoiceSystem.Web.Infrastructure.Database;
+using InvoiceSystem.Web.Infrastructure.Services;
+using InvoiceSystem.Web.Shared.Interfaces;
+using InvoiceSystem.Web.Shared.Models;
+using InvoiceSystem.Web.Shared.Behaviors;
 using InvoiceSystem.Web.Setup;
 using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.EntityFrameworkCore;
 using FluentValidation;
+using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Authorization;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add layers
-builder.Services.AddApplication(typeof(Program).Assembly);
+// MediatR + FluentValidation (VSA Monolith — all in one assembly)
+builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
+builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly);
+builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
 builder.Services.AddControllersWithViews(options =>
 {
     // Globalny wymóg autoryzacji (wszystko chronione domyślnie)
@@ -64,12 +70,12 @@ builder.Services.Configure<RequestLocalizationOptions>(options =>
         .AddSupportedUICultures(supportedCultures);
 });
 
-builder.Services.Configure<InvoiceSystem.Application.Common.Models.StorageSettings>(options => {
+builder.Services.Configure<StorageSettings>(options => {
     var configPath = builder.Configuration.GetSection("Storage").GetValue<string>("RootPath") ?? "App_Data/Storage/Incoming";
     options.RootPath = Path.Combine(builder.Environment.ContentRootPath, configPath);
 });
-builder.Services.AddScoped<InvoiceSystem.Application.Common.Interfaces.IFileStorageService, InvoiceSystem.Infrastructure.Services.FileStorageService>();
-builder.Services.AddScoped<InvoiceSystem.Application.Common.Interfaces.IFileHashService, InvoiceSystem.Infrastructure.Services.FileHashService>();
+builder.Services.AddScoped<IFileStorageService, FileStorageService>();
+builder.Services.AddScoped<IFileHashService, FileHashService>();
 
 var app = builder.Build();
 

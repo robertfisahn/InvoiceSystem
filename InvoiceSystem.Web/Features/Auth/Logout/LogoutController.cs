@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using InvoiceSystem.Domain.Entities;
+using InvoiceSystem.Web.Domain.Entities;
 
 namespace InvoiceSystem.Web.Features.Auth.Logout;
 

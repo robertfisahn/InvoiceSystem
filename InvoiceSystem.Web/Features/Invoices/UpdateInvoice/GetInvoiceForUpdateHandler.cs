@@ -1,15 +1,16 @@
-using InvoiceSystem.Infrastructure.Persistence;
+using InvoiceSystem.Web.Infrastructure.Database;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace InvoiceSystem.Web.Features.Invoices.UpdateInvoice;
 
-public class GetInvoiceForUpdateHandler(AppDbContext db) 
+public sealed class GetInvoiceForUpdateHandler(AppDbContext db)
     : IRequestHandler<GetInvoiceForUpdateQuery, UpdateInvoiceViewModel?>
 {
     public async Task<UpdateInvoiceViewModel?> Handle(GetInvoiceForUpdateQuery request, CancellationToken ct)
     {
         var invoiceDto = await db.Invoices
+            .AsNoTracking()
             .Where(i => i.Id == request.Id)
             .Select(i => new
             {

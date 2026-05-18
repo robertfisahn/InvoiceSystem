@@ -1,5 +1,5 @@
-using InvoiceSystem.Infrastructure.Persistence;
-using InvoiceSystem.Domain.Entities;
+using InvoiceSystem.Web.Infrastructure.Database;
+using InvoiceSystem.Web.Domain.Entities;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
