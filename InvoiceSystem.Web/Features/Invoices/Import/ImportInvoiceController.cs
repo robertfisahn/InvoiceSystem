@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace InvoiceSystem.Web.Features.Invoices.Import;
 
 [Route("invoices/import")]
-public class ImportInvoiceController(IMediator mediator) : Controller
+public sealed class ImportInvoiceController(IMediator mediator) : Controller
 {
     [HttpGet]
     public IActionResult Index()

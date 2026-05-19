@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace InvoiceSystem.Web.Features.Invoices.Import;
 
-public class ImportInvoiceValidator : AbstractValidator<ImportInvoiceCommand>
+public sealed class ImportInvoiceValidator : AbstractValidator<ImportInvoiceCommand>
 {
     private const long MaxFileSize = 10 * 1024 * 1024; // 10MB
     private readonly string[] _allowedExtensions = { ".pdf", ".jpg", ".jpeg", ".png" };

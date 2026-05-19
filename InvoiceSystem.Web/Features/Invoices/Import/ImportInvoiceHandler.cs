@@ -4,10 +4,10 @@ using InvoiceSystem.Web.Shared.Interfaces;
 
 namespace InvoiceSystem.Web.Features.Invoices.Import;
 
-public class ImportInvoiceHandler(
+public sealed class ImportInvoiceHandler(
     IFileStorageService storageService,
     IFileHashService hashService,
-    ILogger<ImportInvoiceHandler> logger) 
+    ILogger<ImportInvoiceHandler> logger)
     : IRequestHandler<ImportInvoiceCommand, ImportInvoiceResponse>
 {
     public async Task<ImportInvoiceResponse> Handle(ImportInvoiceCommand request, CancellationToken cancellationToken)

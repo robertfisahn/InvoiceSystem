@@ -5,9 +5,10 @@ using Microsoft.AspNetCore.Mvc;
 namespace InvoiceSystem.Web.Features.Auth.Login;
 
 [AllowAnonymous]
-public class LoginController(IMediator mediator) : Controller
+[Route("/auth/login")]
+public sealed class LoginController(IMediator mediator) : Controller
 {
-    [HttpGet("/auth/login")]
+    [HttpGet]
     public IActionResult Index()
     {
         if (User.Identity?.IsAuthenticated == true)
@@ -16,7 +17,7 @@ public class LoginController(IMediator mediator) : Controller
         return View(new LoginCommand("", ""));
     }
 
-    [HttpPost("/auth/login")]
+    [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Index([FromForm] LoginCommand command)
     {

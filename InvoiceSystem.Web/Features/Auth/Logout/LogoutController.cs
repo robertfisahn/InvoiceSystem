@@ -4,9 +4,10 @@ using InvoiceSystem.Web.Domain.Entities;
 
 namespace InvoiceSystem.Web.Features.Auth.Logout;
 
-public class LogoutController(SignInManager<AppUser> signInManager) : Controller
+[Route("/auth/logout")]
+public sealed class LogoutController(SignInManager<AppUser> signInManager) : Controller
 {
-    [HttpPost("/auth/logout")]
+    [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Index()
     {
