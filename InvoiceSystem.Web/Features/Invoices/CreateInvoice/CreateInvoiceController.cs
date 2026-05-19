@@ -3,47 +3,35 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace InvoiceSystem.Web.Features.Invoices.CreateInvoice;
 
-public class CreateInvoiceController(IMediator mediator) : Controller
+[Route("invoices/create")]
+public sealed class CreateInvoiceController(IMediator mediator) : Controller
 {
-    [HttpGet("invoices/create")]
+    [HttpGet]
     public async Task<IActionResult> Index()
     {
         var viewModel = await mediator.Send(new GetCreateInvoiceQuery());
-        
+
         if (TempData["UploadedFileName"] is string fileName)
-        {
-            var command = new CreateInvoiceCommand
-            {
-                FilePath = fileName
-            };
-            viewModel = viewModel with { Command = command };
-        }
+            viewModel = viewModel with { Command = new CreateInvoiceCommand { FilePath = fileName } };
 
         return View(viewModel);
     }
 
-    [HttpPost("invoices/create")]
+    [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Index([FromForm] CreateInvoiceCommand command)
     {
         try
         {
-            var result = await mediator.Send(command);
-            if (result.Success)
-                return RedirectToAction("Index", "GetInvoiceList");
-
-            ModelState.AddModelError(string.Empty, result.Error ?? "Wystąpił błąd podczas zapisu.");
+            var invoiceId = await mediator.Send(command);
+            return RedirectToAction("Index", "GetInvoiceDetails", new { id = invoiceId });
         }
         catch (FluentValidation.ValidationException ex)
         {
             foreach (var error in ex.Errors)
-            {
-                // Musimy zmapować PropertyName na Command.PropertyName ponieważ model w widoku to CreateInvoiceViewModel
                 ModelState.AddModelError($"Command.{error.PropertyName}", error.ErrorMessage);
-            }
         }
 
-        // W razie błędu musimy odświeżyć listę kontrahentów
         var refreshViewModel = await mediator.Send(new GetCreateInvoiceQuery());
         return View(refreshViewModel with { Command = command });
     }

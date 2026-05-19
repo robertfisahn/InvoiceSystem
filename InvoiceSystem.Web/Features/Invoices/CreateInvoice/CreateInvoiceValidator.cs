@@ -2,7 +2,7 @@ using FluentValidation;
 
 namespace InvoiceSystem.Web.Features.Invoices.CreateInvoice;
 
-public class CreateInvoiceValidator : AbstractValidator<CreateInvoiceCommand>
+public sealed class CreateInvoiceValidator : AbstractValidator<CreateInvoiceCommand>
 {
     public CreateInvoiceValidator()
     {
