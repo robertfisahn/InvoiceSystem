@@ -3,9 +3,10 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace InvoiceSystem.Web.Features.Invoices.GetInvoiceDetails;
 
-public class GetInvoiceDetailsController(IMediator mediator) : Controller
+[Route("invoices")]
+public sealed class GetInvoiceDetailsController(IMediator mediator) : Controller
 {
-    [HttpGet("invoices/{id:int}")]
+    [HttpGet("{id:int}")]
     public async Task<IActionResult> Index(int id)
     {
         var result = await mediator.Send(new GetInvoiceDetailsQuery(id));

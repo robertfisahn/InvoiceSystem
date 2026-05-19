@@ -12,19 +12,19 @@ public record GetInvoiceDetailsViewModel(
     DateTime Date,
     ContractorDetailsDto Contractor,
     List<InvoiceItemDto> Items,
-    decimal TotalNet,
-    decimal TotalGross
+    decimal TotalAmount
 );
 
 public record ContractorDetailsDto(string Name, string? TaxId, string? Address);
 public record InvoiceItemDto(string Name, decimal Quantity, decimal UnitPrice, decimal TotalPrice);
 
-public class GetInvoiceDetailsHandler(AppDbContext db) 
+public sealed class GetInvoiceDetailsHandler(AppDbContext db)
     : IRequestHandler<GetInvoiceDetailsQuery, GetInvoiceDetailsViewModel?>
 {
     public async Task<GetInvoiceDetailsViewModel?> Handle(GetInvoiceDetailsQuery request, CancellationToken ct)
     {
         return await db.Invoices
+            .AsNoTracking()
             .Where(i => i.Id == request.Id)
             .Select(i => new GetInvoiceDetailsViewModel(
                 i.Id,
@@ -37,7 +37,6 @@ public class GetInvoiceDetailsHandler(AppDbContext db)
                     item.UnitPrice,
                     item.TotalPrice
                 )).ToList(),
-                i.Items.Sum(x => x.TotalPrice),
                 i.Items.Sum(x => x.TotalPrice)
             ))
             .FirstOrDefaultAsync(ct);
