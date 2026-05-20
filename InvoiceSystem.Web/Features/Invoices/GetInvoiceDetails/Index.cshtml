@@ -4,7 +4,7 @@
 }
 
 @section PageActions {
-    <div class="d-flex gap-2">
+    <div class="d-flex flex-wrap gap-2 justify-content-start justify-content-sm-end">
         <a href="/invoices/update/@Model.Id" class="btn-secondary-outline">
             <i class="bi bi-pencil me-1"></i> Edytuj
         </a>
@@ -39,15 +39,15 @@
             <hr class="my-4" />
 
             <!-- Contractor Info -->
-            <div class="row mb-5">
-                <div class="col-6">
+            <div class="row mb-4 gap-3 gap-sm-0">
+                <div class="col-sm-6">
                     <label class="text-muted small text-uppercase fw-bold d-block mb-2">Sprzedawca</label>
                     <strong>InvoiceSystem Enterprise</strong><br />
                     ul. Technologiczna 12<br />
                     80-001 Gdańsk<br />
                     NIP: 1234567890
                 </div>
-                <div class="col-6 text-end">
+                <div class="col-sm-6 text-sm-end">
                     <label class="text-muted small text-uppercase fw-bold d-block mb-2">Nabywca</label>
                     <strong>@Model.Contractor.Name</strong><br />
                     @Model.Contractor.Address<br />
@@ -56,34 +56,36 @@
             </div>
 
             <!-- Items Table -->
-            <table class="table table-bordered mb-5">
-                <thead class="table-light">
-                    <tr>
-                        <th style="width: 50px;">Lp.</th>
-                        <th>Nazwa towaru lub usługi</th>
-                        <th class="text-end" style="width: 100px;">Ilość</th>
-                        <th class="text-end" style="width: 150px;">Cena netto</th>
-                        <th class="text-end" style="width: 150px;">Wartość netto</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @for (int i = 0; i < Model.Items.Count; i++)
-                    {
-                        var item = Model.Items[i];
+            <div class="table-responsive mb-4">
+                <table class="table table-bordered mb-0" style="min-width: 600px;">
+                    <thead class="table-light">
                         <tr>
-                            <td>@(i + 1)</td>
-                            <td>@item.Name</td>
-                            <td class="text-end">@item.Quantity.ToString("F2")</td>
-                            <td class="text-end">@item.UnitPrice.ToString("N2") PLN</td>
-                            <td class="text-end">@item.TotalPrice.ToString("N2") PLN</td>
+                            <th style="width: 50px;">Lp.</th>
+                            <th>Nazwa towaru lub usługi</th>
+                            <th class="text-end" style="width: 100px;">Ilość</th>
+                            <th class="text-end" style="width: 150px;">Cena netto</th>
+                            <th class="text-end" style="width: 150px;">Wartość netto</th>
                         </tr>
-                    }
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        @for (int i = 0; i < Model.Items.Count; i++)
+                        {
+                            var item = Model.Items[i];
+                            <tr>
+                                <td>@(i + 1)</td>
+                                <td>@item.Name</td>
+                                <td class="text-end">@item.Quantity.ToString("F2")</td>
+                                <td class="text-end">@item.UnitPrice.ToString("N2") PLN</td>
+                                <td class="text-end">@item.TotalPrice.ToString("N2") PLN</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
 
             <!-- Summary -->
             <div class="row justify-content-end">
-                <div class="col-5">
+                <div class="col-12 col-sm-6 col-md-5">
                     <div class="d-flex justify-content-between py-2 border-bottom">
                         <span class="text-muted">Suma netto:</span>
                         <strong>@Model.TotalAmount.ToString("N2") PLN</strong>
@@ -108,14 +110,22 @@
     .invoice-document {
         background: white !important;
         color: #1a1a1a !important;
-        padding: 4rem;
+        padding: 1.5rem;
         border-radius: 8px;
         max-width: 900px;
-        margin: 2rem auto;
+        margin: 1rem auto;
         font-family: 'Inter', sans-serif;
         display: flex;
         flex-direction: column;
-        min-height: 297mm; /* Wymuszamy A4 dla podglądu */
+        min-height: auto;
+    }
+    
+    @@media (min-width: 768px) {
+        .invoice-document {
+            padding: 4rem;
+            margin: 2rem auto;
+            min-height: 297mm; /* Wymuszamy A4 dla podglądu na desktopie */
+        }
     }
     
     .invoice-content-wrap { flex: 1; }

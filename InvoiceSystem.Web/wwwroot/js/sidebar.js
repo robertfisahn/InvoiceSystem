@@ -13,6 +13,27 @@ $(function() {
         localStorage.setItem(SIDEBAR_STATE_KEY, nowCollapsed);
         updateToggleIcon(nowCollapsed);
     });
+
+    // Obsługa menu mobilnego
+    $('#mobileMenuToggle').on('click', function(e) {
+        e.stopPropagation();
+        $('body').toggleClass('sidebar-open');
+    });
+
+    // Zamknięcie menu mobilnego przy kliknięciu poza nim lub na link
+    $(document).on('click', function(e) {
+        if ($(window).width() < 768) {
+            if (!$(e.target).closest('.app-sidebar').length && !$(e.target).closest('#mobileMenuToggle').length) {
+                $('body').removeClass('sidebar-open');
+            }
+        }
+    });
+    
+    $('.sidebar-menu a').on('click', function() {
+        if ($(window).width() < 768) {
+            $('body').removeClass('sidebar-open');
+        }
+    });
 });
 
 function updateToggleIcon(isCollapsed) {

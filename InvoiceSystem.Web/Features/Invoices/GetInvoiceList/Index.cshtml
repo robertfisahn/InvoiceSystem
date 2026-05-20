@@ -15,20 +15,22 @@
 <div class="page-body">
     <div class="data-card p-0">
         <!-- Toolbar: Search & Info -->
-        <div class="data-card__header d-flex justify-content-between align-items-center p-3">
-            <div class="search-box">
+        <div class="data-card__header d-flex flex-column flex-sm-row gap-2 justify-content-between align-items-sm-center p-3">
+            <div class="search-box w-100 w-sm-auto" style="max-width: 300px;">
                 <i class="bi bi-search"></i>
                 <input type="text" id="tableSearch" placeholder="Szukaj faktury..." class="form-control form-control-sm">
             </div>
-            <div class="d-flex align-items-center gap-3">
-                <label class="small text-secondary mb-0">Pokaż:</label>
-                <select id="pageSize" class="form-select form-select-sm" style="width: 70px; background-color: var(--bg-tertiary);">
-                    <option value="5">5</option>
-                    <option value="10">10</option>
-                    <option value="15">15</option>
-                    <option value="20">20</option>
-                    <option value="30">30</option>
-                </select>
+            <div class="d-flex align-items-center justify-content-between justify-content-sm-end gap-3 w-100 w-sm-auto">
+                <div class="d-flex align-items-center gap-2">
+                    <label class="small text-secondary mb-0">Pokaż:</label>
+                    <select id="pageSize" class="form-select form-select-sm" style="width: 70px; background-color: var(--bg-tertiary);">
+                        <option value="5">5</option>
+                        <option value="10">10</option>
+                        <option value="15">15</option>
+                        <option value="20">20</option>
+                        <option value="30">30</option>
+                    </select>
+                </div>
             </div>
         </div>
 
@@ -76,9 +78,9 @@
         </div>
         
         <!-- Paginacja Info & Numbers -->
-        <div class="p-3 d-flex justify-content-between align-items-center" style="background: var(--bg-tertiary); border-top: 1px solid var(--border);">
-            <div id="paginationInfo" style="font-size: 0.8rem; color: var(--text-secondary);">Ładowanie...</div>
-            <div class="d-flex align-items-center gap-2">
+        <div class="p-3 d-flex flex-column flex-sm-row gap-2 justify-content-between align-items-center" style="background: var(--bg-tertiary); border-top: 1px solid var(--border);">
+            <div id="paginationInfo" style="font-size: 0.8rem; color: var(--text-secondary); text-align: center;">Ładowanie...</div>
+            <div class="d-flex align-items-center justify-content-center gap-2">
                 <button id="prevPage" class="btn-secondary-outline btn-sm px-2"><i class="bi bi-chevron-left"></i></button>
                 <div id="paginationNumbers" class="d-flex gap-1"></div>
                 <button id="nextPage" class="btn-secondary-outline btn-sm px-2"><i class="bi bi-chevron-right"></i></button>

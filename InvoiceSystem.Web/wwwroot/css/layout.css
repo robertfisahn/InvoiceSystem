@@ -155,13 +155,21 @@ div[style*="background-color: #ff9800"] {
    ======================== */
 .page-header {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    flex-direction: column;
+    gap: 0.5rem;
     margin-bottom: 1rem;
     padding: 0;
     background-color: transparent;
     border: none;
     box-shadow: none;
+}
+
+@media (min-width: 576px) {
+    .page-header {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+    }
 }
 
 .page-title {
@@ -186,9 +194,14 @@ div[style*="background-color: #ff9800"] {
 @media (max-width: 767px) {
     .app-sidebar {
         transform: translateX(-100%);
+        z-index: 1010; /* Above the fixed app-topbar (z-index 1000) */
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        height: 100vh;
+        top: 0;
     }
     .sidebar-open .app-sidebar {
         transform: translateX(0);
+        box-shadow: 8px 0 32px rgba(0, 0, 0, 0.3);
     }
     .app-content {
         margin-left: 0 !important;
