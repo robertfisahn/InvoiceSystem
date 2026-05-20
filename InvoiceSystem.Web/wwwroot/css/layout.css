@@ -206,4 +206,10 @@ div[style*="background-color: #ff9800"] {
     .app-content {
         margin-left: 0 !important;
     }
+    .app-topbar {
+        padding: 0 1rem;
+    }
+    .topbar-brand {
+        min-width: auto;
+    }
 }
