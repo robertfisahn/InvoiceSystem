@@ -17,6 +17,14 @@ body {
     height: 100%;
 }
 
+.text-muted {
+    color: var(--text-muted) !important;
+}
+
+.text-secondary {
+    color: var(--text-secondary) !important;
+}
+
 /* DevExtreme nadpisuje tło — wymuszamy nasze */
 body.dx-viewport,
 .dx-viewport {

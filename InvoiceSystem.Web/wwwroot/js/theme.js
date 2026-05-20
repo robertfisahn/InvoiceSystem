@@ -14,7 +14,7 @@ $(function() {
 });
 
 function applyTheme(theme) {
-    $('html').attr('data-theme', theme);
+    $('html').attr('data-theme', theme).attr('data-bs-theme', theme);
     
     const icon = $('#themeIcon');
     if (theme === 'dark') {
