@@ -5,7 +5,9 @@ namespace InvoiceSystem.Web.Features.Invoices.Import;
 
 public record ImportInvoiceCommand(IFormFile File) : IRequest<ImportInvoiceResponse>;
 
-public record ImportInvoiceResponse(bool Success, string Message, string? FilePath = null)
-{
-    public string? ExtractedData { get; init; }
-}
+public record ImportInvoiceResponse(
+    bool Success,
+    string Message,
+    string? FilePath = null,
+    string? ExtractedText = null,
+    string? DocumentType = null);

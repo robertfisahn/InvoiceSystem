@@ -9,7 +9,7 @@ public sealed class ImportInvoiceController(IMediator mediator) : Controller
     [HttpGet]
     public IActionResult Index()
     {
-        return View("Import");
+        return View("Import", new ImportInvoiceViewModel());
     }
 
     [HttpPost]
@@ -19,21 +19,33 @@ public sealed class ImportInvoiceController(IMediator mediator) : Controller
         try
         {
             var result = await mediator.Send(new ImportInvoiceCommand(file));
-            
-            if (result.Success)
-            {
-                TempData["SuccessMessage"] = result.Message;
-                TempData["UploadedFileName"] = result.FilePath;
-                return RedirectToAction("Index", "CreateInvoice");
-            }
 
-            ViewBag.ErrorMessage = result.Message;
+            var viewModel = new ImportInvoiceViewModel
+            {
+                SuccessMessage = result.Success ? result.Message : null,
+                ErrorMessage = result.Success ? null : result.Message,
+                ExtractedText = result.ExtractedText,
+                DocumentType = result.DocumentType,
+                FilePath = result.FilePath
+            };
+
+            return View("Import", viewModel);
         }
         catch (FluentValidation.ValidationException ex)
         {
-            ViewBag.ErrorMessage = string.Join("<br/>", ex.Errors.Select(e => e.ErrorMessage));
-        }
+            var viewModel = new ImportInvoiceViewModel
+            {
+                ErrorMessage = string.Join("<br/>", ex.Errors.Select(e => e.ErrorMessage))
+            };
 
-        return View("Import");
+            return View("Import", viewModel);
+        }
+    }
+
+    [HttpGet("proceed")]
+    public IActionResult Proceed(string filePath)
+    {
+        TempData["UploadedFileName"] = filePath;
+        return RedirectToAction("Index", "CreateInvoice");
     }
 }

@@ -76,6 +76,7 @@ builder.Services.Configure<StorageSettings>(options => {
 });
 builder.Services.AddScoped<IFileStorageService, FileStorageService>();
 builder.Services.AddScoped<IFileHashService, FileHashService>();
+builder.Services.AddScoped<IDocumentOcrService, DocumentOcrService>();
 
 var app = builder.Build();
 

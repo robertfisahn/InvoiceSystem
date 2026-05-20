@@ -1,3 +1,4 @@
+@model InvoiceSystem.Web.Features.Invoices.Import.ImportInvoiceViewModel
 @{
     ViewData["Title"] = "Importuj Fakturę (AI OCR)";
 }
@@ -5,62 +6,105 @@
 <div class="page-header no-print">
     <div class="page-header-left">
         <h2 class="page-title">Wgrywanie Dokumentów</h2>
-        <p class="text-muted small">Wgraj fakturę w formacie PDF lub obrazu, aby dołączyć ją do nowej faktury.</p>
+        <p class="text-muted small">Wgraj fakturę w formacie PDF lub obrazu, aby wyodrębnić z niej tekst.</p>
     </div>
 </div>
 
 <div class="row justify-content-center" style="margin-top: var(--grid-gap);">
-    <div class="col-xl-6 col-lg-8 col-md-10">
-        <div class="data-card">
-            <div class="data-card__body" style="padding: var(--card-padding);">
-                @if (ViewBag.ErrorMessage != null)
-                {
-                    <div class="alert alert-danger mb-4">
-                        <i class="bi bi-exclamation-triangle me-2"></i> @ViewBag.ErrorMessage
-                    </div>
-                }
+    @if (!Model.HasResult)
+    {
+        <!-- WIDOK 1: Formularz wgrywania pliku -->
+        <div class="col-xl-6 col-lg-8 col-md-10">
+            <div class="data-card">
+                <div class="data-card__body" style="padding: var(--card-padding);">
+                    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+                    {
+                        <div class="alert alert-danger mb-4">
+                            <i class="bi bi-exclamation-triangle me-2"></i> @Html.Raw(Model.ErrorMessage)
+                        </div>
+                    }
 
-                <form asp-action="Index" method="post" enctype="multipart/form-data" id="importForm">
-                    <div class="upload-area" id="dropZone">
-                        <div class="upload-area__icon mb-2">
-                            <i class="bi bi-cloud-arrow-up fs-1 text-primary opacity-75"></i>
-                        </div>
-                        <div class="upload-area__text mb-2">
-                            <h5 class="fw-bold" style="color: var(--text-primary); margin-bottom: 4px;">Przeciągnij plik tutaj</h5>
-                            <p class="text-secondary small mb-0">Lub kliknij, aby wybrać z dysku</p>
-                        </div>
-                        <div class="upload-area__hint small text-muted mb-2">
-                            Dozwolone formaty: <strong>PDF, JPG, PNG</strong> (max. 10MB)
-                        </div>
-                        <input type="file" name="file" class="upload-area__input" id="fileInput" accept=".pdf,.jpg,.jpeg,.png" required />
-                        
-                        <div class="selected-file d-none mt-2 p-2 rounded border" style="background-color: var(--bg-tertiary); border-color: var(--border-strong) !important;">
-                            <div class="d-flex align-items-center justify-content-between">
-                                <div class="d-flex align-items-center">
-                                    <i class="bi bi-file-earmark-pdf h4 me-2 text-primary" id="fileIcon"></i>
-                                    <div class="text-start">
-                                        <div class="fw-bold small" style="color: var(--text-primary); max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" id="fileName">faktura.pdf</div>
-                                        <div class="text-muted" style="font-size: 0.75rem;" id="fileSize">1.2 MB</div>
+                    <form asp-action="Index" method="post" enctype="multipart/form-data" id="importForm">
+                        <div class="upload-area" id="dropZone">
+                            <div class="upload-area__icon mb-2">
+                                <i class="bi bi-cloud-arrow-up fs-1 text-primary opacity-75"></i>
+                            </div>
+                            <div class="upload-area__text mb-2">
+                                <h5 class="fw-bold" style="color: var(--text-primary); margin-bottom: 4px;">Przeciągnij plik tutaj</h5>
+                                <p class="text-secondary small mb-0">Lub kliknij, aby wybrać z dysku</p>
+                            </div>
+                            <div class="upload-area__hint small text-muted mb-2">
+                                Dozwolone formaty: <strong>PDF, JPG, PNG</strong> (max. 10MB)
+                            </div>
+                            <input type="file" name="file" class="upload-area__input" id="fileInput" accept=".pdf,.jpg,.jpeg,.png" required />
+
+                            <div class="selected-file d-none mt-2 p-2 rounded border" style="background-color: var(--bg-tertiary); border-color: var(--border-strong) !important;">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-file-earmark-pdf h4 me-2 text-primary" id="fileIcon"></i>
+                                        <div class="text-start">
+                                            <div class="fw-bold small" style="color: var(--text-primary); max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" id="fileName">faktura.pdf</div>
+                                            <div class="text-muted" style="font-size: 0.75rem;" id="fileSize">1.2 MB</div>
+                                        </div>
                                     </div>
+                                    <button type="button" class="btn btn-sm btn-outline-danger" style="padding: 2px 6px;" id="removeFile">
+                                        <i class="bi bi-x-lg" style="font-size: 0.8rem;"></i>
+                                    </button>
                                 </div>
-                                <button type="button" class="btn btn-sm btn-outline-danger" style="padding: 2px 6px;" id="removeFile">
-                                    <i class="bi bi-x-lg" style="font-size: 0.8rem;"></i>
-                                </button>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="text-center mt-3">
-                        <button type="submit" class="btn-primary-accent w-100 justify-content-center py-2" id="submitBtn" disabled>
-                            <i class="bi bi-upload me-2"></i> Wyślij Plik
-                        </button>
-                    </div>
-                </form>
-
-
+                        <div class="text-center mt-3">
+                            <button type="submit" class="btn-primary-accent w-100 justify-content-center py-2" id="submitBtn" disabled>
+                                <i class="bi bi-upload me-2"></i> Wyślij i analizuj
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
-    </div>
+    }
+    else
+    {
+        <!-- WIDOK 2: Wynik ekstrakcji tekstu -->
+        <div class="col-xl-8 col-lg-10 col-md-12">
+            @if (!string.IsNullOrEmpty(Model.SuccessMessage))
+            {
+                <div class="alert alert-success mb-3">
+                    <i class="bi bi-check-circle me-2"></i> @Model.SuccessMessage
+                </div>
+            }
+
+            <div class="data-card mb-3">
+                <div class="data-card__header d-flex align-items-center justify-content-between" style="padding: var(--card-padding); padding-bottom: 0;">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-file-earmark-text fs-4 text-primary"></i>
+                        <div>
+                            <h5 class="mb-0 fw-bold" style="color: var(--text-primary);">Wyodrębniony tekst</h5>
+                            <span class="badge rounded-pill" style="background-color: var(--accent); color: white; font-size: 0.7rem;">
+                                @(Model.DocumentType == "PDF" ? "PDF Parser" : "Tesseract OCR")
+                            </span>
+                        </div>
+                    </div>
+                    <button class="btn btn-sm btn-outline-secondary" id="copyTextBtn" title="Kopiuj tekst">
+                        <i class="bi bi-clipboard me-1"></i> Kopiuj
+                    </button>
+                </div>
+                <div class="data-card__body" style="padding: var(--card-padding);">
+                    <div id="extractedContent" class="extracted-text-box">@Model.ExtractedText</div>
+                </div>
+            </div>
+
+            <div class="d-flex flex-wrap gap-2">
+                <a href="@Url.Action("Proceed", "ImportInvoice", new { filePath = Model.FilePath })" class="btn-primary-accent py-2 px-4">
+                    <i class="bi bi-arrow-right-circle me-2"></i> Przejdź do wystawiania faktury
+                </a>
+                <a href="@Url.Action("Index", "ImportInvoice")" class="btn btn-outline-secondary py-2 px-4">
+                    <i class="bi bi-arrow-counterclockwise me-2"></i> Wgraj inny dokument
+                </a>
+            </div>
+        </div>
+    }
 </div>
 
 <style>
@@ -90,68 +134,96 @@
         opacity: 0;
         cursor: pointer;
     }
+
+    .extracted-text-box {
+        background-color: var(--bg-tertiary);
+        border: 1px solid var(--border-default);
+        border-radius: 8px;
+        padding: 1rem;
+        font-family: 'Courier New', Courier, monospace;
+        font-size: 0.85rem;
+        line-height: 1.6;
+        color: var(--text-primary);
+        max-height: 400px;
+        overflow-y: auto;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+    }
 </style>
 
-<script>
-    const dropZone = document.getElementById('dropZone');
-    const fileInput = document.getElementById('fileInput');
-    const submitBtn = document.getElementById('submitBtn');
-    const selectedFileDiv = document.querySelector('.selected-file');
-    const fileNameDisplay = document.getElementById('fileName');
-    const fileSizeDisplay = document.getElementById('fileSize');
-    const removeFileBtn = document.getElementById('removeFile');
-    const uploadIcon = document.querySelector('.upload-area__icon');
-    const uploadText = document.querySelector('.upload-area__text');
-    const uploadHint = document.querySelector('.upload-area__hint');
+@section Scripts {
+    @if (!Model.HasResult)
+    {
+        <script>
+            const dropZone = document.getElementById('dropZone');
+            const fileInput = document.getElementById('fileInput');
+            const submitBtn = document.getElementById('submitBtn');
+            const selectedFileDiv = document.querySelector('.selected-file');
+            const fileNameDisplay = document.getElementById('fileName');
+            const fileSizeDisplay = document.getElementById('fileSize');
+            const removeFileBtn = document.getElementById('removeFile');
+            const uploadIcon = document.querySelector('.upload-area__icon');
+            const uploadText = document.querySelector('.upload-area__text');
+            const uploadHint = document.querySelector('.upload-area__hint');
 
-    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-        dropZone.addEventListener(eventName, preventDefaults, false);
-    });
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, preventDefaults, false);
+            });
 
-    function preventDefaults(e) {
-        e.preventDefault();
-        e.stopPropagation();
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropZone.addEventListener(eventName, () => dropZone.classList.add('drag-over'), false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, () => dropZone.classList.remove('drag-over'), false);
+            });
+
+            fileInput.addEventListener('change', function (e) {
+                handleFiles(this.files);
+            });
+
+            function handleFiles(files) {
+                if (files.length > 0) {
+                    const file = files[0];
+                    fileNameDisplay.textContent = file.name;
+                    fileSizeDisplay.textContent = (file.size / (1024 * 1024)).toFixed(2) + ' MB';
+
+                    selectedFileDiv.classList.remove('d-none');
+                    uploadIcon.classList.add('d-none');
+                    uploadText.classList.add('d-none');
+                    uploadHint.classList.add('d-none');
+                    submitBtn.disabled = false;
+                }
+            }
+
+            removeFileBtn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                fileInput.value = '';
+                selectedFileDiv.classList.add('d-none');
+                uploadIcon.classList.remove('d-none');
+                uploadText.classList.remove('d-none');
+                uploadHint.classList.remove('d-none');
+                submitBtn.disabled = true;
+            });
+
+            document.getElementById('importForm').addEventListener('submit', function () {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Analizowanie...';
+            });
+        </script>
     }
-
-    ['dragenter', 'dragover'].forEach(eventName => {
-        dropZone.addEventListener(eventName, () => dropZone.classList.add('drag-over'), false);
-    });
-
-    ['dragleave', 'drop'].forEach(eventName => {
-        dropZone.addEventListener(eventName, () => dropZone.classList.remove('drag-over'), false);
-    });
-
-    fileInput.addEventListener('change', function(e) {
-        handleFiles(this.files);
-    });
-
-    function handleFiles(files) {
-        if (files.length > 0) {
-            const file = files[0];
-            fileNameDisplay.textContent = file.name;
-            fileSizeDisplay.textContent = (file.size / (1024 * 1024)).toFixed(2) + ' MB';
-            
-            // Toggle visibility
-            selectedFileDiv.classList.remove('d-none');
-            uploadIcon.classList.add('d-none');
-            uploadText.classList.add('d-none');
-            uploadHint.classList.add('d-none');
-            submitBtn.disabled = false;
-        }
+    else
+    {
+        <script>
+            document.getElementById('copyTextBtn').addEventListener('click', function () {
+                const text = document.getElementById('extractedContent').innerText;
+                navigator.clipboard.writeText(text);
+            });
+        </script>
     }
-
-    removeFileBtn.addEventListener('click', function(e) {
-        e.stopPropagation();
-        fileInput.value = '';
-        selectedFileDiv.classList.add('d-none');
-        uploadIcon.classList.remove('d-none');
-        uploadText.classList.remove('d-none');
-        uploadHint.classList.remove('d-none');
-        submitBtn.disabled = true;
-    });
-
-    document.getElementById('importForm').onsubmit = function() {
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Analizowanie...';
-    };
-</script>
+}
