@@ -118,7 +118,7 @@ div[style*="background-color: #ff9800"] {
 .app-content {
     flex: 1;
     margin-left: var(--sidebar-width);
-    padding: 12px 24px 60px;
+    padding: var(--page-padding-y) var(--page-padding-x) 60px;
     transition: margin-left 0.25s ease;
     background-color: var(--bg-primary);
     height: calc(100vh - var(--topbar-height));

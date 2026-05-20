@@ -56,9 +56,24 @@
     --shadow-sm:     0 1px 4px rgba(15, 23, 42, 0.06);
 }
 
-/* Globalne stałe */
+/* Globalne stałe i responsywne odstępy */
 :root {
     --topbar-height: 64px;
     --sidebar-width: 240px;
     --sidebar-collapsed-width: 64px;
+
+    /* Spacing tokens */
+    --page-padding-x: 24px;
+    --page-padding-y: 12px;
+    --card-padding: 24px;
+    --grid-gap: 24px;
+}
+
+@media (max-width: 767px) {
+    :root {
+        --page-padding-x: 12px;
+        --page-padding-y: 12px;
+        --card-padding: 16px;
+        --grid-gap: 16px;
+    }
 }
