@@ -27,6 +27,12 @@
                 <span class="menu-label">Import (OCR)</span>
             </a>
         </li>
+        <li class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "GenerateSample" ? "active" : "")">
+            <a href="/invoices/generator">
+                <i class="bi bi-magic"></i>
+                <span class="menu-label">Generator Faktur</span>
+            </a>
+        </li>
 
         <li class="menu-group-label">Kontrahenci</li>
         <li>

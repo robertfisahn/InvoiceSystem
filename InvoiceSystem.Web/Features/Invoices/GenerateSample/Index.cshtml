@@ -1,0 +1,184 @@
+@model InvoiceSystem.Web.Features.Invoices.GenerateSample.GenerateSampleViewModel
+@{
+    ViewData["Title"] = "Generator Faktur Testowych";
+}
+
+<div class="row justify-content-center">
+    <div class="col-xl-8 col-lg-10 col-md-12">
+        <div class="data-card">
+            <div class="data-card__header">
+                <h3 class="data-card__title">
+                    <i class="bi bi-magic me-2"></i> Generator Faktur Testowych
+                </h3>
+                <span class="text-muted" style="font-size: 0.78rem;">Wylosuj dane i pobierz plik do testów OCR</span>
+            </div>
+            <div class="data-card__body">
+                <div class="text-center mb-4">
+                    <button type="button" class="btn-primary-accent py-2 px-4" id="randomizeBtn">
+                        <i class="bi bi-dice-5 me-2"></i> Losuj nowe dane
+                    </button>
+                </div>
+
+                <div class="mb-3">
+                    <label for="jsonData" class="form-label fw-semibold">Dane faktury (JSON):</label>
+                    <textarea id="jsonData" name="jsonData" rows="14" class="generator-textarea" placeholder="Kliknij &quot;Losuj nowe dane&quot;, aby wypełnić..."></textarea>
+                </div>
+
+                <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 pt-2">
+                    <a asp-controller="GetInvoiceList" asp-action="Index" class="btn-ghost">
+                        <i class="bi bi-arrow-left me-1"></i> Wróć do listy
+                    </a>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="generator-download-btn generator-download-btn--png" data-format="png">
+                            <i class="bi bi-file-earmark-image me-1"></i> PNG
+                        </button>
+                        <button type="button" class="generator-download-btn generator-download-btn--jpg" data-format="jpg">
+                            <i class="bi bi-file-earmark-image me-1"></i> JPG
+                        </button>
+                        <button type="button" class="generator-download-btn generator-download-btn--pdf" data-format="pdf">
+                            <i class="bi bi-file-earmark-pdf me-1"></i> PDF
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .generator-textarea {
+        width: 100%;
+        border-radius: 10px;
+        border: 1px solid var(--border-strong);
+        background-color: var(--bg-tertiary);
+        color: var(--text-primary);
+        font-family: 'JetBrains Mono', 'Courier New', monospace;
+        font-size: 0.82rem;
+        line-height: 1.6;
+        padding: 1rem;
+        resize: vertical;
+        transition: border-color 0.2s;
+    }
+
+    .generator-textarea:focus {
+        outline: none;
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px var(--accent-soft);
+    }
+
+    .generator-textarea::placeholder {
+        color: var(--text-muted);
+    }
+
+    .generator-download-btn {
+        border: none;
+        padding: 0.5rem 1.25rem;
+        border-radius: 50rem;
+        font-weight: 700;
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #ffffff;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .generator-download-btn:hover {
+        transform: scale(1.05);
+        filter: brightness(1.15);
+    }
+
+    .generator-download-btn:active {
+        transform: scale(0.95);
+    }
+
+    .generator-download-btn--pdf { background: #3b82f6; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); }
+    .generator-download-btn--jpg { background: #eab308; box-shadow: 0 4px 12px rgba(234, 179, 8, 0.3); }
+    .generator-download-btn--png { background: #22c55e; box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3); }
+</style>
+
+@section Scripts {
+    <script>
+        const randomizeBtn = document.getElementById('randomizeBtn');
+        const jsonTextarea = document.getElementById('jsonData');
+        const downloadBtns = document.querySelectorAll('.generator-download-btn');
+        const antiForgeryToken = '@Html.AntiForgeryToken()';
+
+        // Wyciągnij token z ukrytego inputa
+        const tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
+
+        randomizeBtn.addEventListener('click', async function () {
+            randomizeBtn.disabled = true;
+            randomizeBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Losowanie...';
+
+            try {
+                const response = await fetch('@Url.Action("Randomize", "GenerateSample")');
+                const data = await response.json();
+                jsonTextarea.value = JSON.stringify(data, null, 2);
+            } catch (error) {
+                console.error('Błąd losowania:', error);
+            } finally {
+                randomizeBtn.disabled = false;
+                randomizeBtn.innerHTML = '<i class="bi bi-dice-5 me-2"></i> Losuj nowe dane';
+            }
+        });
+
+        downloadBtns.forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                const format = btn.dataset.format;
+                const jsonData = jsonTextarea.value;
+
+                if (!jsonData) {
+                    alert('Najpierw wylosuj dane klikając "Losuj nowe dane"!');
+                    return;
+                }
+
+                try {
+                    JSON.parse(jsonData);
+                } catch (e) {
+                    alert('Niepoprawny format JSON! Sprawdź dane w polu tekstowym.');
+                    return;
+                }
+
+                // Tworzymy ukryty formularz POST z tokenem CSRF
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '@Url.Action("Download", "GenerateSample")';
+
+                const inputJson = document.createElement('input');
+                inputJson.type = 'hidden';
+                inputJson.name = 'jsonData';
+                inputJson.value = jsonData;
+                form.appendChild(inputJson);
+
+                const inputFormat = document.createElement('input');
+                inputFormat.type = 'hidden';
+                inputFormat.name = 'format';
+                inputFormat.value = format;
+                form.appendChild(inputFormat);
+
+                // Anti-forgery token
+                const tokenEl = document.querySelector('input[name="__RequestVerificationToken"]');
+                if (tokenEl) {
+                    const inputToken = document.createElement('input');
+                    inputToken.type = 'hidden';
+                    inputToken.name = '__RequestVerificationToken';
+                    inputToken.value = tokenEl.value;
+                    form.appendChild(inputToken);
+                }
+
+                document.body.appendChild(form);
+                form.submit();
+                document.body.removeChild(form);
+            });
+        });
+    </script>
+}
+
+@* Ukryty token CSRF do wykorzystania przez JavaScript *@
+<form id="antiForgeryForm" class="d-none">
+    @Html.AntiForgeryToken()
+</form>
