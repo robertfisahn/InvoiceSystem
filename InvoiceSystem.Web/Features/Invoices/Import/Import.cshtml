@@ -87,11 +87,48 @@
                 </div>
             </div>
 
+            <div class="data-card mb-3">
+                <div class="data-card__header d-flex flex-column" style="padding: var(--card-padding); padding-bottom: 0;">
+                    <h5 class="mb-0 fw-bold" style="color: var(--text-primary);">Analiza AI (LLM)</h5>
+                    <p class="text-muted small mb-0">Wybierz model sztucznej inteligencji, aby automatycznie wyodrębnić kontrahenta, datę i pozycje faktury.</p>
+                </div>
+                <div class="data-card__body" style="padding: var(--card-padding);">
+                    <form asp-action="Analyze" method="post" id="aiAnalysisForm">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="filePath" value="@Model.FilePath" />
+                        <input type="hidden" name="extractedText" value="@Model.ExtractedText" />
+                        <input type="hidden" name="documentType" value="@Model.DocumentType" />
+
+                        <div class="row align-items-end g-3">
+                            <div class="col-md-6 text-start">
+                                <label class="form-label text-muted small fw-bold">Dostawca LLM</label>
+                                <div class="input-group">
+                                    <span class="input-group-text" style="background-color: var(--bg-tertiary); border-color: var(--border); color: var(--text-secondary);">
+                                        <i class="bi bi-cpu"></i>
+                                    </span>
+                                    <select name="provider" id="aiProviderSelect" class="form-select" style="background-color: var(--bg-tertiary); color: var(--text-primary); border-color: var(--border);">
+                                        <option value="Ollama">Ollama (lokalny LLM)</option>
+                                        <option value="Groq">Groq (chmurowy LLM - szybki)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <button type="submit" class="btn-primary-accent w-100 py-2 justify-content-center" id="aiAnalyzeBtn">
+                                    <span class="spinner-border spinner-border-sm me-2 d-none" id="aiSpinner" role="status" aria-hidden="true"></span>
+                                    <i class="bi bi-magic me-2" id="aiMagicIcon"></i>
+                                    <span id="aiButtonText">Analizuj i wypełnij formularz</span>
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
             <div class="d-flex flex-wrap gap-2">
-                <a href="@Url.Action("Proceed", "ImportInvoice", new { filePath = Model.FilePath })" class="btn-primary-accent py-2 px-4">
-                    <i class="bi bi-arrow-right-circle me-2"></i> Przejdź do wystawiania faktury
+                <a href="@Url.Action("Proceed", "ImportInvoice", new { filePath = Model.FilePath })" class="btn btn-outline-primary py-2 px-4 d-inline-flex align-items-center justify-content-center">
+                    <i class="bi bi-arrow-right-circle me-2"></i> Przejdź bez analizy (ręczne wprowadzanie)
                 </a>
-                <a href="@Url.Action("Index", "ImportInvoice")" class="btn btn-outline-secondary py-2 px-4">
+                <a href="@Url.Action("Index", "ImportInvoice")" class="btn btn-outline-secondary py-2 px-4 d-inline-flex align-items-center justify-content-center">
                     <i class="bi bi-arrow-counterclockwise me-2"></i> Wgraj inny dokument
                 </a>
             </div>
@@ -215,6 +252,26 @@
             document.getElementById('copyTextBtn').addEventListener('click', function () {
                 const text = document.getElementById('extractedContent').innerText;
                 navigator.clipboard.writeText(text);
+                
+                const btn = this;
+                const icon = btn.querySelector('i');
+                const oldClass = icon.className;
+                icon.className = 'bi bi-check-lg text-success me-1';
+                setTimeout(() => {
+                    icon.className = oldClass;
+                }, 2000);
+            });
+
+            document.getElementById('aiAnalysisForm').addEventListener('submit', function () {
+                const btn = document.getElementById('aiAnalyzeBtn');
+                const spinner = document.getElementById('aiSpinner');
+                const icon = document.getElementById('aiMagicIcon');
+                const btnText = document.getElementById('aiButtonText');
+
+                btn.disabled = true;
+                spinner.classList.remove('d-none');
+                icon.classList.add('d-none');
+                btnText.textContent = 'Analizowanie tekstu przez AI...';
             });
         </script>
     }

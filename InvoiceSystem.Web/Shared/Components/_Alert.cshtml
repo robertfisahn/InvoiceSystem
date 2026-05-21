@@ -1,31 +1,21 @@
 @if (TempData["SuccessMessage"] != null)
 {
-    <script>
-        $(function() {
-            DevExpress.ui.notify({
-                message: @Html.Raw(Json.Serialize(TempData["SuccessMessage"])),
-                type: "success",
-                displayTime: 3000,
-                position: { at: "top right", my: "top right", offset: "-20 20" },
-                width: 300,
-                shading: false
-            });
-        });
-    </script>
+    <div class="alert alert-success alert-dismissible fade show no-print" role="alert" style="border-radius: 8px; margin-bottom: 1.5rem; background-color: rgba(46, 204, 113, 0.15); border: 1px solid rgba(46, 204, 113, 0.3); color: #2ecc71;">
+        <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-check-circle-fill"></i>
+            <div>@TempData["SuccessMessage"]</div>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" style="filter: invert(1); opacity: 0.5;"></button>
+    </div>
 }
 
 @if (TempData["ErrorMessage"] != null)
 {
-    <script>
-        $(function() {
-            DevExpress.ui.notify({
-                message: @Html.Raw(Json.Serialize(TempData["ErrorMessage"])),
-                type: "error",
-                displayTime: 5000,
-                position: { at: "top right", my: "top right", offset: "-20 20" },
-                width: 300,
-                shading: false
-            });
-        });
-    </script>
+    <div class="alert alert-danger alert-dismissible fade show no-print" role="alert" style="border-radius: 8px; margin-bottom: 1.5rem; background-color: rgba(231, 76, 60, 0.15); border: 1px solid rgba(231, 76, 60, 0.3); color: #e74c3c;">
+        <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            <div>@Html.Raw(TempData["ErrorMessage"])</div>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" style="filter: invert(1); opacity: 0.5;"></button>
+    </div>
 }

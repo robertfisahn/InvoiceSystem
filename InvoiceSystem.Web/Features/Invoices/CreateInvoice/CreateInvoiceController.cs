@@ -11,8 +11,25 @@ public sealed class CreateInvoiceController(IMediator mediator) : Controller
     {
         var viewModel = await mediator.Send(new GetCreateInvoiceQuery());
 
-        if (TempData["UploadedFileName"] is string fileName)
+        if (TempData["AiParsedCommand"] is string jsonCommand)
+        {
+            try
+            {
+                var command = System.Text.Json.JsonSerializer.Deserialize<CreateInvoiceCommand>(jsonCommand);
+                if (command is not null)
+                {
+                    viewModel = viewModel with { Command = command };
+                }
+            }
+            catch
+            {
+                // Ignorujemy błędy deserializacji, fallback do standardowego zachowania
+            }
+        }
+        else if (TempData["UploadedFileName"] is string fileName)
+        {
             viewModel = viewModel with { Command = new CreateInvoiceCommand { FilePath = fileName } };
+        }
 
         return View(viewModel);
     }

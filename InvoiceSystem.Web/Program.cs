@@ -74,9 +74,13 @@ builder.Services.Configure<StorageSettings>(options => {
     var configPath = builder.Configuration.GetSection("Storage").GetValue<string>("RootPath") ?? "App_Data/Storage/Incoming";
     options.RootPath = Path.Combine(builder.Environment.ContentRootPath, configPath);
 });
+builder.Services.Configure<InvoiceSystem.Web.Infrastructure.Configuration.AiSettings>(
+    builder.Configuration.GetSection(InvoiceSystem.Web.Infrastructure.Configuration.AiSettings.SectionName));
+builder.Services.AddHttpClient();
 builder.Services.AddScoped<IFileStorageService, FileStorageService>();
 builder.Services.AddScoped<IFileHashService, FileHashService>();
 builder.Services.AddScoped<IDocumentOcrService, DocumentOcrService>();
+builder.Services.AddScoped<ILlmService, LlmService>();
 
 var app = builder.Build();
 
