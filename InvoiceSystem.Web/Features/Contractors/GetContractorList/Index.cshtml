@@ -1,0 +1,62 @@
+@model List<InvoiceSystem.Web.Features.Contractors.GetContractorList.ContractorDto>
+@{
+    ViewData["Title"] = "Lista Kontrahentów";
+}
+
+<div class="row mb-4">
+    <div class="col-12 d-flex justify-content-between align-items-center">
+        <h2 class="page-title mb-0">Lista Kontrahentów</h2>
+        <a href="/invoices/create" class="btn-primary-accent py-2 px-3">
+            <i class="bi bi-file-earmark-plus me-1"></i> Wystaw nową fakturę
+        </a>
+    </div>
+</div>
+
+<div class="data-card">
+    <div class="data-card__header">
+        <h3 class="data-card__title">
+            <i class="bi bi-building me-2 text-primary"></i> Zarejestrowane firmy
+        </h3>
+    </div>
+    <div class="data-card__body" style="padding: 0;">
+        <div class="table-responsive">
+            <table class="dx-datagrid-table" style="width: 100%; border-collapse: collapse;">
+                <thead class="dx-datagrid-headers">
+                    <tr class="dx-header-row">
+                        <th style="padding: 12px 16px; color: var(--text-secondary); font-size: 11px; text-transform: uppercase; width: 60px; text-align: center;">ID</th>
+                        <th style="padding: 12px 16px; color: var(--text-secondary); font-size: 11px; text-transform: uppercase; text-align: left;">Nazwa firmy</th>
+                        <th style="padding: 12px 16px; color: var(--text-secondary); font-size: 11px; text-transform: uppercase; text-align: left; width: 180px;">NIP</th>
+                        <th style="padding: 12px 16px; color: var(--text-secondary); font-size: 11px; text-transform: uppercase; text-align: left;">Adres</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Any())
+                    {
+                        foreach (var item in Model)
+                        {
+                            <tr style="border-bottom: 1px solid var(--border); transition: background-color 0.2s;" onmouseover="this.style.backgroundColor='rgba(255,255,255,0.02)'" onmouseout="this.style.backgroundColor='transparent'">
+                                <td style="padding: 12px 16px; text-align: center; color: var(--text-muted); font-size: 0.9rem;">@item.Id</td>
+                                <td style="padding: 12px 16px; font-weight: 500; color: var(--text-primary);">@item.Name</td>
+                                <td style="padding: 12px 16px;">
+                                    <span class="badge" style="background: rgba(99,102,241,0.1); color: var(--accent); font-weight: 500; font-family: monospace; font-size: 0.9rem; padding: 4px 8px; border-radius: 4px;">
+                                        @item.TaxId
+                                    </span>
+                                </td>
+                                <td style="padding: 12px 16px; color: var(--text-secondary); font-size: 0.9rem;">@item.Address</td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="4" style="padding: 30px; text-align: center; color: var(--text-muted);">
+                                <i class="bi bi-info-circle fs-3 d-block mb-2"></i>
+                                Brak zarejestrowanych kontrahentów w systemie.
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

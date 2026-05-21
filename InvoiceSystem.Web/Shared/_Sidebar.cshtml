@@ -35,8 +35,8 @@
         </li>
 
         <li class="menu-group-label">Kontrahenci</li>
-        <li>
-            <a href="#">
+        <li class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "GetContractorList" ? "active" : "")">
+            <a href="/contractors">
                 <i class="bi bi-building"></i>
                 <span class="menu-label">Lista firm</span>
             </a>
