@@ -3,24 +3,22 @@
     ViewData["Title"] = $"Faktura {Model.InvoiceNumber}";
 }
 
-@section PageActions {
-    <div class="d-flex flex-wrap gap-2 justify-content-start justify-content-sm-end">
+<div class="page-body">
+    <div class="d-flex flex-wrap gap-2 justify-content-start mb-4 no-print">
         <a href="/invoices/update/@Model.Id" class="btn-secondary-outline">
-            <i class="bi bi-pencil me-1"></i> Edytuj
+            <i class="bi bi-pencil"></i> Edytuj
         </a>
         <button onclick="printInvoice()" class="btn-secondary-outline">
-            <i class="bi bi-printer me-1"></i> Drukuj
+            <i class="bi bi-printer"></i> Drukuj
         </button>
         <button type="button" class="btn-action-delete-large" onclick="showDeleteModal('@Model.Id', '@Model.InvoiceNumber')">
-            <i class="bi bi-trash me-1"></i> Usuń
+            <i class="bi bi-trash"></i> Usuń
         </button>
         <a href="/invoices" class="btn-primary-accent">
-            <i class="bi bi-arrow-left me-1"></i> Powrót
+            <i class="bi bi-arrow-left"></i> Powrót
         </a>
     </div>
-}
 
-<div class="page-body">
     <div class="invoice-document shadow-lg" id="invoiceDoc">
         <div class="invoice-content-wrap">
             <!-- Header -->
@@ -118,6 +116,15 @@
         display: flex;
         flex-direction: column;
         min-height: auto;
+        
+        /* Reset Bootstrap 5 table variables locally for dark mode overrides */
+        --bs-table-bg: transparent !important;
+        --bs-table-color: #1a1a1a !important;
+        --bs-table-border-color: #dee2e6 !important;
+        --bs-table-striped-color: #1a1a1a !important;
+        --bs-table-striped-bg: transparent !important;
+        --bs-table-active-bg: transparent !important;
+        --bs-table-hover-bg: transparent !important;
     }
     
     @@media (min-width: 768px) {
@@ -130,9 +137,14 @@
     
     .invoice-content-wrap { flex: 1; }
 
-    .invoice-document table { background-color: transparent !important; }
-    .invoice-document table td, 
-    .invoice-document table th { color: #1a1a1a !important; border-color: #dee2e6 !important; }
+    .invoice-document table,
+    .invoice-document table tr,
+    .invoice-document table td,
+    .invoice-document table th { 
+        background-color: transparent !important; 
+        color: #1a1a1a !important; 
+        border-color: #dee2e6 !important; 
+    }
 
     .invoice-footer {
         margin-top: 3rem;
@@ -155,6 +167,11 @@
         font-weight: 600;
         font-size: 0.875rem;
         transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        cursor: pointer;
+        text-decoration: none !important;
     }
     .btn-action-delete-large:hover { background: #ef4444; color: white; transform: translateY(-1px); }
 

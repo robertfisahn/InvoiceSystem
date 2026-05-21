@@ -2,14 +2,6 @@
 @{
     ViewData["Title"] = "Importuj Fakturę (AI OCR)";
 }
-
-<div class="page-header no-print">
-    <div class="page-header-left">
-        <h2 class="page-title">Wgrywanie Dokumentów</h2>
-        <p class="text-muted small">Wgraj fakturę w formacie PDF lub obrazu, aby wyodrębnić z niej tekst.</p>
-    </div>
-</div>
-
 <div class="row justify-content-center" style="margin-top: var(--grid-gap);">
     @if (!Model.HasResult)
     {
@@ -30,8 +22,8 @@
                                 <i class="bi bi-cloud-arrow-up fs-1 text-primary opacity-75"></i>
                             </div>
                             <div class="upload-area__text mb-2">
-                                <h5 class="fw-bold" style="color: var(--text-primary); margin-bottom: 4px;">Przeciągnij plik tutaj</h5>
-                                <p class="text-secondary small mb-0">Lub kliknij, aby wybrać z dysku</p>
+                                <h5 class="fw-bold" style="color: var(--text-primary); margin-bottom: 4px;">Przeciągnij plik tutaj lub kliknij, aby wgrać z dysku</h5>
+                                <p class="text-secondary small mb-0">aby wyodrębnić z niego tekst</p>
                             </div>
                             <div class="upload-area__hint small text-muted mb-2">
                                 Dozwolone formaty: <strong>PDF, JPG, PNG</strong> (max. 10MB)
@@ -56,7 +48,7 @@
 
                         <div class="text-center mt-3">
                             <button type="submit" class="btn-primary-accent w-100 justify-content-center py-2" id="submitBtn" disabled>
-                                <i class="bi bi-upload me-2"></i> Wyślij i analizuj
+                                <i class="bi bi-upload"></i> Wyślij i analizuj
                             </button>
                         </div>
                     </form>

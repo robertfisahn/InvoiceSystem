@@ -16,6 +16,7 @@ docs-migration-checklist.md
 *.user
 *.userosscache
 *.sln.docstates
+InvoiceSystem.Web/App_Data
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs

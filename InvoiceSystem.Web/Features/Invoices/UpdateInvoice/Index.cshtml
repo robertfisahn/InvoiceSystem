@@ -4,12 +4,6 @@
     ViewData["Title"] = "Edytuj Fakturę";
 }
 
-@section PageActions {
-    <a href="/invoices" class="btn-secondary-outline">
-        <i class="dx-icon dx-icon-close"></i>
-        <span>Anuluj</span>
-    </a>
-}
 
 <div class="page-body">
     <form asp-action="Index" asp-route-id="@Model.Id" method="post" id="invoiceForm">
@@ -58,9 +52,14 @@
                     </div>
                 }
 
-                <button type="submit" class="btn-primary-accent w-100 justify-content-center py-3">
-                    <i class="dx-icon dx-icon-save me-2"></i> Zapisz zmiany
-                </button>
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn-primary-accent flex-grow-1 justify-content-center py-2">
+                        <i class="dx-icon dx-icon-save"></i> Zapisz zmiany
+                    </button>
+                    <a href="/invoices" class="btn-secondary-outline justify-content-center py-2 px-3">
+                        <i class="dx-icon dx-icon-close"></i> Anuluj
+                    </a>
+                </div>
             </div>
 
             <!-- Pozycje Faktury -->
