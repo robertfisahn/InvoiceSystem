@@ -25,45 +25,38 @@ public sealed class AnalyzeOcrTextHandler(
             if (extractedData is null)
             {
                 logger.LogWarning("Ekstrakcja danych z tekstu przez LLM nie zwróciła wyniku.");
-                return new AnalyzeOcrTextResponse(false, null, null, "Nie udało się poprawnie sparsować faktury. Upewnij się, że tekst zawiera poprawne dane faktury.");
+                return new AnalyzeOcrTextResponse(false, null, null, false, "Nie udało się poprawnie sparsować faktury. Upewnij się, że tekst zawiera poprawne dane faktury.");
             }
 
-            // 1. Sprawdzanie i ewentualne tworzenie kontrahenta
-            var cleanTaxId = CleanTaxId(extractedData.SellerTaxId);
+            // 1. Sprawdzanie kontrahenta w bazie
+            var cleanTaxId = CleanTaxId(extractedData.BuyerTaxId);
             if (string.IsNullOrWhiteSpace(cleanTaxId))
             {
-                logger.LogWarning("AI nie odnalazło poprawnego NIP sprzedawcy.");
-                return new AnalyzeOcrTextResponse(false, extractedData, null, "NIP sprzedawcy jest wymagany do identyfikacji i przypisania kontrahenta w systemie.");
+                logger.LogWarning("AI nie odnalazło poprawnego NIP kupującego.");
+                return new AnalyzeOcrTextResponse(false, extractedData, null, false, "NIP kupującego jest wymagany do identyfikacji i przypisania kontrahenta w systemie.");
             }
 
             var contractor = await db.Contractors
                 .FirstOrDefaultAsync(c => c.TaxId == cleanTaxId, cancellationToken);
 
-            if (contractor is null)
-            {
-                logger.LogInformation("Kontrahent o NIP {Nip} nie został odnaleziony. Tworzenie nowej kartoteki...", cleanTaxId);
-                contractor = new Contractor
-                {
-                    Name = string.IsNullOrWhiteSpace(extractedData.SellerName) ? "Kontrahent z OCR" : extractedData.SellerName.Trim(),
-                    TaxId = cleanTaxId,
-                    Address = string.IsNullOrWhiteSpace(extractedData.SellerAddress) ? "Brak adresu" : extractedData.SellerAddress.Trim()
-                };
+            bool contractorExists = contractor is not null;
+            int? contractorId = contractor?.Id;
 
-                db.Contractors.Add(contractor);
-                await db.SaveChangesAsync(cancellationToken);
-                logger.LogInformation("Pomyślnie dodano nowego kontrahenta: {Name} (ID: {Id})", contractor.Name, contractor.Id);
+            if (contractorExists)
+            {
+                logger.LogInformation("Znaleziono istniejącego kontrahenta: {Name} (ID: {Id})", contractor!.Name, contractor.Id);
             }
             else
             {
-                logger.LogInformation("Znaleziono istniejącego kontrahenta: {Name} (ID: {Id})", contractor.Name, contractor.Id);
+                logger.LogInformation("Kontrahent o NIP {Nip} nie został odnaleziony w bazie danych.", cleanTaxId);
             }
 
-            return new AnalyzeOcrTextResponse(true, extractedData, contractor.Id);
+            return new AnalyzeOcrTextResponse(true, extractedData, contractorId, contractorExists);
         }
         catch (Exception ex)
         {
             logger.LogError(ex, "Wystąpił nieoczekiwany błąd w AnalyzeOcrTextHandler.");
-            return new AnalyzeOcrTextResponse(false, null, null, $"Błąd serwera analizy: {ex.Message}");
+            return new AnalyzeOcrTextResponse(false, null, null, false, $"Błąd serwera analizy: {ex.Message}");
         }
     }
 

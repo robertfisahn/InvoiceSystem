@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 namespace InvoiceSystem.Web.Shared.Interfaces;
 
 public record LlmInvoiceDto(
-    string SellerName,
-    string SellerTaxId,
-    string SellerAddress,
+    string BuyerName,
+    string BuyerTaxId,
+    string BuyerAddress,
     string InvoiceNumber,
     DateTime? Date,
     List<LlmInvoiceItemDto> Items

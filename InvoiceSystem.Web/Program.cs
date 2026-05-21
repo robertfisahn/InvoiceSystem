@@ -76,6 +76,7 @@ builder.Services.Configure<StorageSettings>(options => {
 });
 builder.Services.Configure<InvoiceSystem.Web.Infrastructure.Configuration.AiSettings>(
     builder.Configuration.GetSection(InvoiceSystem.Web.Infrastructure.Configuration.AiSettings.SectionName));
+builder.Services.AddMemoryCache();
 builder.Services.AddHttpClient();
 builder.Services.AddScoped<IFileStorageService, FileStorageService>();
 builder.Services.AddScoped<IFileHashService, FileHashService>();

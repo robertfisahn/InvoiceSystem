@@ -166,22 +166,28 @@ public sealed class LlmService(
 
     private string GetSystemPrompt()
     {
-        return "You are an expert data extraction assistant. Your task is to analyze raw, messy OCR text from an invoice and extract structured fields. " +
-               "You must return ONLY a JSON object matching this schema exactly, and nothing else. Do not output any markdown blocks, do not wrap the JSON in ```json or ```, do not include preamble, notes, explanations, or extra text. " +
-               "Strict JSON Schema: " +
-               "{" +
-                 "\"SellerName\": \"string (name of the company/vendor selling the service/product)\"," +
-                 "\"SellerTaxId\": \"string (NIP / Tax Identification Number of the seller, clean digits only, e.g. 1234567890)\"," +
-                 "\"SellerAddress\": \"string (complete postal address of the seller)\"," +
-                 "\"InvoiceNumber\": \"string (the invoice number/id from the document)\"," +
-                 "\"Date\": \"string (the invoice issue date formatted strictly as YYYY-MM-DD)\"," +
-                 "\"Items\": [" +
-                   "{" +
-                     "\"Name\": \"string (name/description of the item or service)\"," +
-                     "\"Quantity\": number (quantity sold, defaults to 1.00 if not clear)," +
-                     "\"UnitPrice\": number (unit net price, defaults to 0.00 if not clear)" +
-                   "}" +
-                 "]" +
+        return "You are an expert data extraction assistant. Your task is to analyze raw, messy OCR text from an invoice and extract structured fields.\n" +
+               "CRITICAL RULES:\n" +
+               "1. The entity named 'InvoiceSystem Enterprise' (Tax ID/NIP: 1234567890, address: ul. Technologiczna 12) is ALWAYS the SELLER. Do NOT extract it as the Buyer.\n" +
+               "2. Extract the BUYER (the customer/client purchasing the services/products, e.g., 'Rak, Lewandowski and Bednarski'). Look for the OTHER business entity in the text.\n" +
+               "3. OCR text often reads two-column layouts row-by-row (e.g. 'SellerName BuyerName', 'SellerAddress BuyerAddress', 'SellerNip BuyerNip'). Split these lines carefully to extract the buyer's name, address, and NIP (e.g. NIP: 572-299-69-03) rather than the seller's.\n" +
+               "4. For BuyerTaxId, output ONLY clean digits (e.g. '5722996903').\n" +
+               "5. For Date, format it strictly as YYYY-MM-DD. If the document states 5/21/2026, return '2026-05-21'.\n\n" +
+               "You must return ONLY a JSON object matching this schema exactly, and nothing else. Do not output any markdown blocks, do not wrap the JSON in ```json or ```, do not include preamble, notes, explanations, or extra text.\n" +
+               "Strict JSON Schema:\n" +
+               "{\n" +
+                 "  \"BuyerName\": \"string (name of the client company/buyer)\",\n" +
+                 "  \"BuyerTaxId\": \"string (NIP of the buyer, digits only)\",\n" +
+                 "  \"BuyerAddress\": \"string (complete postal address of the buyer)\",\n" +
+                 "  \"InvoiceNumber\": \"string (the invoice number/id from the document)\",\n" +
+                 "  \"Date\": \"string (YYYY-MM-DD)\",\n" +
+                 "  \"Items\": [\n" +
+                 "    {\n" +
+                 "      \"Name\": \"string (description of the item/service)\",\n" +
+                 "      \"Quantity\": number,\n" +
+                 "      \"UnitPrice\": number\n" +
+                 "    }\n" +
+                 "  ]\n" +
                "}";
     }
 

@@ -9,4 +9,5 @@ public sealed record AnalyzeOcrTextResponse(
     bool Success, 
     LlmInvoiceDto? Data, 
     int? ContractorId = null,
+    bool ContractorExists = false,
     string? ErrorMessage = null);

@@ -1,0 +1,65 @@
+@model InvoiceSystem.Web.Domain.Entities.Contractor
+@{
+    ViewData["Title"] = "Zarejestruj Nowego Kontrahenta";
+    var sessionId = ViewBag.SessionId as string;
+    var warningMessage = ViewBag.WarningMessage as string;
+}
+
+<div class="row justify-content-center" style="margin-top: var(--grid-gap);">
+    <div class="col-xl-6 col-lg-8 col-md-10">
+        <div class="data-card">
+            <div class="data-card__header">
+                <h3 class="data-card__title">
+                    <i class="bi bi-person-plus me-2 text-warning"></i> Zarejestruj kontrahenta z AI OCR
+                </h3>
+            </div>
+            <div class="data-card__body" style="padding: var(--card-padding);">
+                @if (!string.IsNullOrEmpty(warningMessage))
+                {
+                    <div class="alert alert-warning mb-4" style="background: rgba(245, 158, 11, 0.1); border: none; border-left: 4px solid #f59e0b; color: #d97706;">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i> @warningMessage
+                    </div>
+                }
+
+                @if (!ViewData.ModelState.IsValid)
+                {
+                    <div class="alert alert-danger mb-4">
+                        <div asp-validation-summary="All" class="small"></div>
+                    </div>
+                }
+
+                <form asp-action="CreateContractor" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="sessionId" value="@sessionId" />
+
+                    <div class="form-group mb-3">
+                        <label class="form-label" for="Name">Nazwa firmy / kontrahenta</label>
+                        <input asp-for="Name" class="form-control" placeholder="Wprowadź nazwę firmy..." required />
+                        <span asp-validation-for="Name" class="text-danger small"></span>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label class="form-label" for="TaxId">NIP (Tax Identification Number)</label>
+                        <input asp-for="TaxId" class="form-control" placeholder="Np. 1234567890" required />
+                        <span asp-validation-for="TaxId" class="text-danger small"></span>
+                    </div>
+
+                    <div class="form-group mb-4">
+                        <label class="form-label" for="Address">Adres pocztowy</label>
+                        <textarea asp-for="Address" class="form-control" rows="3" placeholder="Wprowadź adres..."></textarea>
+                        <span asp-validation-for="Address" class="text-danger small"></span>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn-primary-accent flex-grow-1 justify-content-center py-2">
+                            <i class="bi bi-check-lg"></i> Zapisz i Utwórz Fakturę
+                        </button>
+                        <a href="/invoices/import" class="btn-secondary-outline justify-content-center py-2 px-3">
+                            Anuluj
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
