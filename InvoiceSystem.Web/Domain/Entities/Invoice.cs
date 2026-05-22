@@ -6,6 +6,7 @@ public class Invoice
     public string InvoiceNumber { get; set; } = string.Empty;
     public DateTime Date { get; set; }
     public string? FilePath { get; set; }
+    public InvoiceStatus Status { get; set; } = InvoiceStatus.Draft;
     
     public int ContractorId { get; set; }
     public Contractor Contractor { get; set; } = null!;

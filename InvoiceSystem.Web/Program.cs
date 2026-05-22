@@ -95,7 +95,7 @@ using (var scope = app.Services.CreateScope())
     var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<AppUser>>();
     
-    await context.Database.EnsureCreatedAsync();
+    await context.Database.MigrateAsync();
     await DataSeeder.SeedAsync(context);
     await DataSeeder.SeedUsersAsync(userManager);
 }

@@ -1,3 +1,4 @@
+using InvoiceSystem.Web.Domain.Entities;
 using MediatR;
 
 namespace InvoiceSystem.Web.Features.Invoices.GetInvoiceList;
@@ -9,5 +10,6 @@ public record GetInvoiceListViewModel(
     string InvoiceNumber,
     string ContractorName,
     DateTime Date,
-    decimal TotalAmount
+    decimal TotalAmount,
+    InvoiceStatus Status
 );

@@ -1,3 +1,4 @@
+using InvoiceSystem.Web.Domain.Entities;
 using InvoiceSystem.Web.Infrastructure.Database;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -12,7 +13,8 @@ public record GetInvoiceDetailsViewModel(
     DateTime Date,
     ContractorDetailsDto Contractor,
     List<InvoiceItemDto> Items,
-    decimal TotalAmount
+    decimal TotalAmount,
+    InvoiceStatus Status
 );
 
 public record ContractorDetailsDto(string Name, string? TaxId, string? Address);
@@ -37,7 +39,8 @@ public sealed class GetInvoiceDetailsHandler(AppDbContext db)
                     item.UnitPrice,
                     item.TotalPrice
                 )).ToList(),
-                i.Items.Sum(x => x.TotalPrice)
+                i.Items.Sum(x => x.TotalPrice),
+                i.Status
             ))
             .FirstOrDefaultAsync(ct);
     }

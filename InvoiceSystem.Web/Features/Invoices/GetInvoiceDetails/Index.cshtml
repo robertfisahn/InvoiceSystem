@@ -5,14 +5,33 @@
 
 <div class="page-body">
     <div class="d-flex flex-wrap gap-2 justify-content-start mb-4 no-print">
-        <a href="/invoices/update/@Model.Id" class="btn-secondary-outline">
-            <i class="bi bi-pencil"></i> Edytuj
-        </a>
+        @if (Model.Status == InvoiceSystem.Web.Domain.Entities.InvoiceStatus.Draft)
+        {
+            <a href="/invoices/update/@Model.Id" class="btn-secondary-outline">
+                <i class="bi bi-pencil"></i> Edytuj
+            </a>
+            <form asp-controller="ConfirmInvoice" asp-action="Confirm" asp-route-id="@Model.Id" method="post" style="display:inline;">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn-primary-accent">
+                    <i class="bi bi-check-circle"></i> Zatwierdź
+                </button>
+            </form>
+            <button type="button" class="btn-action-delete-large" onclick="showDeleteModal('@Model.Id', '@Model.InvoiceNumber')">
+                <i class="bi bi-trash"></i> Usuń
+            </button>
+        }
+        else if (Model.Status == InvoiceSystem.Web.Domain.Entities.InvoiceStatus.Confirmed)
+        {
+            <form asp-controller="MarkAsPaid" asp-action="Pay" asp-route-id="@Model.Id" method="post" style="display:inline;">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn-primary-accent">
+                    <i class="bi bi-cash-coin"></i> Oznacz jako opłaconą
+                </button>
+            </form>
+        }
+        
         <button onclick="printInvoice()" class="btn-secondary-outline">
             <i class="bi bi-printer"></i> Drukuj
-        </button>
-        <button type="button" class="btn-action-delete-large" onclick="showDeleteModal('@Model.Id', '@Model.InvoiceNumber')">
-            <i class="bi bi-trash"></i> Usuń
         </button>
         <a href="/invoices" class="btn-primary-accent">
             <i class="bi bi-arrow-left"></i> Powrót
@@ -29,7 +48,21 @@
                 </div>
                 <div class="text-end">
                     <h1 class="h3 mb-0">FAKTURA</h1>
-                    <p class="fw-bold">Nr: @Model.InvoiceNumber</p>
+                    <p class="fw-bold d-flex align-items-center justify-content-end gap-2">
+                        Nr: @Model.InvoiceNumber
+                        @if (Model.Status == InvoiceSystem.Web.Domain.Entities.InvoiceStatus.Draft)
+                        {
+                            <span class="badge-status badge-status--draft">Szkic</span>
+                        }
+                        else if (Model.Status == InvoiceSystem.Web.Domain.Entities.InvoiceStatus.Confirmed)
+                        {
+                            <span class="badge-status badge-status--overdue">Zatwierdzona</span>
+                        }
+                        else if (Model.Status == InvoiceSystem.Web.Domain.Entities.InvoiceStatus.Paid)
+                        {
+                            <span class="badge-status badge-status--confirmed">Opłacona</span>
+                        }
+                    </p>
                     <p class="small text-muted">Data wystawienia: @Model.Date.ToShortDateString()</p>
                 </div>
             </div>

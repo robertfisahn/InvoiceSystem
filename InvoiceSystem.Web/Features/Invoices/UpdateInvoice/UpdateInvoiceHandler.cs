@@ -15,6 +15,11 @@ public sealed class UpdateInvoiceHandler(AppDbContext db)
             .FirstOrDefaultAsync(i => i.Id == request.Id, ct)
             ?? throw new InvalidOperationException($"Invoice {request.Id} not found.");
 
+        if (invoice.Status != InvoiceStatus.Draft)
+        {
+            throw new InvalidOperationException("Można edytować wyłącznie faktury o statusie Szkic (Draft).");
+        }
+
         // Aktualizacja nagłówka
         invoice.InvoiceNumber = request.InvoiceNumber;
         invoice.Date = request.Date;

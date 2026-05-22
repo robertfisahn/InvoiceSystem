@@ -35,6 +35,7 @@
                         <th class="sortable" data-sort="number">Numer <i class="bi bi-arrow-down-up ms-1"></i></th>
                         <th class="sortable" data-sort="contractor">Kontrahent <i class="bi bi-arrow-down-up ms-1"></i></th>
                         <th class="sortable" data-sort="date">Data <i class="bi bi-arrow-down-up ms-1"></i></th>
+                        <th class="sortable" data-sort="status">Status <i class="bi bi-arrow-down-up ms-1"></i></th>
                         <th class="sortable text-end" data-sort="amount">Suma <i class="bi bi-arrow-down-up ms-1"></i></th>
                         <th class="dx-header-static text-center" style="width: 140px;">Akcje</th>
                     </tr>
@@ -46,23 +47,41 @@
                             data-number="@invoice.InvoiceNumber"
                             data-contractor="@invoice.ContractorName"
                             data-date="@invoice.Date.ToString("yyyy-MM-dd")"
+                            data-status="@((int)invoice.Status)"
                             data-amount="@invoice.TotalAmount.ToString("F2").Replace(",", ".")">
                             <td style="padding: 14px 16px; font-weight: 600; color: var(--text-primary);">@invoice.InvoiceNumber</td>
                             <td style="padding: 14px 16px; color: var(--text-secondary);">@invoice.ContractorName</td>
                             <td style="padding: 14px 16px; color: var(--text-secondary);">@invoice.Date.ToShortDateString()</td>
+                            <td style="padding: 14px 16px; color: var(--text-secondary);">
+                                @if (invoice.Status == InvoiceSystem.Web.Domain.Entities.InvoiceStatus.Draft)
+                                {
+                                    <span class="badge-status badge-status--draft">Szkic</span>
+                                }
+                                else if (invoice.Status == InvoiceSystem.Web.Domain.Entities.InvoiceStatus.Confirmed)
+                                {
+                                    <span class="badge-status badge-status--overdue">Zatwierdzona</span>
+                                }
+                                else if (invoice.Status == InvoiceSystem.Web.Domain.Entities.InvoiceStatus.Paid)
+                                {
+                                    <span class="badge-status badge-status--confirmed">Opłacona</span>
+                                }
+                            </td>
                             <td style="padding: 14px 16px; text-align: right; font-weight: 700; color: var(--text-primary);">@invoice.TotalAmount.ToString("C")</td>
                             <td style="padding: 14px 16px; text-align: center;">
                                 <div class="d-flex justify-content-center gap-2">
                                     <a href="/invoices/@invoice.Id" class="btn-action btn-action-view" title="Szczegóły">
                                         <i class="bi bi-eye"></i>
                                     </a>
-                                    <a href="/invoices/update/@invoice.Id" class="btn-action btn-action-edit" title="Edytuj">
-                                        <i class="bi bi-pencil"></i>
-                                    </a>
-                                    <button type="button" class="btn-action btn-action-delete" 
-                                            onclick="showDeleteModal('@invoice.Id', '@invoice.InvoiceNumber')" title="Usuń">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
+                                    @if (invoice.Status == InvoiceSystem.Web.Domain.Entities.InvoiceStatus.Draft)
+                                    {
+                                        <a href="/invoices/update/@invoice.Id" class="btn-action btn-action-edit" title="Edytuj">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <button type="button" class="btn-action btn-action-delete" 
+                                                onclick="showDeleteModal('@invoice.Id', '@invoice.InvoiceNumber')" title="Usuń">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    }
                                 </div>
                             </td>
                         </tr>

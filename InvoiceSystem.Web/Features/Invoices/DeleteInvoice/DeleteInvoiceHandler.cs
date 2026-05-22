@@ -1,3 +1,4 @@
+using InvoiceSystem.Web.Domain.Entities;
 using InvoiceSystem.Web.Infrastructure.Database;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -13,6 +14,11 @@ public sealed class DeleteInvoiceHandler(AppDbContext db)
             .Include(i => i.Items)
             .FirstOrDefaultAsync(i => i.Id == request.Id, ct)
             ?? throw new InvalidOperationException($"Invoice {request.Id} not found.");
+
+        if (invoice.Status != InvoiceStatus.Draft)
+        {
+            throw new InvalidOperationException("Można usuwać wyłącznie faktury o statusie Szkic (Draft).");
+        }
 
         db.Invoices.Remove(invoice);
         await db.SaveChangesAsync(ct);
