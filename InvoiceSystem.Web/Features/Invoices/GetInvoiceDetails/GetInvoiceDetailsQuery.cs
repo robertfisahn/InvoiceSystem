@@ -18,7 +18,7 @@ public record GetInvoiceDetailsViewModel(
 );
 
 public record ContractorDetailsDto(string Name, string? TaxId, string? Address);
-public record InvoiceItemDto(string Name, decimal Quantity, decimal UnitPrice, decimal TotalPrice);
+public record InvoiceItemDto(string Name, int Quantity, decimal UnitPrice, decimal TotalPrice);
 
 public sealed class GetInvoiceDetailsHandler(AppDbContext db)
     : IRequestHandler<GetInvoiceDetailsQuery, GetInvoiceDetailsViewModel?>

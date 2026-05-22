@@ -84,7 +84,7 @@ public static class DataSeeder
     }
 
     private static Invoice CreateInvoice(
-        string number, Contractor contractor, DateTime date, string itemName, decimal qty, decimal unitPrice)
+        string number, Contractor contractor, DateTime date, string itemName, int qty, decimal unitPrice)
     {
         return new Invoice
         {

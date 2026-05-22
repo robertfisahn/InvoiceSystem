@@ -32,7 +32,7 @@ public sealed class OcrSessionData
 public sealed class OcrSessionItem
 {
     public string Name { get; set; } = string.Empty;
-    public decimal Quantity { get; set; }
+    public int Quantity { get; set; }
     public decimal UnitPrice { get; set; }
 }
 
@@ -49,6 +49,6 @@ public sealed class ConfirmOcrViewModel
 public sealed class ConfirmOcrItemViewModel
 {
     public string Name { get; set; } = string.Empty;
-    public decimal Quantity { get; set; }
+    public int Quantity { get; set; }
     public decimal UnitPrice { get; set; }
 }

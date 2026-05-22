@@ -10,4 +10,4 @@ public record CreateInvoiceCommand : IRequest<int>
     public List<CreateInvoiceItemCommand> Items { get; init; } = [];
 }
 
-public record CreateInvoiceItemCommand(string Name, decimal Quantity, decimal UnitPrice);
+public record CreateInvoiceItemCommand(string Name, int Quantity, decimal UnitPrice);

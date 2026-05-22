@@ -15,6 +15,6 @@ public record UpdateInvoiceItemCommand
 {
     public int? Id { get; init; } // null dla nowych pozycji
     public string Name { get; init; } = string.Empty;
-    public decimal Quantity { get; init; }
+    public int Quantity { get; init; }
     public decimal UnitPrice { get; init; }
 }

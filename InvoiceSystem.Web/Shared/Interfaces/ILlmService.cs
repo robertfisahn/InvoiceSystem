@@ -16,7 +16,7 @@ public record LlmInvoiceDto(
 
 public record LlmInvoiceItemDto(
     string Name,
-    decimal Quantity,
+    int Quantity,
     decimal UnitPrice
 );
 
