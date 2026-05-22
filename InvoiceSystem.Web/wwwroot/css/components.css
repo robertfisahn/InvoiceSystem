@@ -309,3 +309,16 @@
 [data-theme="light"] .btn-ghost:hover {
     background-color: rgba(0, 0, 0, 0.05);
 }
+
+@media (max-width: 767px) {
+    /* Show labels on mobile even if the sidebar is collapsed on desktop */
+    .sidebar-collapsed .menu-label {
+        display: block !important;
+    }
+    
+    .sidebar-collapsed .menu-group-label {
+        visibility: visible !important;
+        height: auto !important;
+        padding: 1.5rem 1rem 0.5rem !important;
+    }
+}

@@ -47,17 +47,17 @@
                 @if (!ViewData.ModelState.IsValid && ViewData.ModelState.ContainsKey(""))
                 {
                     <div class="alert alert-danger d-flex align-items-center mb-4" style="background: rgba(239,68,68,0.1); border: none; border-left: 4px solid #ef4444; color: #ef4444;">
-                        <i class="dx-icon dx-icon-warning me-2"></i>
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
                         <div asp-validation-summary="ModelOnly" class="small"></div>
                     </div>
                 }
 
-                <div class="d-flex gap-2">
+                <div class="d-flex gap-2 mb-4 mb-lg-0">
                     <button type="submit" class="btn-primary-accent flex-grow-1 justify-content-center py-2">
-                        <i class="dx-icon dx-icon-save"></i> Zapisz zmiany
+                        <i class="bi bi-save me-1"></i> Zapisz zmiany
                     </button>
                     <a href="/invoices" class="btn-secondary-outline justify-content-center py-2 px-3">
-                        <i class="dx-icon dx-icon-close"></i> Anuluj
+                        <i class="bi bi-x-circle me-1"></i> Anuluj
                     </a>
                 </div>
             </div>
@@ -68,7 +68,7 @@
                     <div class="data-card__header">
                         <h3 class="data-card__title">Pozycje faktury</h3>
                         <button type="button" class="btn-secondary-outline btn-sm" onclick="addItem()">
-                            <i class="dx-icon dx-icon-add"></i>
+                            <i class="bi bi-plus-lg me-1"></i>
                             <span>Dodaj pozycję</span>
                         </button>
                     </div>
@@ -103,7 +103,7 @@
                                             </td>
                                             <td style="padding: 12px 16px; text-align: center;">
                                                 <button type="button" class="btn-action btn-action-delete" onclick="removeItem(this)">
-                                                    <i class="dx-icon dx-icon-trash"></i>
+                                                    <i class="bi bi-trash"></i>
                                                 </button>
                                             </td>
                                         </tr>
@@ -140,7 +140,7 @@
                 </td>
                 <td style="padding: 12px 16px; text-align: center;">
                     <button type="button" class="btn-action btn-action-delete" onclick="removeItem(this)">
-                        <i class="dx-icon dx-icon-trash"></i>
+                        <i class="bi bi-trash"></i>
                     </button>
                 </td>
             `;

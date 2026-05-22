@@ -12,7 +12,7 @@ public sealed class LoginController(IMediator mediator) : Controller
     public IActionResult Index()
     {
         if (User.Identity?.IsAuthenticated == true)
-            return RedirectToAction("Index", "GetInvoiceList");
+            return Redirect("/dashboard");
 
         return View(new LoginCommand("", ""));
     }
@@ -26,7 +26,7 @@ public sealed class LoginController(IMediator mediator) : Controller
             var result = await mediator.Send(command);
 
             if (result.Success)
-                return RedirectToAction("Index", "GetInvoiceList");
+                return Redirect("/dashboard");
 
             ModelState.AddModelError(string.Empty, result.Error ?? "Błąd logowania.");
         }

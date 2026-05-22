@@ -147,6 +147,112 @@
     vertical-align: top;
 }
 
+@media (max-width: 767px) {
+    /* Hide table headers completely for item repeater only */
+    .table-responsive:has(.item-row) .dx-datagrid-headers {
+        display: none !important;
+    }
+    
+    /* Override table responsive container to avoid scrollbars for item repeater only */
+    .table-responsive:has(.item-row) {
+        overflow-x: visible !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    
+    /* Make table and body block elements for item repeater only */
+    .table-responsive:has(.item-row) .dx-datagrid-table {
+        width: 100% !important;
+        min-width: 100% !important;
+        display: block !important;
+        border: none !important;
+    }
+    
+    #itemsContainer {
+        width: 100% !important;
+        display: block !important;
+        padding: 0 !important;
+    }
+    
+    /* Convert each item row into a grid card */
+    .item-row {
+        display: grid !important;
+        grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) auto;
+        gap: 8px;
+        padding: 12px !important;
+        margin-bottom: 12px;
+        border: 1px solid var(--border-strong) !important;
+        border-radius: 12px;
+        background-color: var(--bg-secondary) !important;
+        box-shadow: var(--shadow-sm);
+        border-bottom: 1px solid var(--border-strong) !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+    
+    /* Style td elements to behave as clean grid items */
+    .item-row td {
+        display: block !important;
+        padding: 0 !important;
+        border: none !important;
+        background: transparent !important;
+    }
+    
+    /* Prevent inputs from overflowing */
+    .item-row td input {
+        width: 100% !important;
+        min-width: 0 !important;
+    }
+    
+    /* Name/Description spans full width on top row */
+    .item-row td:nth-child(1) {
+        grid-column: 1 / span 3;
+    }
+    
+    /* Quantity input row, col 1 */
+    .item-row td:nth-child(2) {
+        grid-column: 1;
+    }
+    .item-row td:nth-child(2)::before {
+        content: 'Ilość';
+        display: block;
+        font-size: 10px;
+        text-transform: uppercase;
+        color: var(--text-secondary);
+        margin-bottom: 4px;
+        font-weight: 600;
+        letter-spacing: 0.05em;
+    }
+    
+    /* Price input row, col 2 */
+    .item-row td:nth-child(3) {
+        grid-column: 2;
+    }
+    .item-row td:nth-child(3)::before {
+        content: 'Cena netto';
+        display: block;
+        font-size: 10px;
+        text-transform: uppercase;
+        color: var(--text-secondary);
+        margin-bottom: 4px;
+        font-weight: 600;
+        letter-spacing: 0.05em;
+    }
+    
+    /* Delete button aligned with inputs, col 3 */
+    .item-row td:nth-child(4) {
+        grid-column: 3;
+        display: flex !important;
+        align-items: flex-end !important;
+        justify-content: center;
+        height: 100%;
+    }
+    
+    .item-row td:nth-child(4) button {
+        margin-bottom: 2px;
+    }
+}
+
 /* =================================================================
    SEARCH PANEL — wymuszenie widoczności w obu motywach
    DevExtreme Material Light ustawia rgba(0,0,0,0.04) jako tło

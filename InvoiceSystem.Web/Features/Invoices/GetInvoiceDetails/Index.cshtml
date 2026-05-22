@@ -4,81 +4,87 @@
 }
 
 <div class="page-body">
-    <div class="d-flex flex-wrap gap-2 justify-content-start mb-4 no-print">
+    <div class="invoice-actions-bar no-print">
         @if (Model.Status == InvoiceSystem.Web.Domain.Entities.InvoiceStatus.Draft)
         {
-            <a href="/invoices/update/@Model.Id" class="btn-secondary-outline">
+            <a href="/invoices/update/@Model.Id" class="btn-secondary-outline justify-content-center">
                 <i class="bi bi-pencil"></i> Edytuj
             </a>
-            <form asp-controller="ConfirmInvoice" asp-action="Confirm" asp-route-id="@Model.Id" method="post" style="display:inline;">
+            <form asp-controller="ConfirmInvoice" asp-action="Confirm" asp-route-id="@Model.Id" method="post" class="actions-bar-form">
                 @Html.AntiForgeryToken()
-                <button type="submit" class="btn-primary-accent">
+                <button type="submit" class="btn-primary-accent justify-content-center w-100">
                     <i class="bi bi-check-circle"></i> Zatwierdź
                 </button>
             </form>
-            <button type="button" class="btn-action-delete-large" onclick="showDeleteModal('@Model.Id', '@Model.InvoiceNumber')">
+            <button type="button" class="btn-action-delete-large justify-content-center" onclick="showDeleteModal('@Model.Id', '@Model.InvoiceNumber')">
                 <i class="bi bi-trash"></i> Usuń
             </button>
         }
         else if (Model.Status == InvoiceSystem.Web.Domain.Entities.InvoiceStatus.Confirmed)
         {
-            <form asp-controller="MarkAsPaid" asp-action="Pay" asp-route-id="@Model.Id" method="post" style="display:inline;">
+            <form asp-controller="MarkAsPaid" asp-action="Pay" asp-route-id="@Model.Id" method="post" class="actions-bar-form">
                 @Html.AntiForgeryToken()
-                <button type="submit" class="btn-primary-accent">
+                <button type="submit" class="btn-primary-accent justify-content-center w-100">
                     <i class="bi bi-cash-coin"></i> Oznacz jako opłaconą
                 </button>
             </form>
         }
         
-        <button onclick="printInvoice()" class="btn-secondary-outline">
+        <button onclick="printInvoice()" class="btn-secondary-outline justify-content-center">
             <i class="bi bi-printer"></i> Drukuj
         </button>
-        <a href="/invoices" class="btn-primary-accent">
+        <a href="/invoices" class="btn-primary-accent justify-content-center">
             <i class="bi bi-arrow-left"></i> Powrót
         </a>
     </div>
 
-    <div class="invoice-document shadow-lg" id="invoiceDoc">
-        <div class="invoice-content-wrap">
-            <!-- Header -->
-            <div class="d-flex justify-content-between mb-5">
-                <div>
-                    <h2 class="invoice-logo">Invoice<span>System</span></h2>
-                    <p class="text-muted small">System Zarządzania Fakturami</p>
+    <!-- Zoom Hint Banner for Mobile -->
+    <div class="zoom-banner no-print d-md-none text-center mb-3">
+        <i class="bi bi-zoom-in me-1"></i> Dotknij faktury, aby ją powiększyć / zmniejszyć
+    </div>
+
+    <div class="invoice-miniature-wrapper no-print-wrapper" id="invoiceWrapper">
+        <div class="invoice-document shadow-lg" id="invoiceDoc">
+            <div class="invoice-content-wrap">
+                <!-- Header -->
+                <div class="d-flex justify-content-between mb-5">
+                    <div>
+                        <h2 class="invoice-logo">Invoice<span>System</span></h2>
+                        <p class="text-muted small">System Zarządzania Fakturami</p>
+                    </div>
+                    <div class="text-end">
+                        <h1 class="h3 mb-0">FAKTURA</h1>
+                        <p class="fw-bold d-flex align-items-center justify-content-end gap-2">
+                            Nr: @Model.InvoiceNumber
+                            @if (Model.Status == InvoiceSystem.Web.Domain.Entities.InvoiceStatus.Draft)
+                            {
+                                <span class="badge-status badge-status--draft">Szkic</span>
+                            }
+                            else if (Model.Status == InvoiceSystem.Web.Domain.Entities.InvoiceStatus.Confirmed)
+                            {
+                                <span class="badge-status badge-status--overdue">Zatwierdzona</span>
+                            }
+                            else if (Model.Status == InvoiceSystem.Web.Domain.Entities.InvoiceStatus.Paid)
+                            {
+                                <span class="badge-status badge-status--confirmed">Opłacona</span>
+                            }
+                        </p>
+                        <p class="small text-muted">Data wystawienia: @Model.Date.ToShortDateString()</p>
+                    </div>
                 </div>
-                <div class="text-end">
-                    <h1 class="h3 mb-0">FAKTURA</h1>
-                    <p class="fw-bold d-flex align-items-center justify-content-end gap-2">
-                        Nr: @Model.InvoiceNumber
-                        @if (Model.Status == InvoiceSystem.Web.Domain.Entities.InvoiceStatus.Draft)
-                        {
-                            <span class="badge-status badge-status--draft">Szkic</span>
-                        }
-                        else if (Model.Status == InvoiceSystem.Web.Domain.Entities.InvoiceStatus.Confirmed)
-                        {
-                            <span class="badge-status badge-status--overdue">Zatwierdzona</span>
-                        }
-                        else if (Model.Status == InvoiceSystem.Web.Domain.Entities.InvoiceStatus.Paid)
-                        {
-                            <span class="badge-status badge-status--confirmed">Opłacona</span>
-                        }
-                    </p>
-                    <p class="small text-muted">Data wystawienia: @Model.Date.ToShortDateString()</p>
-                </div>
-            </div>
 
             <hr class="my-4" />
 
             <!-- Contractor Info -->
-            <div class="row mb-4 gap-3 gap-sm-0">
-                <div class="col-sm-6">
+            <div class="row mb-4">
+                <div class="col-6">
                     <label class="text-muted small text-uppercase fw-bold d-block mb-2">Sprzedawca</label>
                     <strong>InvoiceSystem Enterprise</strong><br />
                     ul. Technologiczna 12<br />
                     80-001 Gdańsk<br />
                     NIP: 1234567890
                 </div>
-                <div class="col-sm-6 text-sm-end">
+                <div class="col-6 text-end">
                     <label class="text-muted small text-uppercase fw-bold d-block mb-2">Nabywca</label>
                     <strong>@Model.Contractor.Name</strong><br />
                     @Model.Contractor.Address<br />
@@ -116,7 +122,7 @@
 
             <!-- Summary -->
             <div class="row justify-content-end">
-                <div class="col-12 col-sm-6 col-md-5">
+                <div class="col-6">
                     <div class="d-flex justify-content-between py-2 border-bottom">
                         <span class="text-muted">Suma netto:</span>
                         <strong>@Model.TotalAmount.ToString("N2") PLN</strong>
@@ -134,21 +140,61 @@
         </div>
     </div>
 </div>
+</div>
 
 @await Html.PartialAsync("Components/_DeleteModal")
 
 <style>
+    .invoice-actions-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 1.5rem;
+    }
+    
+    .invoice-actions-bar a,
+    .invoice-actions-bar button,
+    .invoice-actions-bar .actions-bar-form {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .invoice-actions-bar .actions-bar-form {
+        margin: 0;
+        padding: 0;
+        border: none;
+    }
+
+    .zoom-banner {
+        font-size: 0.8rem;
+        color: var(--accent);
+        background-color: var(--accent-soft);
+        padding: 8px 12px;
+        border-radius: 8px;
+        border: 1px dashed rgba(99, 102, 241, 0.25);
+    }
+
+    /* Wrapper that clips the miniature on mobile */
+    .invoice-miniature-wrapper {
+        width: 100%;
+        overflow: hidden;
+    }
+
     .invoice-document {
         background: white !important;
         color: #1a1a1a !important;
-        padding: 1.5rem;
+        padding: 4rem;
         border-radius: 8px;
-        max-width: 900px;
+        width: 800px;
+        max-width: 800px;
         margin: 1rem auto;
         font-family: 'Inter', sans-serif;
         display: flex;
         flex-direction: column;
-        min-height: auto;
+        min-height: 1130px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15) !important;
+        transform-origin: top left;
         
         /* Reset Bootstrap 5 table variables locally for dark mode overrides */
         --bs-table-bg: transparent !important;
@@ -160,11 +206,34 @@
         --bs-table-hover-bg: transparent !important;
     }
     
+    @@media (max-width: 767px) {
+        .invoice-actions-bar {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .invoice-actions-bar a,
+        .invoice-actions-bar button,
+        .invoice-actions-bar .actions-bar-form {
+            flex: 1 1 calc(50% - 4px);
+            min-width: calc(50% - 4px);
+            width: auto !important;
+        }
+        .invoice-actions-bar .actions-bar-form button {
+            width: 100% !important;
+        }
+
+        /* Po kliknięciu - pełny rozmiar z przewijaniem */
+        .invoice-miniature-wrapper.zoomed {
+            overflow-x: auto;
+        }
+    }
+    
     @@media (min-width: 768px) {
         .invoice-document {
-            padding: 4rem;
             margin: 2rem auto;
-            min-height: 297mm; /* Wymuszamy A4 dla podglądu na desktopie */
+            min-height: 297mm;
         }
     }
     
@@ -195,16 +264,6 @@
         background: rgba(239, 68, 68, 0.05);
         color: #ef4444;
         border: 1px solid rgba(239, 68, 68, 0.2);
-        padding: 0.5rem 1.25rem;
-        border-radius: 8px;
-        font-weight: 600;
-        font-size: 0.875rem;
-        transition: all 0.2s;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        cursor: pointer;
-        text-decoration: none !important;
     }
     .btn-action-delete-large:hover { background: #ef4444; color: white; transform: translateY(-1px); }
 
@@ -223,8 +282,17 @@
             overflow: hidden !important; /* Usuwa suwaki na wydruku */
         }
 
-        .no-print, .app-topbar, .app-sidebar, .page-header, .page-header-actions, .modal-backdrop {
+        .no-print, .no-print-wrapper, .zoom-banner, .app-topbar, .app-sidebar, .page-header, .page-header-actions, .modal-backdrop {
             display: none !important;
+        }
+
+        .invoice-miniature-wrapper {
+            overflow: visible !important;
+            width: 100% !important;
+        }
+        .invoice-miniature-wrapper .invoice-document {
+            transform: none !important;
+            margin-bottom: 0 !important;
         }
 
         .app-wrapper, .app-content, .content-body, .page-body {
@@ -275,31 +343,66 @@
     <script>
         function printInvoice() {
             const doc = document.getElementById('invoiceDoc');
-            
-            // 1. Reset wysokości
             doc.style.minHeight = 'auto';
-            
-            // 2. Obliczanie wysokości roboczej A4 (297mm - 30mm marginesów = 267mm)
-            // Dodajemy 3mm bufora bezpieczeństwa (264mm), żeby uniknąć pustych stron
-            const safetyBufferMm = 264; 
+            const safetyBufferMm = 264;
             const pxToMm = 0.2645833333;
-            
-            // 3. Pobranie aktualnej wysokości kontenera
             const currentHeightMm = doc.scrollHeight * pxToMm;
-            
-            // 4. Obliczanie ile stron potrzebujemy
             const pagesCount = Math.ceil(currentHeightMm / safetyBufferMm);
-            
-            // 5. Ustawienie wysokości kontenera
             doc.style.minHeight = (pagesCount * safetyBufferMm) + 'mm';
-
-            // 6. Druk
             document.body.classList.add('is-printing');
             setTimeout(() => {
                 window.print();
                 document.body.classList.remove('is-printing');
-                doc.style.minHeight = '297mm'; // Przywrócenie dla UI
+                doc.style.minHeight = '297mm';
             }, 300);
         }
+
+        // ---- Miniatura: dynamiczne skalowanie faktury A4 do ekranu ----
+        const wrapper = document.getElementById('invoiceWrapper');
+        const invoiceDoc = document.getElementById('invoiceDoc');
+        const INVOICE_WIDTH = 800;
+        const SIDE_PADDING = 16;
+
+        function scaleInvoice() {
+            if (!wrapper || !invoiceDoc) return;
+
+            // Na desktopie (>=768px) nie skalujemy
+            if (window.innerWidth >= 768) {
+                invoiceDoc.style.transform = '';
+                wrapper.style.height = '';
+                wrapper.style.cursor = '';
+                return;
+            }
+
+            // Jeśli w trybie zoom - pełny rozmiar 1:1
+            if (wrapper.classList.contains('zoomed')) {
+                invoiceDoc.style.transform = 'scale(1)';
+                wrapper.style.height = '';
+                wrapper.style.cursor = 'zoom-out';
+                return;
+            }
+
+            // Oblicz skalę: dostępna szerokość / szerokość faktury
+            var availableWidth = wrapper.clientWidth - SIDE_PADDING;
+            var scale = Math.min(availableWidth / INVOICE_WIDTH, 1);
+            invoiceDoc.style.transform = 'scale(' + scale + ')';
+
+            // Ustaw wysokość wrappera = skalowana wysokość faktury
+            wrapper.style.height = (invoiceDoc.scrollHeight * scale) + 'px';
+            wrapper.style.cursor = 'zoom-in';
+        }
+
+        // Zoom toggle po kliknięciu
+        if (wrapper) {
+            wrapper.addEventListener('click', function() {
+                if (window.innerWidth >= 768) return;
+                this.classList.toggle('zoomed');
+                scaleInvoice();
+            });
+        }
+
+        // Skaluj na starcie i przy resize
+        scaleInvoice();
+        window.addEventListener('resize', scaleInvoice);
     </script>
 }

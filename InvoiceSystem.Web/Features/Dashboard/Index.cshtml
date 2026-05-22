@@ -5,20 +5,130 @@
     ViewData["Title"] = "Panel Główny";
 }
 
-<div class="page-body">
-    <!-- Statystyki finansowe -->
-    <div class="row g-4 mb-4">
+<style>
+    .dashboard-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 8px 12px;
+    }
+    
+    .data-card {
+        background-color: var(--bg-secondary);
+        border: 1px solid var(--border-strong);
+        border-radius: 12px;
+        transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s;
+    }
+    
+    .data-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    }
+    
+    .bg-accent-soft { background-color: rgba(99, 102, 241, 0.1); color: var(--accent); }
+    .bg-success-soft { background-color: rgba(16, 185, 129, 0.1); color: #10b981; }
+    .bg-warning-soft { background-color: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+    .bg-gray-soft { background-color: rgba(156, 163, 175, 0.1); color: #9ca3af; }
+    
+    .shortcut-link {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 14px;
+        border-radius: 8px;
+        color: var(--text-primary);
+        text-decoration: none;
+        transition: background-color 0.15s, color 0.15s;
+    }
+    
+    .shortcut-link:hover {
+        background-color: var(--bg-tertiary);
+        color: var(--accent);
+    }
+    
+    .metric-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 8px;
+    }
+    
+    .invoice-activity-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 16px;
+        border-radius: 8px;
+        transition: background-color 0.2s, border-color 0.2s;
+        border: 1px solid transparent;
+    }
+    
+    .invoice-activity-item:hover {
+        background-color: var(--bg-tertiary);
+        border-color: var(--border-strong);
+    }
+    
+    .btn-circle-action {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-secondary);
+        border: 1px solid var(--border-strong);
+        background: transparent;
+        transition: all 0.2s;
+        text-decoration: none;
+    }
+    
+    .btn-circle-action:hover {
+        background-color: var(--accent-soft);
+        color: var(--accent);
+        border-color: var(--accent);
+        transform: translateX(2px);
+    }
+
+    @@media (max-width: 575px) {
+        .invoice-activity-item {
+            padding: 10px 8px;
+        }
+        .invoice-activity-item .rounded-circle {
+            display: none !important;
+        }
+    }
+</style>
+
+<div class="dashboard-container">
+    <!-- Welcome Header -->
+    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center mb-4 gap-3 no-print">
+        <div>
+            <h4 class="fw-bold mb-1" style="color: var(--text-primary); letter-spacing: -0.02em;">Dzień dobry, Admin!</h4>
+            <p class="text-secondary mb-0" style="font-size: 0.85rem;">Oto aktualny podgląd finansowy Twojego przedsiębiorstwa.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="/invoices/create" class="btn-primary-accent d-inline-flex align-items-center gap-2" style="font-size: 0.85rem;">
+                <i class="bi bi-plus-lg"></i> Nowa faktura
+            </a>
+            <a href="/invoices/import" class="btn-secondary-outline d-inline-flex align-items-center gap-2" style="font-size: 0.85rem;">
+                <i class="bi bi-magic"></i> Import AI OCR
+            </a>
+        </div>
+    </div>
+
+    <!-- Statystyki finansowe (Grid) -->
+    <div class="row g-3 mb-4">
         <!-- Suma Łączna -->
         <div class="col-xl-3 col-sm-6">
-            <div class="data-card h-100" style="padding: 20px; position: relative; overflow: hidden; border-left: 4px solid var(--accent);">
+            <div class="data-card h-100" style="padding: 16px 20px; border-top: 3px solid var(--accent);">
                 <div class="d-flex justify-content-between align-items-start">
                     <div>
-                        <span class="text-secondary small fw-bold text-uppercase" style="letter-spacing: 0.05em;">Wystawione ogółem</span>
-                        <h2 class="mt-2 mb-1 fw-bold" style="color: var(--text-primary);">@Model.TotalAmount.ToString("N2") PLN</h2>
-                        <span class="badge" style="background-color: var(--bg-tertiary); color: var(--text-secondary);">@Model.TotalCount faktur</span>
+                        <span class="text-secondary small fw-bold text-uppercase" style="letter-spacing: 0.05em; font-size: 0.7rem;">Wystawione ogółem</span>
+                        <div class="mt-1 mb-1 fw-bold" style="color: var(--text-primary); font-size: 1.3rem; line-height: 1.2;">@Model.TotalAmount.ToString("N2") PLN</div>
+                        <span class="badge" style="background-color: var(--bg-tertiary); color: var(--text-secondary); font-size: 0.7rem;">@Model.TotalCount faktur</span>
                     </div>
-                    <div class="p-2 rounded" style="background-color: rgba(99,102,241,0.1); color: var(--accent);">
-                        <i class="bi bi-wallet2 fs-4"></i>
+                    <div class="p-2 rounded bg-accent-soft">
+                        <i class="bi bi-wallet2 fs-5"></i>
                     </div>
                 </div>
             </div>
@@ -26,15 +136,15 @@
 
         <!-- Opłacone -->
         <div class="col-xl-3 col-sm-6">
-            <div class="data-card h-100" style="padding: 20px; position: relative; overflow: hidden; border-left: 4px solid #10b981;">
+            <div class="data-card h-100" style="padding: 16px 20px; border-top: 3px solid #10b981;">
                 <div class="d-flex justify-content-between align-items-start">
                     <div>
-                        <span class="text-secondary small fw-bold text-uppercase" style="letter-spacing: 0.05em;">Opłacone</span>
-                        <h2 class="mt-2 mb-1 fw-bold" style="color: #10b981;">@Model.PaidAmount.ToString("N2") PLN</h2>
-                        <span class="badge" style="background-color: rgba(16,185,129,0.1); color: #10b981;">@Model.PaidCount opłaconych</span>
+                        <span class="text-secondary small fw-bold text-uppercase" style="letter-spacing: 0.05em; font-size: 0.7rem;">Opłacone</span>
+                        <div class="mt-1 mb-1 fw-bold" style="color: #10b981; font-size: 1.3rem; line-height: 1.2;">@Model.PaidAmount.ToString("N2") PLN</div>
+                        <span class="badge bg-success-soft" style="font-size: 0.7rem;">@Model.PaidCount opłaconych</span>
                     </div>
-                    <div class="p-2 rounded" style="background-color: rgba(16,185,129,0.1); color: #10b981;">
-                        <i class="bi bi-check-circle fs-4"></i>
+                    <div class="p-2 rounded bg-success-soft">
+                        <i class="bi bi-check-circle fs-5"></i>
                     </div>
                 </div>
             </div>
@@ -42,15 +152,15 @@
 
         <!-- Potwierdzone (Oczekujące) -->
         <div class="col-xl-3 col-sm-6">
-            <div class="data-card h-100" style="padding: 20px; position: relative; overflow: hidden; border-left: 4px solid #f59e0b;">
+            <div class="data-card h-100" style="padding: 16px 20px; border-top: 3px solid #f59e0b;">
                 <div class="d-flex justify-content-between align-items-start">
                     <div>
-                        <span class="text-secondary small fw-bold text-uppercase" style="letter-spacing: 0.05em;">Oczekujące</span>
-                        <h2 class="mt-2 mb-1 fw-bold" style="color: #f59e0b;">@Model.ConfirmedAmount.ToString("N2") PLN</h2>
-                        <span class="badge" style="background-color: rgba(245,158,11,0.1); color: #f59e0b;">@Model.ConfirmedCount zatwierdzonych</span>
+                        <span class="text-secondary small fw-bold text-uppercase" style="letter-spacing: 0.05em; font-size: 0.7rem;">Oczekujące</span>
+                        <div class="mt-1 mb-1 fw-bold" style="color: #f59e0b; font-size: 1.3rem; line-height: 1.2;">@Model.ConfirmedAmount.ToString("N2") PLN</div>
+                        <span class="badge bg-warning-soft" style="font-size: 0.7rem;">@Model.ConfirmedCount zatwierdzonych</span>
                     </div>
-                    <div class="p-2 rounded" style="background-color: rgba(245,158,11,0.1); color: #f59e0b;">
-                        <i class="bi bi-hourglass-split fs-4"></i>
+                    <div class="p-2 rounded bg-warning-soft">
+                        <i class="bi bi-hourglass-split fs-5"></i>
                     </div>
                 </div>
             </div>
@@ -58,118 +168,154 @@
 
         <!-- Szkice -->
         <div class="col-xl-3 col-sm-6">
-            <div class="data-card h-100" style="padding: 20px; position: relative; overflow: hidden; border-left: 4px solid #9ca3af;">
+            <div class="data-card h-100" style="padding: 16px 20px; border-top: 3px solid #9ca3af;">
                 <div class="d-flex justify-content-between align-items-start">
                     <div>
-                        <span class="text-secondary small fw-bold text-uppercase" style="letter-spacing: 0.05em;">Szkice (Drafts)</span>
-                        <h2 class="mt-2 mb-1 fw-bold" style="color: #9ca3af;">@Model.DraftAmount.ToString("N2") PLN</h2>
-                        <span class="badge" style="background-color: rgba(156,163,175,0.1); color: #9ca3af;">@Model.DraftCount roboczych</span>
+                        <span class="text-secondary small fw-bold text-uppercase" style="letter-spacing: 0.05em; font-size: 0.7rem;">Szkice (Drafts)</span>
+                        <div class="mt-1 mb-1 fw-bold" style="color: #9ca3af; font-size: 1.3rem; line-height: 1.2;">@Model.DraftAmount.ToString("N2") PLN</div>
+                        <span class="badge bg-gray-soft" style="font-size: 0.7rem;">@Model.DraftCount roboczych</span>
                     </div>
-                    <div class="p-2 rounded" style="background-color: rgba(156,163,175,0.1); color: #9ca3af;">
-                        <i class="bi bi-file-earmark-code fs-4"></i>
+                    <div class="p-2 rounded bg-gray-soft">
+                        <i class="bi bi-file-earmark-code fs-5"></i>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Pasek wskaźnika spłat i Szybkie akcje -->
-    <div class="row g-4 mb-4">
-        <!-- Spłacalność -->
+    <!-- Główna zawartość: Ostatnie operacje (lewa) + Koło spłat i Skróty (prawa) -->
+    <div class="row g-4">
+        <!-- Ostatnie faktury (Lista Działań) -->
         <div class="col-lg-8">
-            <div class="data-card" style="padding: 24px;">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h5 class="fw-bold mb-0" style="color: var(--text-primary);">Współczynnik ściągalności należności</h5>
-                    <span class="fs-5 fw-bold" style="color: var(--accent);">@Model.PaidRatio%</span>
+            <div class="data-card h-100" style="padding: 20px;">
+                <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom" style="border-bottom-color: var(--border-strong) !important;">
+                    <h6 class="fw-bold mb-0" style="color: var(--text-primary); font-size: 0.95rem;">Ostatnie faktury</h6>
+                    <a href="/invoices" class="btn-secondary-outline" style="font-size: 0.75rem; padding: 4px 10px;">Pokaż wszystkie</a>
                 </div>
-                <div class="progress mb-2" style="height: 12px; background-color: var(--bg-tertiary); border-radius: 6px; overflow: hidden;">
-                    <div class="progress-bar" role="progressbar" style="width: @Model.PaidRatio%; background-color: var(--accent); transition: width 0.8s ease;" aria-valuenow="@Model.PaidRatio" aria-valuemin="0" aria-valuemax="100"></div>
-                </div>
-                <div class="text-secondary small">
-                    Wskaźnik wyliczany jako stosunek kwot faktur oznaczonych jako <strong class="text-success">Opłacone</strong> do łącznej wartości wszystkich wystawionych dokumentów w bazie.
-                </div>
-            </div>
-        </div>
 
-        <!-- Skróty / Akcje -->
-        <div class="col-lg-4">
-            <div class="data-card h-100" style="padding: 24px;">
-                <h5 class="fw-bold mb-3" style="color: var(--text-primary);">Szybkie operacje</h5>
                 <div class="d-flex flex-column gap-2">
-                    <a href="/invoices/create" class="btn-primary-accent justify-content-center py-2">
-                        <i class="bi bi-plus-lg me-2"></i> Wystaw fakturę
-                    </a>
-                    <a href="/invoices/import" class="btn-secondary-outline justify-content-center py-2" style="border-color: var(--border-strong) !important;">
-                        <i class="bi bi-magic me-2"></i> Importuj przez AI OCR
-                    </a>
+                    @if (Model.RecentInvoices.Count == 0)
+                    {
+                        <div class="text-center text-muted py-4" style="font-size: 0.85rem;">
+                            Brak faktur w bazie danych.
+                        </div>
+                    }
+                    else
+                    {
+                        foreach (var invoice in Model.RecentInvoices)
+                        {
+                            string statusBg = "bg-gray-soft";
+                            string statusIcon = "bi bi-file-earmark-text text-secondary";
+                            string statusLabel = "Szkic";
+                            
+                            if (invoice.Status == InvoiceStatus.Paid)
+                            {
+                                statusBg = "bg-success-soft";
+                                statusIcon = "bi bi-check2 text-success";
+                                statusLabel = "Opłacona";
+                            }
+                            else if (invoice.Status == InvoiceStatus.Confirmed)
+                            {
+                                statusBg = "bg-warning-soft";
+                                statusIcon = "bi bi-clock text-warning";
+                                statusLabel = "Zatwierdzona";
+                            }
+                            
+                            <div class="invoice-activity-item">
+                                <div class="d-flex align-items-center gap-3">
+                                    <!-- Ikona stanu -->
+                                    <div class="p-2 rounded-circle d-flex align-items-center justify-content-center @statusBg" style="width: 38px; height: 38px; flex-shrink: 0;">
+                                        <i class="@statusIcon" style="font-size: 1.1rem;"></i>
+                                    </div>
+                                    <!-- Kontrahent i dane podstawowe -->
+                                    <div>
+                                        <div class="fw-semibold text-truncate" style="font-size: 0.85rem; color: var(--text-primary); max-width: 250px;">
+                                            @invoice.ContractorName
+                                        </div>
+                                        <div class="text-secondary" style="font-size: 0.75rem;">
+                                            @invoice.InvoiceNumber &bull; @invoice.Date.ToString("dd.MM.yyyy")
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="d-flex align-items-center gap-3">
+                                    <!-- Suma i Badge statusu -->
+                                    <div class="text-end">
+                                        <div class="fw-bold" style="font-size: 0.85rem; color: var(--text-primary);">
+                                            @invoice.TotalAmount.ToString("N2") PLN
+                                        </div>
+                                        <div class="text-secondary" style="font-size: 0.7rem;">
+                                            @statusLabel
+                                        </div>
+                                    </div>
+                                    <!-- Przycisk przejścia do szczegółów -->
+                                    <a href="/invoices/@invoice.Id" class="btn-circle-action" title="Szczegóły">
+                                        <i class="bi bi-chevron-right"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        }
+                    }
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Ostatnie faktury -->
-    <div class="row">
-        <div class="col-12">
-            <div class="data-card p-0">
-                <div class="data-card__header d-flex justify-content-between align-items-center p-3">
-                    <h5 class="fw-bold mb-0" style="color: var(--text-primary);">Ostatnie faktury</h5>
-                    <a href="/invoices" class="btn btn-sm btn-outline-secondary" style="font-size: 0.8rem; border-color: var(--border-strong);">Pokaż wszystkie</a>
+        <!-- Koło spłat i Szybkie akcje (Prawa kolumna) -->
+        <div class="col-lg-4 d-flex flex-column gap-3">
+            <!-- Współczynnik spłacalności -->
+            <div class="data-card" style="padding: 20px;">
+                <h6 class="fw-bold mb-3" style="color: var(--text-primary); font-size: 0.95rem;">Ściągalność należności</h6>
+                
+                <div class="d-flex align-items-center gap-3 mb-4">
+                    <div class="position-relative" style="width: 76px; height: 76px; flex-shrink: 0;">
+                        <svg viewBox="0 0 36 36" style="width: 100%; height: 100%; transform: rotate(-90deg);">
+                            <!-- Circle track -->
+                            <circle cx="18" cy="18" r="15.915" fill="none" stroke="var(--border)" stroke-width="2.5" />
+                            <!-- Progress circle -->
+                            <circle cx="18" cy="18" r="15.915" fill="none" stroke="var(--accent)" stroke-width="2.8" stroke-dasharray="@Model.PaidRatio 100" stroke-linecap="round" style="transition: stroke-dasharray 0.8s ease;" />
+                        </svg>
+                        <div class="position-absolute top-50 start-50 translate-middle fw-bold" style="font-size: 0.9rem; color: var(--text-primary);">
+                            @Model.PaidRatio%
+                        </div>
+                    </div>
+                    <div>
+                        <div class="fw-bold" style="font-size: 0.85rem; color: var(--text-primary);">Stopa spłat</div>
+                        <div class="text-secondary" style="font-size: 0.75rem; line-height: 1.3;">Procentowa wartość faktur opłaconych w stosunku do sumy wystawionej.</div>
+                    </div>
                 </div>
 
-                <div class="table-responsive">
-                    <table class="dx-datagrid-table" style="width: 100%; border-collapse: collapse;">
-                        <thead class="dx-datagrid-headers">
-                            <tr class="dx-header-row">
-                                <th style="padding: 12px 16px;">Numer</th>
-                                <th style="padding: 12px 16px;">Kontrahent</th>
-                                <th style="padding: 12px 16px;">Data</th>
-                                <th style="padding: 12px 16px;">Status</th>
-                                <th style="padding: 12px 16px; text-align: right;">Suma</th>
-                                <th style="padding: 12px 16px; width: 80px; text-align: center;">Akcje</th>
-                            </tr>
-                        </thead>
-                        <tbody class="dx-datagrid-rows">
-                            @if (Model.RecentInvoices.Count == 0)
-                            {
-                                <tr>
-                                    <td colspan="6" class="text-center text-muted" style="padding: 30px;">
-                                        Brak faktur w bazie danych.
-                                    </td>
-                                </tr>
-                            }
-                            else
-                            {
-                                foreach (var invoice in Model.RecentInvoices)
-                                {
-                                    <tr class="dx-row">
-                                        <td style="padding: 12px 16px; font-weight: 600; color: var(--text-primary);">@invoice.InvoiceNumber</td>
-                                        <td style="padding: 12px 16px; color: var(--text-secondary);">@invoice.ContractorName</td>
-                                        <td style="padding: 12px 16px; color: var(--text-secondary);">@invoice.Date.ToShortDateString()</td>
-                                        <td style="padding: 12px 16px;">
-                                            @if (invoice.Status == InvoiceStatus.Draft)
-                                            {
-                                                <span class="badge-status badge-status--draft">Szkic</span>
-                                            }
-                                            else if (invoice.Status == InvoiceStatus.Confirmed)
-                                            {
-                                                <span class="badge-status badge-status--overdue">Zatwierdzona</span>
-                                            }
-                                            else if (invoice.Status == InvoiceStatus.Paid)
-                                            {
-                                                <span class="badge-status badge-status--confirmed">Opłacona</span>
-                                            }
-                                        </td>
-                                        <td style="padding: 12px 16px; text-align: right; font-weight: 700; color: var(--text-primary);">@invoice.TotalAmount.ToString("N2") PLN</td>
-                                        <td style="padding: 12px 16px; text-align: center;">
-                                            <a href="/invoices/@invoice.Id" class="btn-action btn-action-view" title="Szczegóły">
-                                                <i class="bi bi-eye"></i>
-                                            </a>
-                                        </td>
-                                    </tr>
-                                }
-                            }
-                        </tbody>
-                    </table>
+                <div class="d-flex flex-column gap-2" style="font-size: 0.8rem; border-top: 1px solid var(--border); padding-top: 14px;">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="text-secondary"><span class="metric-dot" style="background-color: #10b981;"></span>Opłacone</span>
+                        <span class="fw-semibold" style="color: var(--text-primary);">@Model.PaidAmount.ToString("N2") PLN</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="text-secondary"><span class="metric-dot" style="background-color: #f59e0b;"></span>Oczekujące</span>
+                        <span class="fw-semibold" style="color: var(--text-primary);">@Model.ConfirmedAmount.ToString("N2") PLN</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="text-secondary"><span class="metric-dot" style="background-color: #9ca3af;"></span>Robocze</span>
+                        <span class="fw-semibold" style="color: var(--text-primary);">@Model.DraftAmount.ToString("N2") PLN</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Szybkie skróty -->
+            <div class="data-card" style="padding: 20px;">
+                <h6 class="fw-bold mb-3" style="color: var(--text-primary); font-size: 0.95rem;">Skróty systemowe</h6>
+                <div class="d-flex flex-column gap-1">
+                    <a href="/invoices" class="shortcut-link">
+                        <i class="bi bi-file-earmark-text text-secondary"></i>
+                        <div style="font-size: 0.85rem;">Przejdź do listy faktur</div>
+                    </a>
+                    <a href="/contractors" class="shortcut-link">
+                        <i class="bi bi-building text-secondary"></i>
+                        <div style="font-size: 0.85rem;">Lista kontrahentów (firm)</div>
+                    </a>
+                    <a href="/invoices/generator" class="shortcut-link">
+                        <i class="bi bi-magic text-secondary"></i>
+                        <div style="font-size: 0.85rem;">Generator danych testowych</div>
+                    </a>
                 </div>
             </div>
         </div>
