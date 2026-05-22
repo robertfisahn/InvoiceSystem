@@ -27,6 +27,18 @@ builder.Services.AddControllersWithViews(options =>
         .RequireAuthenticatedUser()
         .Build();
     options.Filters.Add(new AuthorizeFilter(policy));
+
+    // Spolszczenie komunikatów błędu bindowania modeli
+    options.ModelBindingMessageProvider.SetValueMustNotBeNullAccessor(
+        _ => "Pole jest wymagane.");
+    options.ModelBindingMessageProvider.SetValueIsInvalidAccessor(
+        val => $"Wartość '{val}' jest nieprawidłowa.");
+    options.ModelBindingMessageProvider.SetValueMustBeANumberAccessor(
+        name => $"Pole {name} musi być liczbą.");
+    options.ModelBindingMessageProvider.SetAttemptedValueIsInvalidAccessor(
+        (val, name) => $"Wartość '{val}' jest nieprawidłowa.");
+    options.ModelBindingMessageProvider.SetMissingKeyOrValueAccessor(
+        () => "Wartość jest wymagana.");
 });
 
 // Identity
@@ -116,7 +128,7 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapGet("/", () => Results.Redirect("/invoices"));
+app.MapGet("/", () => Results.Redirect("/dashboard"));
 
 app.MapControllerRoute(
     name: "default",

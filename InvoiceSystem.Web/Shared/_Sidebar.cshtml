@@ -1,10 +1,10 @@
 <nav class="app-sidebar" id="appSidebar">
     <ul class="sidebar-menu">
         <li class="menu-group-label">Główne</li>
-        <li class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" ? "active" : "")">
+        <li class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Dashboard" ? "active" : "")">
             <a href="/">
                 <i class="bi bi-grid-1x2"></i>
-                <span class="menu-label">Dashboard</span>
+                <span class="menu-label">Panel główny</span>
             </a>
         </li>
 
