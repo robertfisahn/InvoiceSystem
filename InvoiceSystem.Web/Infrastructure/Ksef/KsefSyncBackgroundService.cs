@@ -1,0 +1,156 @@
+using System;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using InvoiceSystem.Web.Domain.Entities;
+using InvoiceSystem.Web.Infrastructure.Database;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+
+namespace InvoiceSystem.Web.Infrastructure.Ksef;
+
+public sealed class KsefSyncBackgroundService : BackgroundService
+{
+    private readonly IServiceProvider _serviceProvider;
+    private readonly ILogger<KsefSyncBackgroundService> _logger;
+
+    public KsefSyncBackgroundService(IServiceProvider serviceProvider, ILogger<KsefSyncBackgroundService> logger)
+    {
+        _serviceProvider = serviceProvider;
+        _logger = logger;
+    }
+
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        _logger.LogInformation("KSeF Sync Background Service started.");
+
+        while (!stoppingToken.IsCancellationRequested)
+        {
+            try
+            {
+                await SyncAllActiveConfigsAsync(stoppingToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred during KSeF synchronization.");
+            }
+
+            // Sync every 5 minutes in development for highly responsive behavior
+            await Task.Delay(TimeSpan.FromMinutes(5), stoppingToken);
+        }
+    }
+
+    private async Task SyncAllActiveConfigsAsync(CancellationToken cancellationToken)
+    {
+        using var scope = _serviceProvider.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var ksefClient = scope.ServiceProvider.GetRequiredService<IKsefClient>();
+
+        var settings = await dbContext.KsefSettings
+            .Where(s => s.IsEnabled)
+            .ToListAsync(cancellationToken);
+
+        foreach (var setting in settings)
+        {
+            if (string.IsNullOrWhiteSpace(setting.Nip) || string.IsNullOrWhiteSpace(setting.ApiKey))
+            {
+                continue;
+            }
+
+            _logger.LogInformation("Starting KSeF synchronization for NIP: {Nip}", setting.Nip);
+
+            try
+            {
+                // 1. Authorisation Challenge
+                var challenge = await ksefClient.AuthorisationChallengeAsync(setting.Nip, cancellationToken);
+
+                // 2. Init session
+                var sessionToken = await ksefClient.InitSessionAsync(
+                    setting.Nip,
+                    setting.ApiKey,
+                    challenge.Challenge,
+                    challenge.Timestamp,
+                    cancellationToken
+                );
+
+                // Update setting session details (session token lasts up to 24h)
+                setting.ActiveSessionToken = sessionToken;
+                setting.SessionExpiresAt = DateTime.UtcNow.AddHours(23); // expire early
+
+                // 3. Sync invoices (default from last sync date or 30 days ago)
+                var syncFrom = setting.LastSyncDate ?? DateTime.UtcNow.AddDays(-30);
+                var incomingInvoices = await ksefClient.SyncInvoicesAsync(sessionToken, syncFrom, cancellationToken);
+
+                int newCount = 0;
+                foreach (var dto in incomingInvoices)
+                {
+                    // Avoid importing duplicates
+                    var exists = await dbContext.KsefIncomingInvoices
+                        .AnyAsync(i => i.KsefNumber == dto.KsefNumber, cancellationToken);
+
+                    if (!exists)
+                    {
+                        var newIncoming = new KsefIncomingInvoice
+                        {
+                            KsefNumber = dto.KsefNumber,
+                            SellerName = dto.SellerName,
+                            SellerNip = dto.SellerNip,
+                            IssueDate = dto.IssueDate,
+                            TotalAmount = dto.TotalAmount,
+                            RawXml = dto.RawXml,
+                            ImportStatus = KsefImportStatus.Pending
+                        };
+                        dbContext.KsefIncomingInvoices.Add(newIncoming);
+                        newCount++;
+                    }
+                }
+
+                // Sync/Poll outgoing pending invoices
+                var pendingInvoices = await dbContext.Invoices
+                    .Where(i => i.KsefTransactionId != null && i.KsefNumber == null)
+                    .ToListAsync(cancellationToken);
+
+                foreach (var inv in pendingInvoices)
+                {
+                    if (string.IsNullOrEmpty(inv.KsefTransactionId)) continue;
+                    try
+                    {
+                        var statusResult = await ksefClient.GetInvoiceStatusAsync(sessionToken, inv.KsefTransactionId, cancellationToken);
+                        if (statusResult.Status == "Processed" && !string.IsNullOrEmpty(statusResult.KsefNumber))
+                        {
+                            inv.KsefNumber = statusResult.KsefNumber;
+                            var upoXml = await ksefClient.DownloadUpoAsync(sessionToken, statusResult.KsefNumber, cancellationToken);
+                            inv.UpoXml = upoXml;
+                            _logger.LogInformation("Outgoing invoice {InvoiceNumber} processed by KSeF. Assigned number: {KsefNumber}", inv.InvoiceNumber, statusResult.KsefNumber);
+                        }
+                        else if (statusResult.Status == "Failed")
+                        {
+                            _logger.LogWarning("Outgoing invoice {InvoiceNumber} rejected by KSeF: {Msg}", inv.InvoiceNumber, statusResult.ErrorMessage);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Failed to poll status for transaction {TxId} of invoice {InvoiceNumber}", inv.KsefTransactionId, inv.InvoiceNumber);
+                    }
+                }
+
+                // 4. Close session
+                if (!sessionToken.StartsWith("mock-session"))
+                {
+                    await ksefClient.CloseSessionAsync(sessionToken, cancellationToken);
+                }
+
+                setting.LastSyncDate = DateTime.UtcNow;
+                await dbContext.SaveChangesAsync(cancellationToken);
+
+                _logger.LogInformation("KSeF sync complete for NIP: {Nip}. Added {Count} new invoices.", setting.Nip, newCount);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to synchronize KSeF for NIP: {Nip}", setting.Nip);
+            }
+        }
+    }
+}

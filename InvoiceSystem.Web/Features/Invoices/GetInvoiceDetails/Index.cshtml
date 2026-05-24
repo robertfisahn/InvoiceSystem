@@ -20,14 +20,40 @@
                 <i class="bi bi-trash"></i> Usuń
             </button>
         }
-        else if (Model.Status == InvoiceSystem.Web.Domain.Entities.InvoiceStatus.Confirmed)
+        else
         {
-            <form asp-controller="MarkAsPaid" asp-action="Pay" asp-route-id="@Model.Id" method="post" class="actions-bar-form">
-                @Html.AntiForgeryToken()
-                <button type="submit" class="btn-primary-accent justify-content-center w-100">
-                    <i class="bi bi-cash-coin"></i> Oznacz jako opłaconą
-                </button>
-            </form>
+            @if (Model.Status == InvoiceSystem.Web.Domain.Entities.InvoiceStatus.Confirmed)
+            {
+                <form asp-controller="MarkAsPaid" asp-action="Pay" asp-route-id="@Model.Id" method="post" class="actions-bar-form">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn-primary-accent justify-content-center w-100">
+                        <i class="bi bi-cash-coin"></i> Oznacz jako opłaconą
+                    </button>
+                </form>
+            }
+
+            @if (string.IsNullOrEmpty(Model.KsefNumber))
+            {
+                <form action="/invoices/@Model.Id/send-to-ksef" method="post" class="actions-bar-form">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-outline-primary justify-content-center" style="display: inline-flex; align-items: center; gap: 0.5rem; height: var(--input-height);">
+                        <i class="bi bi-cloud-upload"></i> Wyślij do KSeF
+                    </button>
+                </form>
+            }
+            else
+            {
+                <span class="badge bg-success-soft text-success px-3 py-2 d-inline-flex align-items-center gap-1 fw-bold" style="font-size: 0.85rem; border: 1px solid rgba(34, 197, 94, 0.2);">
+                    <i class="bi bi-cloud-check-fill"></i> KSeF: @Model.KsefNumber
+                </span>
+                <a href="/invoices/@Model.Id/ksef-upo" class="btn btn-outline-success justify-content-center" style="display: inline-flex; align-items: center; gap: 0.5rem; height: var(--input-height);">
+                    <i class="bi bi-file-earmark-check"></i> Pobierz UPO
+                </a>
+            }
+            
+            <a href="/invoices/@Model.Id/ksef-xml" class="btn btn-outline-secondary justify-content-center" style="display: inline-flex; align-items: center; gap: 0.5rem; height: var(--input-height);">
+                <i class="bi bi-filetype-xml"></i> Pobierz XML
+            </a>
         }
         
         <button onclick="printInvoice()" class="btn-secondary-outline justify-content-center">
@@ -69,7 +95,19 @@
                                 <span class="badge-status badge-status--confirmed">Opłacona</span>
                             }
                         </p>
-                        <p class="small text-muted">Data wystawienia: @Model.Date.ToShortDateString()</p>
+                        @if (!string.IsNullOrEmpty(Model.KsefNumber))
+                        {
+                            <p class="small text-muted mb-0 text-monospace text-end" style="font-size: 0.75rem;">
+                                Numer KSeF: <span class="fw-bold">@Model.KsefNumber</span>
+                            </p>
+                        }
+                        else if (!string.IsNullOrEmpty(Model.KsefTransactionId))
+                        {
+                            <p class="small text-muted mb-0 text-end" style="font-size: 0.75rem;">
+                                KSeF ID: <span class="fw-bold text-warning">@Model.KsefTransactionId</span> (Wysyłanie...)
+                            </p>
+                        }
+                        <p class="small text-muted mt-1">Data wystawienia: @Model.Date.ToShortDateString()</p>
                     </div>
                 </div>
 
@@ -282,7 +320,7 @@
             overflow: hidden !important; /* Usuwa suwaki na wydruku */
         }
 
-        .no-print, .no-print-wrapper, .zoom-banner, .app-topbar, .app-sidebar, .page-header, .page-header-actions, .modal-backdrop {
+        .no-print, .no-print-wrapper, .zoom-banner, .app-topbar, .app-sidebar, .page-header, .page-header-actions, .modal-backdrop, .custom-modal-backdrop {
             display: none !important;
         }
 

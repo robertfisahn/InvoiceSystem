@@ -12,4 +12,10 @@ public class Invoice
     public Contractor Contractor { get; set; } = null!;
     
     public ICollection<InvoiceItem> Items { get; set; } = new List<InvoiceItem>();
+
+    // KSeF Metadata
+    public string? KsefNumber { get; set; }
+    public string? KsefTransactionId { get; set; }
+    public DateTime? KsefSentAt { get; set; }
+    public string? UpoXml { get; set; }
 }

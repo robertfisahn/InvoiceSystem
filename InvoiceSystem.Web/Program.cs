@@ -1,6 +1,7 @@
 using InvoiceSystem.Web.Domain.Entities;
 using InvoiceSystem.Web.Infrastructure.Database;
 using InvoiceSystem.Web.Infrastructure.Services;
+using InvoiceSystem.Web.Infrastructure.Ksef;
 using InvoiceSystem.Web.Shared.Interfaces;
 using InvoiceSystem.Web.Shared.Models;
 using InvoiceSystem.Web.Shared.Behaviors;
@@ -91,6 +92,8 @@ builder.Services.Configure<InvoiceSystem.Web.Infrastructure.Configuration.AiSett
     builder.Configuration.GetSection(InvoiceSystem.Web.Infrastructure.Configuration.AiSettings.SectionName));
 builder.Services.AddMemoryCache();
 builder.Services.AddHttpClient();
+builder.Services.AddHttpClient<IKsefClient, KsefClient>();
+builder.Services.AddHostedService<KsefSyncBackgroundService>();
 builder.Services.AddScoped<IFileStorageService, FileStorageService>();
 builder.Services.AddScoped<IFileHashService, FileHashService>();
 builder.Services.AddScoped<IDocumentOcrService, DocumentOcrService>();

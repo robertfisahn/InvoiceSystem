@@ -1,0 +1,209 @@
+@model InvoiceSystem.Web.Features.Ksef.Configuration.KsefConfigurationViewModel
+@{
+    ViewData["Title"] = "Konfiguracja KSeF";
+}
+
+<div class="page-body">
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success mb-4">
+            <i class="bi bi-check-circle-fill me-2"></i> @TempData["SuccessMessage"]
+        </div>
+    }
+
+    <form asp-action="Save" method="post" id="configForm">
+        @Html.AntiForgeryToken()
+        
+        <div class="row">
+            <!-- Lewa kolumna: Formularz podstawowy -->
+            <div class="col-lg-5 col-xl-4">
+                <div class="data-card mb-4">
+                    <div class="data-card__header">
+                        <h3 class="data-card__title">
+                            <i class="bi bi-gear-fill me-2 text-primary"></i> Połączenie KSeF
+                        </h3>
+                    </div>
+                    <div class="data-card__body">
+                        <div class="form-group mb-3">
+                            <label class="form-label" for="nipInput">NIP Firmy</label>
+                            <input asp-for="Nip" id="nipInput" class="form-control" placeholder="Np. 1111111111" required />
+                            <span asp-validation-for="Nip" class="text-danger small"></span>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label class="form-label" for="apiKeyInput">Token Autoryzacyjny (API Key)</label>
+                            <input asp-for="ApiKey" id="apiKeyInput" type="password" class="form-control" placeholder="Wprowadź token z portalu KSeF..." required />
+                            <span asp-validation-for="ApiKey" class="text-danger small"></span>
+                        </div>
+
+                        <div class="form-check form-switch mb-3">
+                            <input asp-for="IsEnabled" class="form-check-input" type="checkbox" id="isEnabledSwitch">
+                            <label class="form-check-label fw-bold" for="isEnabledSwitch">Włącz synchronizację w tle</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Status Połączenia -->
+                <div class="data-card mb-4">
+                    <div class="data-card__header">
+                        <h3 class="data-card__title">
+                            <i class="bi bi-shield-check me-2 text-secondary"></i> Status integracji
+                        </h3>
+                    </div>
+                    <div class="data-card__body">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <span class="text-muted small">Włączona:</span>
+                            @if (Model.IsEnabled)
+                            {
+                                <span class="badge bg-success-soft text-success px-2 py-1">Aktywna</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary-soft text-secondary px-2 py-1">Wyłączona</span>
+                            }
+                        </div>
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <span class="text-muted small">Status sesji:</span>
+                            @if (Model.IsConnected)
+                            {
+                                <span class="badge bg-success text-white px-2 py-1"><i class="bi bi-cloud-check-fill me-1"></i> Połączono</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger text-white px-2 py-1"><i class="bi bi-cloud-slash-fill me-1"></i> Brak sesji</span>
+                            }
+                        </div>
+                        @if (Model.LastSyncDate.HasValue)
+                        {
+                            <div class="d-flex align-items-center justify-content-between">
+                                <span class="text-muted small">Ostatnia synchronizacja:</span>
+                                <span class="small fw-bold">@Model.LastSyncDate.Value.ToString("g")</span>
+                            </div>
+                        }
+                    </div>
+                </div>
+                
+                <!-- Przyciski akcji formularza na dole kolumny podstawowej -->
+                <div class="d-flex flex-column gap-2 mb-4 mb-lg-0">
+                    <button type="submit" class="btn-primary-accent justify-content-center py-2">
+                        <i class="bi bi-check-circle me-1"></i> Zapisz konfigurację
+                    </button>
+                    <button type="button" id="testConnectionBtn" class="btn-secondary-outline justify-content-center py-2">
+                        <i class="bi bi-lightning-fill me-1 text-warning"></i> Testuj połączenie
+                    </button>
+                    <div id="testResult" style="display: none; padding: 10px; border-radius: 6px; font-size: 0.85rem;" class="mt-2"></div>
+                </div>
+            </div>
+
+            <!-- Prawa kolumna: Instrukcja i pomoc -->
+            <div class="col-lg-7 col-xl-8">
+                <div class="data-card">
+                    <div class="data-card__header">
+                        <h3 class="data-card__title">
+                            <i class="bi bi-info-circle-fill me-2 text-info"></i> Jak przetestować integrację KSeF?
+                        </h3>
+                    </div>
+                    <div class="data-card__body">
+                        <h5>1. Tryb Symulacji (Mock Mode)</h5>
+                        <p class="text-muted">
+                            W celach demonstracyjnych i deweloperskich system posiada wbudowany tryb symulatora. 
+                            Aby go aktywować, użyj następujących parametrów:
+                        </p>
+                        <ul>
+                            <li><strong>NIP Firmy:</strong> <code>1111111111</code></li>
+                            <li><strong>Token Autoryzacyjny (API Key):</strong> wpisz cokolwiek zaczynające się od <code>mock</code> (np. <code>mock_demo_key</code>).</li>
+                        </ul>
+                        <p class="text-muted">
+                            W tym trybie system nie łączy się z serwerami Ministerstwa Finansów, lecz symuluje idealne odpowiedzi (w tym pobieranie faktur XML i wystawianie e-faktur z pobieraniem UPO).
+                        </p>
+
+                        <h5 class="mt-4">2. Tryb Rzeczywisty (MF Sandbox)</h5>
+                        <p class="text-muted">
+                            Jeśli chcesz przetestować rzeczywiste połączenie ze środowiskiem testowym Ministerstwa Finansów:
+                        </p>
+                        <ol>
+                            <li>Wejdź na stronę KSeF Klient Demonstracyjny lub Aplikację Podatnika KSeF (środowisko testowe).</li>
+                            <li>Zaloguj się profilem zaufanym lub certyfikatem i wygeneruj <strong>Token Autoryzacyjny</strong>.</li>
+                            <li>Wpisz wygenerowany NIP oraz Token w formularzu po lewej stronie.</li>
+                            <li>Kliknij "Testuj połączenie". System nawiąże szyfrowaną sesję RSA-OAEP i sprawdzi status połączenia.</li>
+                        </ol>
+                        
+                        <div class="alert alert-warning mt-4 mb-0" style="background: rgba(245, 158, 11, 0.05); border: 1px dashed rgba(245, 158, 11, 0.25); color: #d97706;">
+                            <i class="bi bi-shield-lock-fill me-2"></i>
+                            <strong>Ważne:</strong> Środowisko testowe służy wyłącznie do celów integracyjnych. Nigdy nie przesyłaj tutaj prawdziwych, wrażliwych danych finansowych firmy.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        document.getElementById('testConnectionBtn').addEventListener('click', async function() {
+            const nip = document.getElementById('nipInput').value.trim();
+            const apiKey = document.getElementById('apiKeyInput').value.trim();
+            const resultDiv = document.getElementById('testResult');
+            
+            if (!nip || !apiKey) {
+                resultDiv.className = "alert alert-danger mt-3";
+                resultDiv.innerHTML = '<i class="bi bi-exclamation-circle-fill me-2"></i> Podaj NIP i Token Autoryzacyjny przed uruchomieniem testu.';
+                resultDiv.style.display = "block";
+                return;
+            }
+
+            resultDiv.className = "alert alert-info mt-3";
+            resultDiv.innerHTML = '<i class="bi bi-arrow-repeat spin me-2"></i> Trwa nawiązywanie połączenia z KSeF...';
+            resultDiv.style.display = "block";
+            
+            try {
+                const formData = new FormData();
+                formData.append('nip', nip);
+                formData.append('apiKey', apiKey);
+                
+                const tokenElement = document.querySelector('input[name="__RequestVerificationToken"]');
+                if (tokenElement) {
+                    formData.append('__RequestVerificationToken', tokenElement.value);
+                }
+                
+                const response = await fetch('/ksef/test-connection', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`Błąd HTTP ${response.status}`);
+                }
+
+                const res = await response.json();
+                if (res.success) {
+                    resultDiv.className = "alert alert-success mt-3";
+                    resultDiv.innerHTML = `<i class="bi bi-check-circle-fill me-2"></i> ${res.message}`;
+                } else {
+                    resultDiv.className = "alert alert-danger mt-3";
+                    resultDiv.innerHTML = `<i class="bi bi-exclamation-triangle-fill me-2"></i> ${res.message}`;
+                }
+            } catch(err) {
+                resultDiv.className = "alert alert-danger mt-3";
+                resultDiv.innerHTML = `<i class="bi bi-exclamation-triangle-fill me-2"></i> Błąd krytyczny testu: ${err.message}`;
+            }
+        });
+    </script>
+    <style>
+        .spin {
+            display: inline-block;
+            animation: spin-animation 1s linear infinite;
+        }
+        @@keyframes spin-animation {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .bg-success-soft {
+            background-color: rgba(34, 197, 94, 0.1);
+        }
+        .bg-secondary-soft {
+            background-color: rgba(156, 163, 175, 0.1);
+        }
+    </style>
+}

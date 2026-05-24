@@ -11,5 +11,6 @@ public record GetInvoiceListViewModel(
     string ContractorName,
     DateTime Date,
     decimal TotalAmount,
-    InvoiceStatus Status
+    InvoiceStatus Status,
+    string? KsefNumber
 );

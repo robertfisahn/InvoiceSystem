@@ -42,6 +42,20 @@
             </a>
         </li>
 
+        <li class="menu-group-label">KSeF</li>
+        <li class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "KsefInbox" ? "active" : "")">
+            <a href="/ksef/inbox">
+                <i class="bi bi-mailbox"></i>
+                <span class="menu-label">Skrzynka KSeF</span>
+            </a>
+        </li>
+        <li class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "KsefConfiguration" ? "active" : "")">
+            <a href="/ksef/config">
+                <i class="bi bi-gear"></i>
+                <span class="menu-label">Konfiguracja KSeF</span>
+            </a>
+        </li>
+
         <li class="menu-group-label">System</li>
         <li>
             <a href="#">

@@ -9,6 +9,8 @@ public static class DataSeeder
     public static async Task SeedAsync(AppDbContext context)
     {
         await SeedInvoicesAsync(context);
+        await SeedKsefSettingsAsync(context);
+        await SeedKsefIncomingInvoicesAsync(context);
     }
 
     public static async Task SeedUsersAsync(UserManager<AppUser> userManager)
@@ -102,5 +104,137 @@ public static class DataSeeder
                 }
             }
         };
+    }
+
+    private static async Task SeedKsefSettingsAsync(AppDbContext context)
+    {
+        if (await context.KsefSettings.AnyAsync()) return;
+
+        var mockSetting = new KsefSetting
+        {
+            Nip = "1111111111",
+            ApiKey = "mock_demo_key",
+            IsEnabled = true,
+            LastSyncDate = DateTime.UtcNow.AddDays(-1)
+        };
+
+        context.KsefSettings.Add(mockSetting);
+        await context.SaveChangesAsync();
+    }
+
+    private static async Task SeedKsefIncomingInvoicesAsync(AppDbContext context)
+    {
+        if (await context.KsefIncomingInvoices.AnyAsync()) return;
+
+        var mockInvoices = new List<KsefIncomingInvoice>
+        {
+            new()
+            {
+                KsefNumber = $"5270103391-{DateTime.UtcNow:yyyyMMdd}-FA-A1B2C3D4E5",
+                SellerName = "Microsoft Sp. z o.o.",
+                SellerNip = "5270103391",
+                IssueDate = DateTime.UtcNow.AddDays(-5),
+                TotalAmount = 1230.00m,
+                ImportStatus = KsefImportStatus.Pending,
+                RawXml = $@"<?xml version=""1.0"" encoding=""UTF-8""?>
+<Faktura xmlns=""http://crd.gov.pl/wzor/2023/06/29/12648/"">
+    <Naglowek>
+        <KodFormularza kodSystemowy=""FA (2)"" wersjaSchemy=""1-0E"">FA</KodFormularza>
+        <WariantFormularza>2</WariantFormularza>
+        <DataWytworzeniaFa>{DateTime.UtcNow.AddDays(-5):yyyy-MM-ddTHH:mm:ssZ}</DataWytworzeniaFa>
+    </Naglowek>
+    <Podmiot1>
+        <DanePodmiotu>
+            <NIP>5270103391</NIP>
+            <Nazwa>Microsoft Sp. z o.o.</Nazwa>
+        </DanePodmiotu>
+        <Adres>
+            <AdresPol>
+                <KodPocztowy>00-121</KodPocztowy>
+                <Miejscowosc>Warszawa</Miejscowosc>
+                <Ulica>Aleje Jerozolimskie 195A</Ulica>
+            </AdresPol>
+        </Adres>
+    </Podmiot1>
+    <Podmiot2>
+        <DanePodmiotu>
+            <NIP>1111111111</NIP>
+            <Nazwa>InvoiceSystem Enterprise</Nazwa>
+        </DanePodmiotu>
+    </Podmiot2>
+    <Fa>
+        <KodWaluty>PLN</KodWaluty>
+        <P_1>{DateTime.UtcNow.AddDays(-5):yyyy-MM-dd}</P_1>
+        <P_2>FV/2026/05/100</P_2>
+        <P_13_1>1000.00</P_13_1>
+        <P_14_1>230.00</P_14_1>
+        <P_15>1230.00</P_15>
+        <FaWiersz>
+            <NrWierszaFa>1</NrWierszaFa>
+            <P_7>Subskrypcja Microsoft 365 Enterprise</P_7>
+            <P_8A>1</P_8A>
+            <P_9B>1000.00</P_9B>
+            <P_11>1000.00</P_11>
+            <P_12>23</P_12>
+        </FaWiersz>
+    </Fa>
+</Faktura>"
+            },
+            new()
+            {
+                KsefNumber = $"5252344078-{DateTime.UtcNow:yyyyMMdd}-FA-X1Y2Z3W4V5",
+                SellerName = "Google Poland Sp. z o.o.",
+                SellerNip = "5252344078",
+                IssueDate = DateTime.UtcNow.AddDays(-2),
+                TotalAmount = 4500.00m,
+                ImportStatus = KsefImportStatus.Pending,
+                RawXml = $@"<?xml version=""1.0"" encoding=""UTF-8""?>
+<Faktura xmlns=""http://crd.gov.pl/wzor/2023/06/29/12648/"">
+    <Naglowek>
+        <KodFormularza kodSystemowy=""FA (2)"" wersjaSchemy=""1-0E"">FA</KodFormularza>
+        <WariantFormularza>2</WariantFormularza>
+        <DataWytworzeniaFa>{DateTime.UtcNow.AddDays(-2):yyyy-MM-ddTHH:mm:ssZ}</DataWytworzeniaFa>
+    </Naglowek>
+    <Podmiot1>
+        <DanePodmiotu>
+            <NIP>5252344078</NIP>
+            <Nazwa>Google Poland Sp. z o.o.</Nazwa>
+        </DanePodmiotu>
+        <Adres>
+            <AdresPol>
+                <KodPocztowy>00-113</KodPocztowy>
+                <Miejscowosc>Warszawa</Miejscowosc>
+                <Ulica>ul. Emilii Plater 53</Ulica>
+            </AdresPol>
+        </Adres>
+    </Podmiot1>
+    <Podmiot2>
+        <DanePodmiotu>
+            <NIP>1111111111</NIP>
+            <Nazwa>InvoiceSystem Enterprise</Nazwa>
+        </DanePodmiotu>
+    </Podmiot2>
+    <Fa>
+        <KodWaluty>PLN</KodWaluty>
+        <P_1>{DateTime.UtcNow.AddDays(-2):yyyy-MM-dd}</P_1>
+        <P_2>G-998/05/2026</P_2>
+        <P_13_1>3658.54</P_13_1>
+        <P_14_1>841.46</P_14_1>
+        <P_15>4500.00</P_15>
+        <FaWiersz>
+            <NrWierszaFa>1</NrWierszaFa>
+            <P_7>Usługi Google Cloud Platform</P_7>
+            <P_8A>1</P_8A>
+            <P_9B>3658.54</P_9B>
+            <P_11>3658.54</P_11>
+            <P_12>23</P_12>
+        </FaWiersz>
+    </Fa>
+</Faktura>"
+            }
+        };
+
+        context.KsefIncomingInvoices.AddRange(mockInvoices);
+        await context.SaveChangesAsync();
     }
 }

@@ -49,10 +49,19 @@
                             data-date="@invoice.Date.ToString("yyyy-MM-dd")"
                             data-status="@((int)invoice.Status)"
                             data-amount="@invoice.TotalAmount.ToString("F2").Replace(",", ".")">
-                            <td style="padding: 14px 16px; font-weight: 600; color: var(--text-primary);">@invoice.InvoiceNumber</td>
-                            <td style="padding: 14px 16px; color: var(--text-secondary);">@invoice.ContractorName</td>
-                            <td style="padding: 14px 16px; color: var(--text-secondary);">@invoice.Date.ToShortDateString()</td>
-                            <td style="padding: 14px 16px; color: var(--text-secondary);">
+                            <td data-label="Numer faktury" style="padding: 14px 16px; font-weight: 600; color: var(--text-primary);">
+                                @invoice.InvoiceNumber
+                                <span class="text-secondary fw-normal ms-1 d-md-none" style="font-size: 0.75rem;">&bull; @invoice.Date.ToShortDateString()</span>
+                                @if (!string.IsNullOrEmpty(invoice.KsefNumber))
+                                {
+                                    <span class="badge bg-success-soft text-success ms-1" style="font-size: 0.65rem;" title="Zarejestrowano w KSeF: @invoice.KsefNumber">
+                                        <i class="bi bi-cloud-check-fill"></i> KSeF
+                                    </span>
+                                }
+                            </td>
+                            <td data-label="Kontrahent" style="padding: 14px 16px; color: var(--text-secondary);">@invoice.ContractorName</td>
+                            <td data-label="Data wystawienia" style="padding: 14px 16px; color: var(--text-secondary);">@invoice.Date.ToShortDateString()</td>
+                            <td data-label="Status" style="padding: 14px 16px; color: var(--text-secondary);">
                                 @if (invoice.Status == InvoiceSystem.Web.Domain.Entities.InvoiceStatus.Draft)
                                 {
                                     <span class="badge-status badge-status--draft">Szkic</span>
@@ -66,8 +75,8 @@
                                     <span class="badge-status badge-status--confirmed">Opłacona</span>
                                 }
                             </td>
-                            <td style="padding: 14px 16px; text-align: right; font-weight: 700; color: var(--text-primary);">@invoice.TotalAmount.ToString("N2") PLN</td>
-                            <td style="padding: 14px 16px; text-align: center;">
+                            <td data-label="Kwota brutto" style="padding: 14px 16px; text-align: right; font-weight: 700; color: var(--text-primary);">@invoice.TotalAmount.ToString("N2") PLN</td>
+                            <td data-label="Akcje" style="padding: 14px 16px; text-align: center;">
                                 <div class="d-flex justify-content-center gap-2">
                                     <a href="/invoices/@invoice.Id" class="btn-action btn-action-view" title="Szczegóły">
                                         <i class="bi bi-eye"></i>
@@ -121,39 +130,10 @@
     .sortable:hover { color: var(--accent); }
     .sortable i { opacity: 0.3; transition: opacity 0.2s; }
     .sortable.active i { opacity: 1; color: var(--accent); }
-    .search-box { position: relative; width: 300px; }
-    .search-box i { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--text-secondary); font-size: 0.9rem; }
-    .search-box input { padding-left: 32px !important; background-color: var(--bg-tertiary) !important; border-color: var(--border-strong) !important; }
     .invoice-row:hover { background-color: rgba(255, 255, 255, 0.02) !important; }
     .btn-action { width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; background: rgba(255, 255, 255, 0.03); color: var(--text-secondary); border: 1px solid var(--border); transition: all 0.2s; cursor: pointer; }
     .btn-action:hover { background: var(--accent-soft); color: var(--accent); border-color: var(--accent); }
     .btn-action-delete:hover { background: rgba(239, 68, 68, 0.1); color: #ef4444; border-color: rgba(239, 68, 68, 0.2); }
-
-    /* Page Numbers Style */
-    .page-number {
-        width: 32px;
-        height: 32px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 6px;
-        font-size: 0.8rem;
-        font-weight: 600;
-        cursor: pointer;
-        border: 1px solid var(--border);
-        background: transparent;
-        color: var(--text-secondary);
-        transition: all 0.2s;
-    }
-    .page-number:hover {
-        border-color: var(--accent);
-        color: var(--accent);
-    }
-    .page-number.active {
-        background: var(--accent);
-        border-color: var(--accent);
-        color: white;
-    }
 </style>
 
 @section Scripts {
@@ -195,11 +175,37 @@
                 const end = start + pageSize;
                 $filteredRows.slice(start, end).show();
 
-                // 3. Renderowanie numerów stron
+                // 3. Renderowanie numerów stron (Sliding Window)
                 const $numbersWrap = $('#paginationNumbers');
                 $numbersWrap.empty();
                 
-                for (let i = 1; i <= totalPages; i++) {
+                let startPage, endPage;
+                if (totalPages <= 5) {
+                    startPage = 1;
+                    endPage = totalPages;
+                } else {
+                    if (currentPage <= 3) {
+                        startPage = 1;
+                        endPage = 5;
+                    } else if (currentPage + 2 >= totalPages) {
+                        startPage = totalPages - 4;
+                        endPage = totalPages;
+                    } else {
+                        startPage = currentPage - 2;
+                        endPage = currentPage + 2;
+                    }
+                }
+
+                if (startPage > 1) {
+                    const $btn = $('<button></button>').addClass('page-number').text(1)
+                        .on('click', function() { currentPage = 1; updateTable(); });
+                    $numbersWrap.append($btn);
+                    if (startPage > 2) {
+                        $numbersWrap.append($('<span></span>').addClass('px-2 align-self-center text-muted').text('...'));
+                    }
+                }
+
+                for (let i = startPage; i <= endPage; i++) {
                     const $btn = $('<button></button>')
                         .addClass('page-number')
                         .text(i)
@@ -208,6 +214,15 @@
                             currentPage = i;
                             updateTable();
                         });
+                    $numbersWrap.append($btn);
+                }
+
+                if (endPage < totalPages) {
+                    if (endPage < totalPages - 1) {
+                        $numbersWrap.append($('<span></span>').addClass('px-2 align-self-center text-muted').text('...'));
+                    }
+                    const $btn = $('<button></button>').addClass('page-number').text(totalPages)
+                        .on('click', function() { currentPage = totalPages; updateTable(); });
                     $numbersWrap.append($btn);
                 }
 

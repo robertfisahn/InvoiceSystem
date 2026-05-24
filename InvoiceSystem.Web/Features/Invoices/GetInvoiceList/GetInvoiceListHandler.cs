@@ -17,7 +17,8 @@ public sealed class GetInvoiceListHandler(AppDbContext context)
                 i.Contractor.Name,
                 i.Date,
                 i.Items.Sum(x => x.TotalPrice),
-                i.Status
+                i.Status,
+                i.KsefNumber
             ))
             .ToListAsync(cancellationToken);
     }

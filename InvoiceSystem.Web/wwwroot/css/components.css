@@ -3,6 +3,13 @@
     list-style: none;
     padding: 0;
     margin: 0;
+    flex: 1;
+    overflow-y: auto;
+    scrollbar-width: none; /* Hide scrollbar for Firefox */
+}
+
+.sidebar-menu::-webkit-scrollbar {
+    display: none; /* Hide scrollbar for Chrome/Safari */
 }
 
 .menu-group-label {
@@ -56,14 +63,13 @@
    SIDEBAR FOOTER — toggle
    ======================== */
 .sidebar-footer {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
+    position: relative;
+    margin-top: auto;
     padding: 1rem;
     border-top: 1px solid rgba(255, 255, 255, 0.08);
     display: flex;
     justify-content: flex-end;
+    background-color: var(--bg-sidebar);
 }
 
 .sidebar-toggle-btn {
@@ -100,7 +106,7 @@
 /* ========================
    CUSTOM MODAL SYSTEM
    ======================== */
-.modal-backdrop {
+.custom-modal-backdrop {
     position: fixed;
     top: 0;
     left: 0;
@@ -116,7 +122,7 @@
     transition: opacity 0.3s ease;
 }
 
-.modal-backdrop.show {
+.custom-modal-backdrop.show {
     display: flex;
     opacity: 1;
 }
@@ -133,8 +139,14 @@
     transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-.modal-backdrop.show .app-modal {
+.custom-modal-backdrop.show .app-modal {
     transform: scale(1);
+}
+
+/* Bootstrap backdrop styling override (blur only the background, modal is in front) */
+.modal-backdrop.show {
+    backdrop-filter: blur(8px);
+    background-color: rgba(0, 0, 0, 0.5) !important;
 }
 
 .modal-header {
@@ -321,4 +333,27 @@
         height: auto !important;
         padding: 1.5rem 1rem 0.5rem !important;
     }
+}
+
+/* Global Search Box Styling */
+.search-box {
+    position: relative;
+}
+.search-box i {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    pointer-events: none;
+    z-index: 10;
+}
+.search-box input {
+    padding-left: 36px !important;
+    background-color: var(--bg-tertiary) !important;
+    border-color: var(--border-strong) !important;
+}
+[data-theme="light"] .search-box input {
+    border-color: #b0b0c0 !important;
 }

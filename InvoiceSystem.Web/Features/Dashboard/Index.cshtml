@@ -272,7 +272,7 @@
                             <!-- Circle track -->
                             <circle cx="18" cy="18" r="15.915" fill="none" stroke="var(--border)" stroke-width="2.5" />
                             <!-- Progress circle -->
-                            <circle cx="18" cy="18" r="15.915" fill="none" stroke="var(--accent)" stroke-width="2.8" stroke-dasharray="@Model.PaidRatio 100" stroke-linecap="round" style="transition: stroke-dasharray 0.8s ease;" />
+                            <circle cx="18" cy="18" r="15.915" fill="none" stroke="var(--accent)" stroke-width="2.8" stroke-dasharray="@Model.PaidRatio.ToString("F1", System.Globalization.CultureInfo.InvariantCulture) 100" stroke-linecap="round" style="transition: stroke-dasharray 0.8s ease;" />
                         </svg>
                         <div class="position-absolute top-50 start-50 translate-middle fw-bold" style="font-size: 0.9rem; color: var(--text-primary);">
                             @Model.PaidRatio%

@@ -114,6 +114,8 @@ div[style*="background-color: #ff9800"] {
     transition: width 0.25s ease;
     z-index: 999;
     overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
 }
 
 .sidebar-collapsed .app-sidebar {

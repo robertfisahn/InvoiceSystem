@@ -14,7 +14,11 @@ public record GetInvoiceDetailsViewModel(
     ContractorDetailsDto Contractor,
     List<InvoiceItemDto> Items,
     decimal TotalAmount,
-    InvoiceStatus Status
+    InvoiceStatus Status,
+    string? KsefNumber,
+    string? KsefTransactionId,
+    DateTime? KsefSentAt,
+    string? UpoXml
 );
 
 public record ContractorDetailsDto(string Name, string? TaxId, string? Address);
@@ -40,7 +44,11 @@ public sealed class GetInvoiceDetailsHandler(AppDbContext db)
                     item.TotalPrice
                 )).ToList(),
                 i.Items.Sum(x => x.TotalPrice),
-                i.Status
+                i.Status,
+                i.KsefNumber,
+                i.KsefTransactionId,
+                i.KsefSentAt,
+                i.UpoXml
             ))
             .FirstOrDefaultAsync(ct);
     }

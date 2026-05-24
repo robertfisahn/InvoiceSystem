@@ -157,7 +157,7 @@
     .table-responsive:has(.item-row) {
         overflow-x: visible !important;
         margin: 0 !important;
-        padding: 0 !important;
+        padding: 14px 16px 0 16px !important;
     }
     
     /* Make table and body block elements for item repeater only */
@@ -183,7 +183,7 @@
         margin-bottom: 12px;
         border: 1px solid var(--border-strong) !important;
         border-radius: 12px;
-        background-color: var(--bg-secondary) !important;
+        background-color: var(--bg-tertiary) !important;
         box-shadow: var(--shadow-sm);
         border-bottom: 1px solid var(--border-strong) !important;
         width: 100% !important;
@@ -310,3 +310,452 @@
     border-color: var(--color-primary) !important;
     box-shadow: 0 0 0 2px rgba(var(--color-primary-rgb), 0.15) !important;
 }
+
+/* ============================================================
+   UNIFIED MANUAL TABLES (dx-datagrid-table & dx-datagrid-rows)
+   ============================================================ */
+.dx-datagrid-table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+.dx-datagrid-table thead.dx-datagrid-headers {
+    background-color: var(--bg-tertiary) !important;
+    border-bottom: 1px solid var(--border-strong) !important;
+}
+
+.dx-datagrid-table thead th {
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.1em !important;
+    color: var(--text-secondary) !important;
+    padding: 14px 16px !important;
+    border-bottom: 1px solid var(--border-strong) !important;
+    background-color: var(--bg-tertiary) !important;
+    text-align: left;
+}
+
+.dx-datagrid-table thead th.sortable {
+    cursor: pointer;
+    user-select: none;
+    transition: color 0.2s;
+}
+
+.dx-datagrid-table thead th.sortable:hover {
+    color: var(--accent) !important;
+}
+
+.dx-datagrid-table tbody tr.dx-row {
+    border-bottom: 1px solid var(--border) !important;
+    transition: background-color 0.2s ease;
+    background-color: transparent;
+}
+
+.dx-datagrid-table tbody tr.dx-row:hover {
+    background-color: var(--bg-tertiary) !important;
+}
+
+.dx-datagrid-table tbody tr.dx-row:last-child {
+    border-bottom: none !important;
+}
+
+.dx-datagrid-table tbody tr.dx-row td {
+    padding: 14px 16px !important;
+    vertical-align: middle !important;
+    font-size: 0.875rem !important;
+    color: var(--text-secondary);
+    border-bottom: 1px solid var(--border) !important;
+}
+
+.dx-datagrid-table tbody tr.dx-row:last-child td {
+    border-bottom: none !important;
+}
+
+/* Alignments inside unified tables */
+.dx-datagrid-table tbody tr.dx-row td.text-end,
+.dx-datagrid-table thead th.text-end {
+    text-align: right !important;
+}
+
+.dx-datagrid-table tbody tr.dx-row td.text-center,
+.dx-datagrid-table thead th.text-center {
+    text-align: center !important;
+}
+
+/* ============================================================
+   A4 INVOICE PREVIEW COMPONENT (invoice-document)
+   ============================================================ */
+.invoice-miniature-wrapper {
+    width: 100%;
+    overflow: hidden;
+}
+
+.invoice-miniature-wrapper.zoomed {
+    overflow-x: auto !important;
+}
+
+.invoice-document {
+    background: white !important;
+    color: #1a1a1a !important;
+    padding: 3rem !important;
+    border-radius: 8px;
+    width: 800px !important; /* Force exact document width for scaling calculations */
+    max-width: 800px;
+    margin: 1rem auto;
+    font-family: 'Inter', sans-serif;
+    display: flex;
+    flex-direction: column;
+    min-height: 1000px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15) !important;
+    box-sizing: border-box !important;
+    transform-origin: top left;
+    
+    /* Reset Bootstrap 5 table variables locally for dark mode overrides */
+    --bs-table-bg: transparent !important;
+    --bs-table-color: #1a1a1a !important;
+    --bs-table-border-color: #dee2e6 !important;
+    --bs-table-striped-color: #1a1a1a !important;
+    --bs-table-striped-bg: transparent !important;
+    --bs-table-active-bg: transparent !important;
+    --bs-table-hover-bg: transparent !important;
+}
+
+@media (min-width: 768px) {
+    .invoice-document {
+        margin: 2rem auto;
+        min-height: 297mm;
+    }
+}
+
+.invoice-content-wrap {
+    flex: 1;
+}
+
+.invoice-document table,
+.invoice-document table tr,
+.invoice-document table td,
+.invoice-document table th { 
+    background-color: transparent !important; 
+    color: #1a1a1a !important; 
+    border-color: #dee2e6 !important; 
+    padding: 10px 12px !important;
+}
+
+.invoice-document thead.table-light,
+.invoice-document thead.table-light th {
+    background-color: #f8f9fa !important;
+    color: #1a1a1a !important;
+}
+
+.invoice-footer {
+    margin-top: 3rem;
+    padding-top: 2rem;
+    text-align: center;
+    color: #9ca3af;
+    font-size: 0.75rem;
+    border-top: 1px solid #f3f4f6;
+}
+
+.invoice-logo {
+    font-weight: 800;
+    letter-spacing: -1px;
+    margin: 0;
+    color: #1a1a1a;
+}
+
+.invoice-logo span {
+    color: #6366f1;
+}
+
+/* ============================================================
+   RESPONSIVE DATA-GRID TABLES (Table to Card conversion)
+   ============================================================ */
+@media (max-width: 767.98px) {
+    /* Obsługa filtrowania/wyszukiwania jQuery (wymuszenie ukrycia wierszy-kart na mobile) */
+    .table-responsive:has(#invoicesTable) .dx-datagrid-table tbody tr.dx-row[style*="display: none"],
+    .table-responsive:has(#invoicesTable) .dx-datagrid-table tbody tr.dx-row[style*="display:none"],
+    .table-responsive:has(#contractorsTable) .dx-datagrid-table tbody tr.dx-row[style*="display: none"],
+    .table-responsive:has(#contractorsTable) .dx-datagrid-table tbody tr.dx-row[style*="display:none"],
+    .table-responsive:has(#ksefTable) .dx-datagrid-table tbody tr.dx-row[style*="display: none"],
+    .table-responsive:has(#ksefTable) .dx-datagrid-table tbody tr.dx-row[style*="display:none"],
+    .table-responsive .dx-datagrid-table tbody tr.dx-row[style*="display: none"],
+    .table-responsive .dx-datagrid-table tbody tr.dx-row[style*="display:none"],
+    .table-responsive:has(.item-row) tbody tr.item-row[style*="display: none"],
+    .table-responsive:has(.item-row) tbody tr.item-row[style*="display:none"] {
+        display: none !important;
+    }
+
+    /* Zapobiegamy poziomemu przewijaniu kontenera tabeli */
+    .table-responsive:has(.dx-datagrid-table) {
+        overflow-x: visible !important;
+        border: none !important;
+        margin: 0 !important;
+        padding: 14px 16px 0 16px !important;
+    }
+
+    /* Tabela jako kontener blokowy */
+    .table-responsive .dx-datagrid-table {
+        display: block !important;
+        width: 100% !important;
+        border: none !important;
+        background: transparent !important;
+    }
+
+    /* Ukrywamy nagłówek tabeli */
+    .table-responsive .dx-datagrid-table thead {
+        display: none !important;
+    }
+
+    .table-responsive .dx-datagrid-table tbody {
+        display: block !important;
+        width: 100% !important;
+    }
+
+    /* Każdy wiersz zamieniamy w elegancką kartę */
+    .table-responsive .dx-datagrid-table tbody tr.dx-row {
+        display: block !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+        background: var(--bg-tertiary) !important; /* Lżejsze/odróżniające się tło karty niż tło kontenera (bg-secondary) */
+        border: 1px solid var(--border-strong) !important;
+        border-radius: 12px !important;
+        padding: 14px 16px !important;
+        margin-bottom: 14px !important;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.15), 0 2px 4px -1px rgba(0, 0, 0, 0.08) !important;
+        transition: all 0.2s ease-in-out !important;
+    }
+
+    .table-responsive .dx-datagrid-table tbody tr.dx-row:hover {
+        background-color: var(--bg-secondary) !important;
+        border-color: var(--accent) !important;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2), 0 4px 6px -2px rgba(0, 0, 0, 0.1) !important;
+        transform: translateY(-2px);
+    }
+
+    /* Resetujemy domyślne style komórek tabeli na mobilkach */
+    .table-responsive .dx-datagrid-table tbody tr.dx-row td {
+        display: block !important;
+        padding: 0 !important;
+        border: none !important;
+        background: transparent !important;
+        text-align: left !important;
+        width: auto !important;
+        box-sizing: border-box !important;
+    }
+
+    /* ---------------- LISTA FAKTUR (Invoices) ---------------- */
+    .table-responsive:has(#invoicesTable) .dx-datagrid-table tbody tr.dx-row {
+        display: grid !important;
+        grid-template-areas: 
+            "client amount"
+            "num status"
+            "actions actions" !important;
+        grid-template-columns: 1fr auto !important;
+        gap: 6px 12px !important;
+    }
+
+    .table-responsive:has(#invoicesTable) td[data-label="Kontrahent"] {
+        grid-area: client !important;
+        font-weight: 600 !important;
+        color: var(--text-primary) !important;
+        font-size: 0.875rem !important;
+    }
+
+    .table-responsive:has(#invoicesTable) td[data-label="Kwota brutto"] {
+        grid-area: amount !important;
+        font-weight: 700 !important;
+        color: var(--text-primary) !important;
+        font-size: 0.875rem !important;
+        text-align: right !important;
+    }
+
+    .table-responsive:has(#invoicesTable) td[data-label="Numer faktury"] {
+        grid-area: num !important;
+        font-size: 0.75rem !important;
+        color: var(--text-secondary) !important;
+    }
+
+    .table-responsive:has(#invoicesTable) td[data-label="Status"] {
+        grid-area: status !important;
+        text-align: right !important;
+        display: flex !important;
+        justify-content: flex-end !important;
+        align-items: center !important;
+    }
+
+    .table-responsive:has(#invoicesTable) td[data-label="Akcje"] {
+        grid-area: actions !important;
+        display: flex !important;
+        justify-content: center !important;
+        border-top: 1px solid var(--border-strong) !important;
+        padding-top: 8px !important;
+        margin-top: 4px !important;
+    }
+
+    .table-responsive:has(#invoicesTable) td[data-label="Data wystawienia"] {
+        display: none !important;
+    }
+
+    /* ---------------- LISTA KONTRAHENTÓW (Contractors) ---------------- */
+    .table-responsive:has(#contractorsTable) .dx-datagrid-table tbody tr.dx-row {
+        display: grid !important;
+        grid-template-areas: 
+            "company nip"
+            "address id" !important;
+        grid-template-columns: 1fr auto !important;
+        gap: 6px 12px !important;
+    }
+
+    .table-responsive:has(#contractorsTable) td[data-label="Nazwa firmy"] {
+        grid-area: company !important;
+        font-weight: 600 !important;
+        color: var(--text-primary) !important;
+        font-size: 0.875rem !important;
+    }
+
+    .table-responsive:has(#contractorsTable) td[data-label="NIP"] {
+        grid-area: nip !important;
+        text-align: right !important;
+        display: flex !important;
+        justify-content: flex-end !important;
+        align-items: center !important;
+    }
+
+    .table-responsive:has(#contractorsTable) td[data-label="Adres"] {
+        grid-area: address !important;
+        font-size: 0.75rem !important;
+        color: var(--text-secondary) !important;
+    }
+
+    .table-responsive:has(#contractorsTable) td[data-label="ID"] {
+        grid-area: id !important;
+        font-size: 0.75rem !important;
+        color: var(--text-secondary) !important;
+        text-align: right !important;
+    }
+
+    /* ---------------- SKRZYNKA KSEF (KSeF Inbox) ---------------- */
+    .table-responsive:has(#ksefTable) .dx-datagrid-table tbody tr.dx-row {
+        display: grid !important;
+        grid-template-areas: 
+            "seller amount"
+            "date status"
+            "actions actions" !important;
+        grid-template-columns: 1fr auto !important;
+        gap: 6px 12px !important;
+    }
+
+    .table-responsive:has(#ksefTable) td[data-label="Sprzedawca / NIP"] {
+        grid-area: seller !important;
+        font-weight: 600 !important;
+        color: var(--text-primary) !important;
+        font-size: 0.875rem !important;
+    }
+
+    .table-responsive:has(#ksefTable) td[data-label="Kwota brutto"] {
+        grid-area: amount !important;
+        font-weight: 700 !important;
+        color: var(--text-primary) !important;
+        font-size: 0.875rem !important;
+        text-align: right !important;
+    }
+
+    .table-responsive:has(#ksefTable) td[data-label="Data wystawienia"] {
+        grid-area: date !important;
+        font-size: 0.75rem !important;
+        color: var(--text-secondary) !important;
+    }
+
+    .table-responsive:has(#ksefTable) td[data-label="Status"] {
+        grid-area: status !important;
+        text-align: right !important;
+        display: flex !important;
+        justify-content: flex-end !important;
+        align-items: center !important;
+    }
+
+    .table-responsive:has(#ksefTable) td[data-label="Akcje"] {
+        grid-area: actions !important;
+        display: flex !important;
+        justify-content: center !important;
+        border-top: 1px solid var(--border-strong) !important;
+        padding-top: 8px !important;
+        margin-top: 4px !important;
+    }
+
+    .table-responsive:has(#ksefTable) td[data-label="Numer KSeF"] {
+        display: none !important;
+    }
+
+    /* Optymalny rozmiar przycisków paginacji na mobile, aby zmieściły się na ekranie */
+    .page-number, #prevPage, #nextPage {
+        width: 34px !important;
+        height: 34px !important;
+        font-size: 0.85rem !important;
+        border-radius: 6px !important;
+        flex-shrink: 0 !important;
+    }
+    
+    #prevPage, #nextPage {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        padding: 0 !important;
+    }
+    #prevPage i, #nextPage i {
+        font-size: 0.95rem !important;
+    }
+
+    /* Zmniejszamy gap między przyciskami w stopce paginacji na mobile */
+    .d-flex:has(> #prevPage) {
+        gap: 4px !important;
+    }
+
+    /* Zmniejszamy odstępy kropek (...) na mobile */
+    #paginationNumbers span {
+        padding-left: 4px !important;
+        padding-right: 4px !important;
+    }
+}
+
+/* ============================================================
+   PAGINATION COMPONENTS (Global Desktop Default)
+   ============================================================ */
+.page-number, #prevPage, #nextPage {
+    width: 32px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-secondary);
+    transition: all 0.2s;
+    user-select: none;
+    padding: 0;
+    flex-shrink: 0;
+}
+.page-number:hover, #prevPage:hover:not(:disabled), #nextPage:hover:not(:disabled) {
+    border-color: var(--accent);
+    color: var(--accent);
+    background-color: var(--accent-soft);
+}
+.page-number.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: white;
+}
+#prevPage:disabled, #nextPage:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    background: transparent;
+    border-color: var(--border);
+    color: var(--text-secondary);
+}
