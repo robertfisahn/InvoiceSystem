@@ -1,6 +1,8 @@
 @model InvoiceSystem.Web.Features.Invoices.GetInvoiceDetails.GetInvoiceDetailsViewModel
+@inject InvoiceSystem.Web.Shared.Interfaces.IInvoicePreviewService PreviewService
 @{
     ViewData["Title"] = $"Faktura {Model.InvoiceNumber}";
+    var previewDto = PreviewService.MapFromInvoice(Model);
 }
 
 <div class="page-body">
@@ -70,112 +72,7 @@
     </div>
 
     <div class="invoice-miniature-wrapper no-print-wrapper" id="invoiceWrapper">
-        <div class="invoice-document shadow-lg" id="invoiceDoc">
-            <div class="invoice-content-wrap">
-                <!-- Header -->
-                <div class="d-flex justify-content-between mb-5">
-                    <div>
-                        <h2 class="invoice-logo">Invoice<span>System</span></h2>
-                        <p class="text-muted small">System Zarządzania Fakturami</p>
-                    </div>
-                    <div class="text-end">
-                        <h1 class="h3 mb-0">FAKTURA</h1>
-                        <p class="fw-bold d-flex align-items-center justify-content-end gap-2">
-                            Nr: @Model.InvoiceNumber
-                            @if (Model.Status == InvoiceSystem.Web.Domain.Entities.InvoiceStatus.Draft)
-                            {
-                                <span class="badge-status badge-status--draft">Szkic</span>
-                            }
-                            else if (Model.Status == InvoiceSystem.Web.Domain.Entities.InvoiceStatus.Confirmed)
-                            {
-                                <span class="badge-status badge-status--overdue">Zatwierdzona</span>
-                            }
-                            else if (Model.Status == InvoiceSystem.Web.Domain.Entities.InvoiceStatus.Paid)
-                            {
-                                <span class="badge-status badge-status--confirmed">Opłacona</span>
-                            }
-                        </p>
-                        @if (!string.IsNullOrEmpty(Model.KsefNumber))
-                        {
-                            <p class="small text-muted mb-0 text-monospace text-end" style="font-size: 0.75rem;">
-                                Numer KSeF: <span class="fw-bold">@Model.KsefNumber</span>
-                            </p>
-                        }
-                        else if (!string.IsNullOrEmpty(Model.KsefTransactionId))
-                        {
-                            <p class="small text-muted mb-0 text-end" style="font-size: 0.75rem;">
-                                KSeF ID: <span class="fw-bold text-warning">@Model.KsefTransactionId</span> (Wysyłanie...)
-                            </p>
-                        }
-                        <p class="small text-muted mt-1">Data wystawienia: @Model.Date.ToShortDateString()</p>
-                    </div>
-                </div>
-
-            <hr class="my-4" />
-
-            <!-- Contractor Info -->
-            <div class="row mb-4">
-                <div class="col-6">
-                    <label class="text-muted small text-uppercase fw-bold d-block mb-2">Sprzedawca</label>
-                    <strong>InvoiceSystem Enterprise</strong><br />
-                    ul. Technologiczna 12<br />
-                    80-001 Gdańsk<br />
-                    NIP: 1234567890
-                </div>
-                <div class="col-6 text-end">
-                    <label class="text-muted small text-uppercase fw-bold d-block mb-2">Nabywca</label>
-                    <strong>@Model.Contractor.Name</strong><br />
-                    @Model.Contractor.Address<br />
-                    NIP: @Model.Contractor.TaxId
-                </div>
-            </div>
-
-            <!-- Items Table -->
-            <div class="table-responsive mb-4">
-                <table class="table table-bordered mb-0" style="min-width: 600px;">
-                    <thead class="table-light">
-                        <tr>
-                            <th style="width: 50px;">Lp.</th>
-                            <th>Nazwa towaru lub usługi</th>
-                            <th class="text-end" style="width: 100px;">Ilość</th>
-                            <th class="text-end" style="width: 150px;">Cena netto</th>
-                            <th class="text-end" style="width: 150px;">Wartość netto</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @for (int i = 0; i < Model.Items.Count; i++)
-                        {
-                            var item = Model.Items[i];
-                            <tr>
-                                <td>@(i + 1)</td>
-                                <td>@item.Name</td>
-                                <td class="text-end">@item.Quantity</td>
-                                <td class="text-end">@item.UnitPrice.ToString("N2") PLN</td>
-                                <td class="text-end">@item.TotalPrice.ToString("N2") PLN</td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Summary -->
-            <div class="row justify-content-end">
-                <div class="col-6">
-                    <div class="d-flex justify-content-between py-2 border-bottom">
-                        <span class="text-muted">Suma netto:</span>
-                        <strong>@Model.TotalAmount.ToString("N2") PLN</strong>
-                    </div>
-                    <div class="d-flex justify-content-between py-3">
-                        <span class="h5 m-0">RAZEM:</span>
-                        <span class="h5 fw-bold m-0 text-primary">@Model.TotalAmount.ToString("N2") PLN</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="invoice-footer">
-            Faktura wygenerowana automatycznie w systemie InvoiceSystem. Dziękujemy!
-        </div>
+        @await Html.PartialAsync("~/Shared/Components/_InvoicePreview.cshtml", previewDto)
     </div>
 </div>
 </div>
