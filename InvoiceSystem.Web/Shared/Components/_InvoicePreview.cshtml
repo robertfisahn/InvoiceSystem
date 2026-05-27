@@ -1,0 +1,100 @@
+@model InvoiceSystem.Web.Shared.Models.InvoicePreviewDto
+
+<div class="invoice-document shadow-lg" id="invoiceDoc">
+    <div class="invoice-content-wrap">
+        <!-- Header -->
+        <div class="d-flex justify-content-between mb-5">
+            <div>
+                <h2 class="invoice-logo">Invoice<span>System</span></h2>
+                <p class="text-muted small">@Model.Title</p>
+            </div>
+            <div class="text-end">
+                <h1 class="h3 mb-0">@Model.Title</h1>
+                <p class="fw-bold d-flex align-items-center justify-content-end gap-2">
+                    Nr: @Model.InvoiceNumber
+                    @if (!string.IsNullOrEmpty(Model.StatusText))
+                    {
+                        <span class="badge-status badge-status--@Model.StatusClass">@Model.StatusText</span>
+                    }
+                </p>
+                @if (!string.IsNullOrEmpty(Model.KsefNumber))
+                {
+                    <p class="small text-muted mb-0 text-monospace text-end" style="font-size: 0.75rem;">
+                        Numer KSeF: <span class="fw-bold">@Model.KsefNumber</span>
+                    </p>
+                }
+                else if (!string.IsNullOrEmpty(Model.KsefTransactionId))
+                {
+                    <p class="small text-muted mb-0 text-end" style="font-size: 0.75rem;">
+                        KSeF ID: <span class="fw-bold text-warning">@Model.KsefTransactionId</span> (Wysyłanie...)
+                    </p>
+                }
+                <p class="small text-muted mt-1">Data wystawienia: @Model.Date.ToShortDateString()</p>
+            </div>
+        </div>
+
+        <hr class="my-4" />
+
+        <!-- Contractor Info -->
+        <div class="row mb-4">
+            <div class="col-6">
+                <label class="text-muted small text-uppercase fw-bold d-block mb-2">Sprzedawca</label>
+                <strong>@Model.SellerName</strong><br />
+                NIP: @Model.SellerNip<br />
+                @(Html.Raw(Model.SellerAddress.Replace("\n", "<br />")))
+            </div>
+            <div class="col-6 text-end">
+                <label class="text-muted small text-uppercase fw-bold d-block mb-2">Nabywca</label>
+                <strong>@Model.BuyerName</strong><br />
+                NIP: @Model.BuyerNip<br />
+                @(Html.Raw(Model.BuyerAddress.Replace("\n", "<br />")))
+            </div>
+        </div>
+
+        <!-- Items Table -->
+        <div class="table-responsive mb-4">
+            <table class="table table-bordered mb-0" style="min-width: 600px;">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width: 50px;">Lp.</th>
+                        <th>Nazwa towaru lub usługi</th>
+                        <th class="text-end" style="width: 100px;">Ilość</th>
+                        <th class="text-end" style="width: 150px;">Cena netto</th>
+                        <th class="text-end" style="width: 150px;">Wartość netto</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (int i = 0; i < Model.Items.Count; i++)
+                    {
+                        var item = Model.Items[i];
+                        <tr>
+                            <td>@(i + 1)</td>
+                            <td>@item.Name</td>
+                            <td class="text-end">@item.Quantity</td>
+                            <td class="text-end">@item.UnitPrice.ToString("N2") PLN</td>
+                            <td class="text-end">@item.TotalPrice.ToString("N2") PLN</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Summary -->
+        <div class="row justify-content-end">
+            <div class="col-6">
+                <div class="d-flex justify-content-between py-2 border-bottom">
+                    <span class="text-muted">Suma netto:</span>
+                    <strong>@Model.TotalAmount.ToString("N2") PLN</strong>
+                </div>
+                <div class="d-flex justify-content-between py-3">
+                    <span class="h5 m-0">RAZEM:</span>
+                    <span class="h5 fw-bold m-0 text-primary">@Model.TotalAmount.ToString("N2") PLN</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="invoice-footer">
+        @Model.FooterText
+    </div>
+</div>

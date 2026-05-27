@@ -24,7 +24,21 @@ public sealed class KsefSyncBackgroundService : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        _logger.LogInformation("KSeF Sync Background Service started.");
+        try
+        {
+            _logger.LogInformation("KSeF Sync Background Service started. Waiting 1 minute before first sync run.");
+        }
+        catch {}
+
+        // Wait 1 minute before first sync to avoid rate-limiting manual actions on startup
+        try
+        {
+            await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken);
+        }
+        catch (TaskCanceledException)
+        {
+            return;
+        }
 
         while (!stoppingToken.IsCancellationRequested)
         {
@@ -34,11 +48,22 @@ public sealed class KsefSyncBackgroundService : BackgroundService
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error occurred during KSeF synchronization.");
+                try
+                {
+                    _logger.LogError(ex, "Error occurred during KSeF synchronization.");
+                }
+                catch {}
             }
 
-            // Sync every 5 minutes in development for highly responsive behavior
-            await Task.Delay(TimeSpan.FromMinutes(5), stoppingToken);
+            try
+            {
+                // Sync every 5 minutes in development for highly responsive behavior
+                await Task.Delay(TimeSpan.FromMinutes(5), stoppingToken);
+            }
+            catch (TaskCanceledException)
+            {
+                break;
+            }
         }
     }
 
@@ -92,18 +117,38 @@ public sealed class KsefSyncBackgroundService : BackgroundService
 
                     if (!exists)
                     {
-                        var newIncoming = new KsefIncomingInvoice
+                        try
                         {
-                            KsefNumber = dto.KsefNumber,
-                            SellerName = dto.SellerName,
-                            SellerNip = dto.SellerNip,
-                            IssueDate = dto.IssueDate,
-                            TotalAmount = dto.TotalAmount,
-                            RawXml = dto.RawXml,
-                            ImportStatus = KsefImportStatus.Pending
-                        };
-                        dbContext.KsefIncomingInvoices.Add(newIncoming);
-                        newCount++;
+                            // Wait briefly (250ms) to avoid aggressive crawling
+                            await Task.Delay(250, cancellationToken);
+
+                            // Download individual XML content for caching and save it immediately
+                            var rawXml = await ksefClient.DownloadInvoiceXmlAsync(sessionToken, dto.KsefNumber, cancellationToken);
+
+                            var newIncoming = new KsefIncomingInvoice
+                            {
+                                KsefNumber = dto.KsefNumber,
+                                SellerName = dto.SellerName,
+                                SellerNip = dto.SellerNip,
+                                IssueDate = dto.IssueDate,
+                                TotalAmount = dto.TotalAmount,
+                                RawXml = rawXml,
+                                ImportStatus = KsefImportStatus.Pending
+                            };
+                            dbContext.KsefIncomingInvoices.Add(newIncoming);
+                            await dbContext.SaveChangesAsync(cancellationToken);
+                            newCount++;
+                            _logger.LogInformation("Successfully imported new KSeF invoice: {KsefNumber}", dto.KsefNumber);
+                        }
+                        catch (Exception ex)
+                        {
+                            try
+                            {
+                                _logger.LogError(ex, "Failed to download XML or save incoming invoice {KsefNumber}", dto.KsefNumber);
+                            }
+                            catch {}
+                            // Continue to the next invoice so we don't abort the whole synchronization
+                        }
                     }
                 }
 
@@ -132,7 +177,11 @@ public sealed class KsefSyncBackgroundService : BackgroundService
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogError(ex, "Failed to poll status for transaction {TxId} of invoice {InvoiceNumber}", inv.KsefTransactionId, inv.InvoiceNumber);
+                        try
+                        {
+                            _logger.LogError(ex, "Failed to poll status for transaction {TxId} of invoice {InvoiceNumber}", inv.KsefTransactionId, inv.InvoiceNumber);
+                        }
+                        catch {}
                     }
                 }
 
@@ -149,7 +198,11 @@ public sealed class KsefSyncBackgroundService : BackgroundService
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to synchronize KSeF for NIP: {Nip}", setting.Nip);
+                try
+                {
+                    _logger.LogError(ex, "Failed to synchronize KSeF for NIP: {Nip}", setting.Nip);
+                }
+                catch {}
             }
         }
     }

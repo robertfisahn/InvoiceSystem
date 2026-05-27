@@ -11,6 +11,9 @@ public record ParsedKsefInvoice(
     string SellerName,
     string SellerNip,
     string SellerAddress,
+    string BuyerName,
+    string BuyerNip,
+    string BuyerAddress,
     decimal TotalAmount,
     List<ParsedKsefInvoiceItem> Items
 );
@@ -81,6 +84,65 @@ public static class KsefXmlParser
             }
         }
 
+        // Podmiot2 (Nabywca)
+        var podmiot2 = root.Elements().FirstOrDefault(e => e.Name.LocalName == "Podmiot2");
+        string buyerName = string.Empty;
+        string buyerNip = string.Empty;
+        string buyerAddress = string.Empty;
+
+        if (podmiot2 != null)
+        {
+            var danePodmiotu = podmiot2.Elements().FirstOrDefault(e => e.Name.LocalName == "DanePodmiotu");
+            if (danePodmiotu != null)
+            {
+                buyerNip = danePodmiotu.Elements().FirstOrDefault(e => e.Name.LocalName == "NIP")?.Value ?? string.Empty;
+                buyerName = danePodmiotu.Elements().FirstOrDefault(e => e.Name.LocalName == "Nazwa")?.Value ?? string.Empty;
+                
+                if (string.IsNullOrEmpty(buyerName))
+                {
+                    var fizyczna = danePodmiotu.Elements().FirstOrDefault(e => e.Name.LocalName == "OsobaFizyczna");
+                    if (fizyczna != null)
+                    {
+                        var imie = fizyczna.Elements().FirstOrDefault(e => e.Name.LocalName == "ImiePierwsze")?.Value ?? string.Empty;
+                        var nazwisko = fizyczna.Elements().FirstOrDefault(e => e.Name.LocalName == "Nazwisko")?.Value ?? string.Empty;
+                        buyerName = $"{imie} {nazwisko}".Trim();
+                    }
+                }
+            }
+
+            var adres = podmiot2.Elements().FirstOrDefault(e => e.Name.LocalName == "Adres");
+            if (adres != null)
+            {
+                var adresPol = adres.Elements().FirstOrDefault(e => e.Name.LocalName == "AdresPol");
+                if (adresPol != null)
+                {
+                    var ulica = adresPol.Elements().FirstOrDefault(e => e.Name.LocalName == "Ulica")?.Value;
+                    var nrDomu = adresPol.Elements().FirstOrDefault(e => e.Name.LocalName == "NrDomu")?.Value;
+                    var kodPocztowy = adresPol.Elements().FirstOrDefault(e => e.Name.LocalName == "KodPocztowy")?.Value;
+                    var miejscowosc = adresPol.Elements().FirstOrDefault(e => e.Name.LocalName == "Miejscowosc")?.Value;
+                    
+                    var addrParts = new List<string>();
+                    if (!string.IsNullOrEmpty(ulica))
+                    {
+                        addrParts.Add(ulica + (string.IsNullOrEmpty(nrDomu) ? "" : " " + nrDomu));
+                    }
+                    if (!string.IsNullOrEmpty(kodPocztowy) || !string.IsNullOrEmpty(miejscowosc))
+                    {
+                        addrParts.Add($"{kodPocztowy} {miejscowosc}".Trim());
+                    }
+                    buyerAddress = string.Join(", ", addrParts);
+                }
+                else
+                {
+                    var adresLnk = adres.Elements().FirstOrDefault(e => e.Name.LocalName == "AdresLnk");
+                    if (adresLnk != null)
+                    {
+                        buyerAddress = adresLnk.Elements().FirstOrDefault(e => e.Name.LocalName == "AdresTekst")?.Value ?? string.Empty;
+                    }
+                }
+            }
+        }
+
         // Fa - Dane faktury
         var fa = root.Elements().FirstOrDefault(e => e.Name.LocalName == "Fa");
         if (fa == null)
@@ -125,6 +187,9 @@ public static class KsefXmlParser
             sellerName,
             sellerNip,
             sellerAddress,
+            buyerName,
+            buyerNip,
+            buyerAddress,
             totalAmount,
             items
         );
