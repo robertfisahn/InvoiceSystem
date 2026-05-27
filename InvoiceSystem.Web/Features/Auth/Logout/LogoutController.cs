@@ -5,6 +5,7 @@ using InvoiceSystem.Web.Domain.Entities;
 namespace InvoiceSystem.Web.Features.Auth.Logout;
 
 [Route("/auth/logout")]
+[ApiExplorerSettings(IgnoreApi = true)]
 public sealed class LogoutController(SignInManager<AppUser> signInManager) : Controller
 {
     [HttpPost]

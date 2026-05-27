@@ -6,6 +6,7 @@ namespace InvoiceSystem.Web.Features.Auth.Login;
 
 [AllowAnonymous]
 [Route("/auth/login")]
+[ApiExplorerSettings(IgnoreApi = true)]
 public sealed class LoginController(IMediator mediator) : Controller
 {
     [HttpGet]
