@@ -146,9 +146,9 @@
                                 </td>
                                 <td data-label="Akcje" class="text-center">
                                     <div class="d-flex justify-content-center gap-1 flex-wrap">
-                                        <button type="button" class="btn btn-sm btn-outline-primary preview-btn" data-id="@invoice.Id">
+                                        <a href="/ksef/inbox/details/@invoice.Id" class="btn btn-sm btn-outline-primary">
                                             <i class="bi bi-eye"></i> Podgląd
-                                        </button>
+                                        </a>
                                         
                                         @if (invoice.ImportStatus == KsefImportStatus.Pending)
                                         {
@@ -195,39 +195,9 @@
     </div>
 </div>
 
-<!-- Modal Podglądu Faktury KSeF -->
-<div class="modal fade" id="previewModal" tabindex="-1" aria-labelledby="previewModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content" style="background-color: var(--bg-secondary); border: 1px solid var(--border-strong);">
-            <div class="modal-header" style="border-bottom: 1px solid var(--border);">
-                <h5 class="modal-title fw-bold" id="previewModalLabel" style="color: var(--text-primary);">
-                    <i class="bi bi-file-earmark-text-fill text-primary me-2"></i> Podgląd e-Faktury z KSeF
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body" id="modalBodyContent" style="background-color: var(--bg-tertiary); max-height: 70vh; overflow-y: auto; padding: 1.5rem;">
-                <!-- Ładowanie danych dynamicznie -->
-                <div class="text-center py-5">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Ładowanie...</span>
-                    </div>
-                    <p class="text-muted mt-2">Trwa pobieranie i parsowanie struktury XML...</p>
-                </div>
-            </div>
-            <div class="modal-footer" style="border-top: 1px solid var(--border);">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Zamknij</button>
-                <div id="modalImportActionContainer"></div>
-            </div>
-        </div>
-    </div>
-</div>
-
 @section Scripts {
     <script>
         $(function() {
-            // ==========================================
-            // PAGINACJA, SORTOWANIE I FILTROWANIE TABELI
-            // ==========================================
             let currentPage = 1;
             let pageSize = parseInt($('#pageSize').val());
             let sortColumn = 'date';
@@ -269,10 +239,10 @@
 
                 $allRows.hide();
                 const start = (currentPage - 1) * pageSize;
-                const end = start + pageSize;
-                $filteredRows.slice(start, end).show();
+                const textEnd = start + pageSize;
+                $filteredRows.slice(start, textEnd).show();
 
-                // 3. Renderowanie numerów stron (Sliding Window)
+                // 3. Renderowanie numerów stron
                 const $numbersWrap = $('#paginationNumbers');
                 $numbersWrap.empty();
                 
@@ -324,7 +294,7 @@
                 }
 
                 const showStart = totalItems === 0 ? 0 : start + 1;
-                const showEnd = Math.min(end, totalItems);
+                const showEnd = Math.min(textEnd, totalItems);
                 $('#paginationInfo').html(`Pokazano <strong>${showStart}-${showEnd}</strong> z <strong>${totalItems}</strong> faktur`);
                 
                 $('#prevPage').prop('disabled', currentPage === 1);
@@ -349,191 +319,8 @@
                 if (currentPage < Math.ceil(totalItems / pageSize)) { currentPage++; updateTable(); } 
             });
 
-            // Aktywuj domyślne sortowanie
             $('.sortable[data-sort="date"]').addClass('active').find('i').attr('class', 'bi bi-sort-down');
             updateTable();
-
-            // ==========================================
-            // PREVIEW MODAL DYNAMIC RENDERING (A4 PREVIEW)
-            // ==========================================
-            document.querySelectorAll('.preview-btn').forEach(btn => {
-                btn.addEventListener('click', async function() {
-                    const id = this.getAttribute('data-id');
-                    const modal = new bootstrap.Modal(document.getElementById('previewModal'));
-                    const body = document.getElementById('modalBodyContent');
-                    const actionContainer = document.getElementById('modalImportActionContainer');
-                    
-                    body.innerHTML = `
-                        <div class="text-center py-5">
-                            <div class="spinner-border text-primary" role="status">
-                                <span class="visually-hidden">Ładowanie...</span>
-                            </div>
-                            <p class="text-muted mt-2">Trwa pobieranie i parsowanie struktury XML...</p>
-                        </div>
-                    `;
-                    actionContainer.innerHTML = '';
-                    
-                    modal.show();
-                    
-                    try {
-                        const response = await fetch(`/ksef/inbox/preview/${id}`);
-                        const res = await response.json();
-                        
-                        if (!res.success) {
-                            body.innerHTML = `<div class="alert alert-danger">${res.message || 'Wystąpił błąd podczas pobierania podglądu.'}</div>`;
-                            return;
-                        }
-                        
-                        // Render items
-                        let itemsHtml = '';
-                        res.items.forEach((item, index) => {
-                            itemsHtml += `
-                                <tr>
-                                    <td>${index + 1}</td>
-                                    <td>${item.name}</td>
-                                    <td class="text-end">${item.quantity}</td>
-                                    <td class="text-end">${item.unitPrice.toFixed(2)} PLN</td>
-                                    <td class="text-end" style="font-weight: 600;">${item.totalPrice.toFixed(2)} PLN</td>
-                                </tr>
-                            `;
-                        });
-
-                        body.innerHTML = `
-                            <div class="invoice-miniature-wrapper" id="invoiceWrapper">
-                                <div class="invoice-document" id="invoiceDoc" style="padding: 2.5rem !important; min-height: auto; margin: 0 auto; box-shadow: none !important;">
-                                    <div class="invoice-content-wrap">
-                                        <!-- Header -->
-                                        <div class="d-flex justify-content-between mb-4 pb-3 border-bottom">
-                                            <div>
-                                                <h2 class="invoice-logo">Invoice<span>System</span></h2>
-                                                <p class="text-muted small mb-0">Rządowa e-Faktura KSeF</p>
-                                            </div>
-                                            <div class="text-end">
-                                                <h4 class="fw-bold text-primary mb-1">${res.invoiceNumber}</h4>
-                                                <span class="text-muted small">Data wystawienia: <strong>${res.date}</strong></span>
-                                            </div>
-                                        </div>
-
-                                        <!-- Issuer & Buyer -->
-                                        <div class="row mb-4">
-                                            <div class="col-6">
-                                                <label class="text-muted small text-uppercase fw-bold d-block mb-1">Sprzedawca</label>
-                                                <strong>${res.sellerName}</strong><br />
-                                                <span class="text-muted small">NIP: ${res.sellerNip}</span><br />
-                                                <span class="text-muted small">${res.sellerAddress}</span>
-                                            </div>
-                                            <div class="col-6 text-end">
-                                                <label class="text-muted small text-uppercase fw-bold d-block mb-1">Nabywca</label>
-                                                <strong>InvoiceSystem Enterprise</strong><br />
-                                                <span class="text-muted small">NIP: 1111111111</span><br />
-                                                <span class="text-muted small">ul. Technologiczna 12</span>
-                                            </div>
-                                        </div>
-
-                                        <!-- Table of items -->
-                                        <div class="table-responsive mb-4">
-                                            <table class="table table-bordered mb-0" style="width: 100%;">
-                                                <thead class="table-light">
-                                                    <tr>
-                                                        <th style="width: 50px;">Lp.</th>
-                                                        <th>Nazwa towaru lub usługi</th>
-                                                        <th class="text-end" style="width: 80px;">Ilość</th>
-                                                        <th class="text-end" style="width: 120px;">Cena netto</th>
-                                                        <th class="text-end" style="width: 120px;">Suma netto</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    ${itemsHtml}
-                                                </tbody>
-                                            </table>
-                                        </div>
-
-                                        <!-- Summary -->
-                                        <div class="row justify-content-end">
-                                            <div class="col-6">
-                                                <div class="d-flex justify-content-between py-2 border-bottom">
-                                                    <span class="text-muted">Suma netto:</span>
-                                                    <strong>${res.totalAmount.toFixed(2)} PLN</strong>
-                                                </div>
-                                                <div class="d-flex justify-content-between py-2">
-                                                    <span class="h6 fw-bold m-0">RAZEM:</span>
-                                                    <span class="h6 fw-bold m-0 text-primary">${res.totalAmount.toFixed(2)} PLN</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="invoice-footer">
-                                        Faktura pobrana automatycznie z Krajowego Systemu e-Faktur (KSeF).
-                                    </div>
-                                </div>
-                            </div>
-                        `;
-
-                        // If status is Pending, offer an import action inside the modal
-                        actionContainer.innerHTML = `
-                            <form action="/ksef/inbox/import/${id}" method="post" class="d-inline">
-                                <input type="hidden" name="__RequestVerificationToken" value="${document.querySelector('input[name="__RequestVerificationToken"]').value}" />
-                                <button type="submit" class="btn btn-success">
-                                    <i class="bi bi-plus-circle me-1"></i> Zaimportuj do systemu
-                                </button>
-                            </form>
-                        `;
-                    } catch(err) {
-                        body.innerHTML = `<div class="alert alert-danger">Błąd krytyczny: ${err.message}</div>`;
-                    }
-                });
-            });
-
-            // Scaling logic for KSeF invoice preview modal on mobile
-            const INVOICE_WIDTH = 800;
-            const SIDE_PADDING = 16;
-
-            function scaleKsefInvoice() {
-                const wrapper = document.getElementById('invoiceWrapper');
-                const invoiceDoc = document.getElementById('invoiceDoc');
-                if (!wrapper || !invoiceDoc) return;
-
-                if (window.innerWidth >= 768) {
-                    invoiceDoc.style.transform = '';
-                    wrapper.style.height = '';
-                    wrapper.style.cursor = '';
-                    return;
-                }
-
-                if (wrapper.classList.contains('zoomed')) {
-                    invoiceDoc.style.transform = 'scale(1)';
-                    wrapper.style.height = '';
-                    wrapper.style.cursor = 'zoom-out';
-                    return;
-                }
-
-                var availableWidth = wrapper.clientWidth - SIDE_PADDING;
-                if (availableWidth <= 0) {
-                    const modalBody = document.getElementById('modalBodyContent');
-                    if (modalBody) {
-                        availableWidth = modalBody.clientWidth - 32;
-                    }
-                }
-
-                var scale = Math.min(availableWidth / INVOICE_WIDTH, 1);
-                invoiceDoc.style.transform = 'scale(' + scale + ')';
-                wrapper.style.height = (invoiceDoc.scrollHeight * scale) + 'px';
-                wrapper.style.cursor = 'zoom-in';
-            }
-
-            // Click zoom toggle using event delegation
-            document.addEventListener('click', function(e) {
-                const wrapper = e.target.closest('#invoiceWrapper');
-                if (wrapper) {
-                    if (window.innerWidth >= 768) return;
-                    wrapper.classList.toggle('zoomed');
-                    scaleKsefInvoice();
-                }
-            });
-
-            // Rescale on window resize or when modal is shown
-            window.addEventListener('resize', scaleKsefInvoice);
-            document.getElementById('previewModal').addEventListener('shown.bs.modal', scaleKsefInvoice);
         });
     </script>
     <style>
