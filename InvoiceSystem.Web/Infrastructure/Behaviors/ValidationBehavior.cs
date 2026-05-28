@@ -1,9 +1,13 @@
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using FluentValidation;
 using MediatR;
 
-namespace InvoiceSystem.Web.Shared.Behaviors;
+namespace InvoiceSystem.Web.Infrastructure.Behaviors;
 
-public class ValidationBehavior<TRequest, TResponse>(IEnumerable<IValidator<TRequest>> validators) 
+public sealed class ValidationBehavior<TRequest, TResponse>(IEnumerable<IValidator<TRequest>> validators) 
     : IPipelineBehavior<TRequest, TResponse>
     where TRequest : notnull
 {

@@ -8,11 +8,10 @@ using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using InvoiceSystem.Web.Infrastructure.Configuration;
-using InvoiceSystem.Web.Shared.Interfaces;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace InvoiceSystem.Web.Infrastructure.Services;
+namespace InvoiceSystem.Web.Infrastructure.Services.Llm;
 
 public sealed class LlmService(
     IHttpClientFactory httpClientFactory,
@@ -176,18 +175,18 @@ public sealed class LlmService(
                "You must return ONLY a JSON object matching this schema exactly, and nothing else. Do not output any markdown blocks, do not wrap the JSON in ```json or ```, do not include preamble, notes, explanations, or extra text.\n" +
                "Strict JSON Schema:\n" +
                "{\n" +
-                 "  \"BuyerName\": \"string (name of the client company/buyer)\",\n" +
-                 "  \"BuyerTaxId\": \"string (NIP of the buyer, digits only)\",\n" +
-                 "  \"BuyerAddress\": \"string (complete postal address of the buyer)\",\n" +
-                 "  \"InvoiceNumber\": \"string (the invoice number/id from the document)\",\n" +
-                 "  \"Date\": \"string (YYYY-MM-DD)\",\n" +
-                 "  \"Items\": [\n" +
-                 "    {\n" +
-                 "      \"Name\": \"string (description of the item/service)\",\n" +
-                 "      \"Quantity\": number,\n" +
-                 "      \"UnitPrice\": number\n" +
-                 "    }\n" +
-                 "  ]\n" +
+               "  \"BuyerName\": \"string (name of the client company/buyer)\",\n" +
+               "  \"BuyerTaxId\": \"string (NIP of the buyer, digits only)\",\n" +
+               "  \"BuyerAddress\": \"string (complete postal address of the buyer)\",\n" +
+               "  \"InvoiceNumber\": \"string (the invoice number/id from the document)\",\n" +
+               "  \"Date\": \"string (YYYY-MM-DD)\",\n" +
+               "  \"Items\": [\n" +
+               "    {\n" +
+               "      \"Name\": \"string (description of the item/service)\",\n" +
+               "      \"Quantity\": number,\n" +
+               "      \"UnitPrice\": number\n" +
+               "    }\n" +
+               "  ]\n" +
                "}";
     }
 

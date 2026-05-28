@@ -1,11 +1,14 @@
-using InvoiceSystem.Web.Shared.Interfaces;
-using InvoiceSystem.Web.Shared.Models;
+using System;
+using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
+using InvoiceSystem.Web.Infrastructure.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace InvoiceSystem.Web.Infrastructure.Services;
+namespace InvoiceSystem.Web.Infrastructure.Services.Storage;
 
-public class FileStorageService(
+public sealed class FileStorageService(
     IOptions<StorageSettings> settings, 
     ILogger<FileStorageService> logger) : IFileStorageService
 {

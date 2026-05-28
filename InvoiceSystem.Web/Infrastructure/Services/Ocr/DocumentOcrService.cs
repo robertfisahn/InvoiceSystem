@@ -1,16 +1,16 @@
+using System;
 using System.IO;
 using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using InvoiceSystem.Web.Shared.Interfaces;
-using InvoiceSystem.Web.Shared.Models;
+using InvoiceSystem.Web.Infrastructure.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Tesseract;
 using UglyToad.PdfPig;
 
-namespace InvoiceSystem.Web.Infrastructure.Services;
+namespace InvoiceSystem.Web.Infrastructure.Services.Ocr;
 
 public sealed class DocumentOcrService(
     IOptions<StorageSettings> storageSettings,

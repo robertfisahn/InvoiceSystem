@@ -2,7 +2,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace InvoiceSystem.Web.Shared.Interfaces;
+namespace InvoiceSystem.Web.Infrastructure.Services.Storage;
 
 public interface IFileStorageService
 {

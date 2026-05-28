@@ -3,10 +3,8 @@ using System.Linq;
 using InvoiceSystem.Web.Domain.Entities;
 using InvoiceSystem.Web.Features.Invoices.GetInvoiceDetails;
 using InvoiceSystem.Web.Infrastructure.Ksef;
-using InvoiceSystem.Web.Shared.Interfaces;
-using InvoiceSystem.Web.Shared.Models;
 
-namespace InvoiceSystem.Web.Shared.Services;
+namespace InvoiceSystem.Web.Infrastructure.Services.Preview;
 
 public sealed class InvoicePreviewService : IInvoicePreviewService
 {

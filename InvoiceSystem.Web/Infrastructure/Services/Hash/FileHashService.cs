@@ -1,9 +1,12 @@
-using InvoiceSystem.Web.Shared.Interfaces;
+using System;
+using System.IO;
 using System.Security.Cryptography;
+using System.Threading;
+using System.Threading.Tasks;
 
-namespace InvoiceSystem.Web.Infrastructure.Services;
+namespace InvoiceSystem.Web.Infrastructure.Services.Hash;
 
-public class FileHashService : IFileHashService
+public sealed class FileHashService : IFileHashService
 {
     public async Task<string> CalculateHashAsync(Stream stream, CancellationToken ct)
     {

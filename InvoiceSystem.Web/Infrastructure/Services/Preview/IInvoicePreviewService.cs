@@ -1,8 +1,7 @@
 using InvoiceSystem.Web.Features.Invoices.GetInvoiceDetails;
 using InvoiceSystem.Web.Infrastructure.Ksef;
-using InvoiceSystem.Web.Shared.Models;
 
-namespace InvoiceSystem.Web.Shared.Interfaces;
+namespace InvoiceSystem.Web.Infrastructure.Services.Preview;
 
 public interface IInvoicePreviewService
 {

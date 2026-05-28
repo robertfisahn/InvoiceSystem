@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace InvoiceSystem.Web.Shared.Interfaces;
+namespace InvoiceSystem.Web.Infrastructure.Services.Llm;
 
 public record LlmInvoiceDto(
     string BuyerName,

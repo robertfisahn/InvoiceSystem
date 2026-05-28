@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace InvoiceSystem.Web.Shared.Models;
+namespace InvoiceSystem.Web.Infrastructure.Services.Preview;
 
 public sealed class InvoicePreviewDto
 {
