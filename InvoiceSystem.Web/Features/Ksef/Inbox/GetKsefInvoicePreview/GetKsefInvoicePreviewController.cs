@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace InvoiceSystem.Web.Features.Ksef.Inbox.GetKsefInvoicePreview;
 
 [Route("ksef/inbox")]
+[Microsoft.AspNetCore.Http.Tags("KSeF")]
 public sealed class GetKsefInvoicePreviewController(IMediator mediator) : Controller
 {
     [HttpGet("preview/{id:int}")]

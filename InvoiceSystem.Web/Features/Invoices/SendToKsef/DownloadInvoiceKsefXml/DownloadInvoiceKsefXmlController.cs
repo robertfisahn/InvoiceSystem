@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace InvoiceSystem.Web.Features.Invoices.SendToKsef.DownloadInvoiceKsefXml;
 
 [Route("invoices")]
-[Tags("Invoices - KSeF")]
+[Tags("Invoices")]
 public sealed class DownloadInvoiceKsefXmlController(IMediator mediator) : Controller
 {
     [HttpGet("{id:int}/ksef-xml")]

@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace InvoiceSystem.Web.Features.Ksef.Configuration.TestKsefConnection;
 
 [Route("ksef")]
+[Microsoft.AspNetCore.Http.Tags("KSeF")]
 public sealed class TestKsefConnectionController(IMediator mediator) : Controller
 {
     [HttpPost("test-connection")]

@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace InvoiceSystem.Web.Features.Contractors.CreateContractor.CreateContractorCommand;
 
 [Route("contractors/create")]
-[Tags("Contractors - Management")]
+[Tags("Contractors")]
 public sealed class CreateContractorCommandController(IMediator mediator) : Controller
 {
     [HttpPost]

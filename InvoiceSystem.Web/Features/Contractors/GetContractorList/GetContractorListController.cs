@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 namespace InvoiceSystem.Web.Features.Contractors.GetContractorList;
 
 [Route("contractors")]
+[Microsoft.AspNetCore.Http.Tags("Contractors")]
 public sealed class GetContractorListController(IMediator mediator) : Controller
 {
     [HttpGet]

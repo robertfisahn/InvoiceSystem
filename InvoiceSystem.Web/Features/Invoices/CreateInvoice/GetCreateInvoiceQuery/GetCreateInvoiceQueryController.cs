@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace InvoiceSystem.Web.Features.Invoices.CreateInvoice.GetCreateInvoiceQuery;
 
 [Route("invoices/create")]
-[Tags("Invoices - Management")]
+[Tags("Invoices")]
 public sealed class GetCreateInvoiceQueryController(IMediator mediator) : Controller
 {
     [HttpGet]

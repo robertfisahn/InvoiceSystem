@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace InvoiceSystem.Web.Features.Invoices.GenerateSample;
 
 [Route("invoices/generator")]
+[Microsoft.AspNetCore.Http.Tags("Invoices")]
 public sealed class GenerateSampleController(IMediator mediator) : Controller
 {
     [HttpGet]

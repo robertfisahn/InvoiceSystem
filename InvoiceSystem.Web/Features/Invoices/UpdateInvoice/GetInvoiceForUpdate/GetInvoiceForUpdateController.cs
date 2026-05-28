@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace InvoiceSystem.Web.Features.Invoices.UpdateInvoice.GetInvoiceForUpdate;
 
 [Route("invoices/update")]
-[Tags("Invoices - Management")]
+[Tags("Invoices")]
 public sealed class GetInvoiceForUpdateController(IMediator mediator) : Controller
 {
     [HttpGet("{id}")]

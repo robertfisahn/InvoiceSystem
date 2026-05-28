@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace InvoiceSystem.Web.Features.Invoices.SendToKsef.SendInvoiceToKsef;
 
 [Route("invoices")]
-[Tags("Invoices - KSeF")]
+[Tags("Invoices")]
 public sealed class SendInvoiceToKsefController(IMediator mediator) : Controller
 {
     [HttpPost("{id:int}/send-to-ksef")]

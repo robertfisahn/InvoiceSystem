@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace InvoiceSystem.Web.Features.Invoices.ConfirmInvoice;
 
 [Route("invoices")]
+[Microsoft.AspNetCore.Http.Tags("Invoices")]
 public sealed class ConfirmInvoiceController(IMediator mediator) : Controller
 {
     [HttpPost("confirm/{id}")]

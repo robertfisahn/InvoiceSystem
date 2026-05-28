@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace InvoiceSystem.Web.Features.Invoices.Import.ImportInvoice;
 
 [Route("invoices/import")]
-[Tags("Invoices - Import")]
+[Tags("Invoices")]
 public sealed class ImportInvoiceController(IMediator mediator) : Controller
 {
     [HttpGet]

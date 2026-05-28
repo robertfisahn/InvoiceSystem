@@ -10,7 +10,7 @@ using Microsoft.Extensions.Caching.Memory;
 namespace InvoiceSystem.Web.Features.Invoices.Import.AnalyzeOcr;
 
 [Route("invoices/import/analyze")]
-[Tags("Invoices - Import")]
+[Tags("Invoices")]
 public sealed class AnalyzeOcrController(
     IMediator mediator,
     IMemoryCache cache

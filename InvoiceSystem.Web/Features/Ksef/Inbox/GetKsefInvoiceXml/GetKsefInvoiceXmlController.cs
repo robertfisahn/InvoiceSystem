@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace InvoiceSystem.Web.Features.Ksef.Inbox.GetKsefInvoiceXml;
 
 [Route("ksef/inbox")]
+[Microsoft.AspNetCore.Http.Tags("KSeF")]
 public sealed class GetKsefInvoiceXmlController(IMediator mediator) : Controller
 {
     [HttpGet("xml/{id:int}")]
