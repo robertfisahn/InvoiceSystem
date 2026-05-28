@@ -1,5 +1,5 @@
 @model InvoiceSystem.Web.Features.Invoices.GetInvoiceDetails.GetInvoiceDetailsViewModel
-@inject InvoiceSystem.Web.Shared.Interfaces.IInvoicePreviewService PreviewService
+@inject InvoiceSystem.Web.Infrastructure.Services.Preview.IInvoicePreviewService PreviewService
 @{
     ViewData["Title"] = $"Faktura {Model.InvoiceNumber}";
     var previewDto = PreviewService.MapFromInvoice(Model);
