@@ -31,10 +31,7 @@ public sealed class TestKsefConnectionCommandHandler(IKsefClient ksefClient)
             );
 
             // 3. Clean up / close test session
-            if (!sessionToken.StartsWith("mock-session"))
-            {
-                await ksefClient.CloseSessionAsync(sessionToken, cancellationToken);
-            }
+            await ksefClient.CloseSessionAsync(sessionToken, cancellationToken);
 
             return new TestKsefConnectionResult(true, "Połączenie z Sandboxem KSeF nawiązane pomyślnie!");
         }

@@ -186,10 +186,7 @@ public sealed class KsefSyncBackgroundService : BackgroundService
                 }
 
                 // 4. Close session
-                if (!sessionToken.StartsWith("mock-session"))
-                {
-                    await ksefClient.CloseSessionAsync(sessionToken, cancellationToken);
-                }
+                await ksefClient.CloseSessionAsync(sessionToken, cancellationToken);
 
                 setting.LastSyncDate = DateTime.UtcNow;
                 await dbContext.SaveChangesAsync(cancellationToken);

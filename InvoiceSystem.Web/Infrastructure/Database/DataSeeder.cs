@@ -110,15 +110,15 @@ public static class DataSeeder
     {
         if (await context.KsefSettings.AnyAsync()) return;
 
-        var mockSetting = new KsefSetting
+        var placeholderSetting = new KsefSetting
         {
-            Nip = "1111111111",
-            ApiKey = "mock_demo_key",
-            IsEnabled = true,
-            LastSyncDate = DateTime.UtcNow.AddDays(-1)
+            Nip = "",
+            ApiKey = "",
+            IsEnabled = false,
+            LastSyncDate = null
         };
 
-        context.KsefSettings.Add(mockSetting);
+        context.KsefSettings.Add(placeholderSetting);
         await context.SaveChangesAsync();
     }
 

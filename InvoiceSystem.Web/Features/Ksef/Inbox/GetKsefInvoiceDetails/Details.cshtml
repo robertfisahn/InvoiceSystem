@@ -1,5 +1,5 @@
 @model InvoiceSystem.Web.Infrastructure.Ksef.ParsedKsefInvoice
-@inject InvoiceSystem.Web.Shared.Interfaces.IInvoicePreviewService PreviewService
+@inject InvoiceSystem.Web.Infrastructure.Services.Preview.IInvoicePreviewService PreviewService
 @{
     ViewData["Title"] = $"e-Faktura KSeF {Model.InvoiceNumber}";
     var previewDto = PreviewService.MapFromKsef(Model, ViewBag.KsefNumber as string);

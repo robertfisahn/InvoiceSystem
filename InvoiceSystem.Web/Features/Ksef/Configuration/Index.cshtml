@@ -104,33 +104,20 @@
                         </h3>
                     </div>
                     <div class="data-card__body">
-                        <h5>1. Tryb Symulacji (Mock Mode)</h5>
                         <p class="text-muted">
-                            W celach demonstracyjnych i deweloperskich system posiada wbudowany tryb symulatora. 
-                            Aby go aktywować, użyj następujących parametrów:
-                        </p>
-                        <ul>
-                            <li><strong>NIP Firmy:</strong> <code>1111111111</code></li>
-                            <li><strong>Token Autoryzacyjny (API Key):</strong> wpisz cokolwiek zaczynające się od <code>mock</code> (np. <code>mock_demo_key</code>).</li>
-                        </ul>
-                        <p class="text-muted">
-                            W tym trybie system nie łączy się z serwerami Ministerstwa Finansów, lecz symuluje idealne odpowiedzi (w tym pobieranie faktur XML i wystawianie e-faktur z pobieraniem UPO).
-                        </p>
-
-                        <h5 class="mt-4">2. Tryb Rzeczywisty (MF Sandbox)</h5>
-                        <p class="text-muted">
-                            Jeśli chcesz przetestować rzeczywiste połączenie ze środowiskiem testowym Ministerstwa Finansów:
+                            Aplikacja integruje się bezpośrednio z oficjalnym środowiskiem testowym Ministerstwa Finansów (KSeF Sandbox):
                         </p>
                         <ol>
-                            <li>Wejdź na stronę KSeF Klient Demonstracyjny lub Aplikację Podatnika KSeF (środowisko testowe).</li>
-                            <li>Zaloguj się profilem zaufanym lub certyfikatem i wygeneruj <strong>Token Autoryzacyjny</strong>.</li>
-                            <li>Wpisz wygenerowany NIP oraz Token w formularzu po lewej stronie.</li>
-                            <li>Kliknij "Testuj połączenie". System nawiąże szyfrowaną sesję RSA-OAEP i sprawdzi status połączenia.</li>
+                            <li class="mb-2">Wejdź na stronę <strong>Aplikacji Podatnika KSeF (środowisko testowe)</strong> lub Klienta Demonstracyjnego.</li>
+                            <li class="mb-2">Zaloguj się (np. profilem zaufanym lub podpisem elektronicznym) na dane testowe i wygeneruj <strong>Token Autoryzacyjny (API Key)</strong> z uprawnieniami do wystawiania oraz pobierania faktur.</li>
+                            <li class="mb-2">Wpisz NIP firmy oraz wygenerowany Token w formularzu konfiguracyjnym po lewej stronie.</li>
+                            <li class="mb-2">Włącz przełącznik <strong>"Włącz synchronizację w tle"</strong>, aby system automatycznie sprawdzał i pobierał nowe e-faktury co 5 minut w tle.</li>
+                            <li class="mb-2">Kliknij <strong>"Testuj połączenie"</strong>. System nawiąże szyfrowane wyzwanie (Challenge), prześle zaszyfrowany klucz publiczny RSA-OAEP SHA-256 i sprawdzi poprawność autoryzacji sesji.</li>
                         </ol>
                         
                         <div class="alert alert-warning mt-4 mb-0" style="background: rgba(245, 158, 11, 0.05); border: 1px dashed rgba(245, 158, 11, 0.25); color: #d97706;">
                             <i class="bi bi-shield-lock-fill me-2"></i>
-                            <strong>Ważne:</strong> Środowisko testowe służy wyłącznie do celów integracyjnych. Nigdy nie przesyłaj tutaj prawdziwych, wrażliwych danych finansowych firmy.
+                            <strong>Ważne:</strong> Połączenie ze środowiskiem testowym Sandbox służy wyłącznie do celów weryfikacyjnych i demonstracyjnych. Nie przesyłaj tutaj prawdziwych, produkcyjnych dokumentów finansowych.
                         </div>
                     </div>
                 </div>

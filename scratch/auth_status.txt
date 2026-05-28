@@ -1,1 +1,1 @@
-{"startDate":"2026-05-27T20:51:17.6086985+00:00","authenticationMethod":"Token","authenticationMethodInfo":{"category":"Token","code":"token.ksef","displayName":"Token KSeF"},"status":{"code":200,"description":"Uwierzytelnianie zakończone sukcesem"},"isTokenRedeemed":false}
+{"startDate":"2026-05-28T18:04:39.2825693+00:00","authenticationMethod":"Token","authenticationMethodInfo":{"category":"Token","code":"token.ksef","displayName":"Token KSeF"},"status":{"code":200,"description":"Uwierzytelnianie zakończone sukcesem"},"isTokenRedeemed":false}
