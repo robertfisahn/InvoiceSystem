@@ -6,7 +6,7 @@ using Microsoft.Extensions.Caching.Memory;
 namespace InvoiceSystem.Web.Features.Contractors.CreateContractor.GetCreateContractorQuery;
 
 [Route("contractors/create")]
-[Tags("Contractors")]
+[ApiExplorerSettings(IgnoreApi = true)]
 public sealed class GetCreateContractorQueryController(IMemoryCache cache) : Controller
 {
     [HttpGet]

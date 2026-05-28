@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace InvoiceSystem.Web.Features.Ksef.Inbox.GetKsefInbox;
 
 [Route("ksef/inbox")]
-[Microsoft.AspNetCore.Http.Tags("KSeF")]
+[ApiExplorerSettings(IgnoreApi = true)]
 public sealed class GetKsefInboxController(IMediator mediator) : Controller
 {
     [HttpGet]

@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace InvoiceSystem.Web.Features.Ksef.Inbox.IgnoreKsefInvoice;
 
 [Route("ksef/inbox")]
-[Microsoft.AspNetCore.Http.Tags("KSeF")]
+[ApiExplorerSettings(IgnoreApi = true)]
 public sealed class IgnoreKsefInvoiceController(IMediator mediator) : Controller
 {
     [HttpPost("ignore/{id:int}")]

@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace InvoiceSystem.Web.Features.Invoices.DeleteInvoice;
 
 [Route("invoices/delete")]
-[Microsoft.AspNetCore.Http.Tags("Invoices")]
+[ApiExplorerSettings(IgnoreApi = true)]
 public sealed class DeleteInvoiceController(IMediator mediator) : Controller
 {
     [HttpPost("{id}")]

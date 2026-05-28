@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace InvoiceSystem.Web.Features.Invoices.MarkAsPaid;
 
 [Route("invoices")]
-[Microsoft.AspNetCore.Http.Tags("Invoices")]
+[ApiExplorerSettings(IgnoreApi = true)]
 public sealed class MarkAsPaidController(IMediator mediator) : Controller
 {
     [HttpPost("pay/{id}")]

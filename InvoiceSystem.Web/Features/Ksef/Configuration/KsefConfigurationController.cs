@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace InvoiceSystem.Web.Features.Ksef.Configuration;
 
 [Route("ksef")]
-[Microsoft.AspNetCore.Http.Tags("KSeF")]
+[ApiExplorerSettings(IgnoreApi = true)]
 public sealed class KsefConfigurationController(IMediator mediator) : Controller
 {
     [HttpGet("config")]

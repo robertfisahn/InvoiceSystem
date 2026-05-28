@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace InvoiceSystem.Web.Features.Invoices.GetInvoiceDetails;
 
 [Route("invoices")]
-[Microsoft.AspNetCore.Http.Tags("Invoices")]
+[ApiExplorerSettings(IgnoreApi = true)]
 public sealed class GetInvoiceDetailsController(IMediator mediator) : Controller
 {
     [HttpGet("{id:int}")]

@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace InvoiceSystem.Web.Features.Invoices.CreateInvoice.CreateInvoiceCommand;
 
 [Route("invoices/create")]
-[Tags("Invoices")]
+[ApiExplorerSettings(IgnoreApi = true)]
 public sealed class CreateInvoiceCommandController(IMediator mediator) : Controller
 {
     [HttpPost]

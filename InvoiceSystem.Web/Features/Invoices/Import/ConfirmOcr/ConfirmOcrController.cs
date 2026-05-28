@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace InvoiceSystem.Web.Features.Invoices.Import.ConfirmOcr;
 
 [Route("invoices/import/confirm")]
-[Tags("Invoices")]
+[ApiExplorerSettings(IgnoreApi = true)]
 public sealed class ConfirmOcrController(IMediator mediator) : Controller
 {
     [HttpPost]

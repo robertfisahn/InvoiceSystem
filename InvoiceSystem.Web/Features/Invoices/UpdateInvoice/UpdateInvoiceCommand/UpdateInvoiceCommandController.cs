@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace InvoiceSystem.Web.Features.Invoices.UpdateInvoice.UpdateInvoiceCommand;
 
 [Route("invoices/update")]
-[Tags("Invoices")]
+[ApiExplorerSettings(IgnoreApi = true)]
 public sealed class UpdateInvoiceCommandController(IMediator mediator) : Controller
 {
     [HttpPost("{id}")]

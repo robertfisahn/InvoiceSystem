@@ -9,6 +9,7 @@ namespace InvoiceSystem.Web.Features.Invoices.GenerateSample;
 public sealed class GenerateSampleController(IMediator mediator) : Controller
 {
     [HttpGet]
+    [ApiExplorerSettings(IgnoreApi = true)]
     public IActionResult Index()
     {
         return View(new GenerateSampleViewModel());
