@@ -11,27 +11,17 @@ namespace InvoiceSystem.Web.Features.Ksef.Inbox.GetKsefInvoicePreview;
 public sealed class GetKsefInvoicePreviewController(IMediator mediator) : Controller
 {
     [HttpGet("preview/{id:int}")]
+    [Produces("application/json")]
+    [ProducesResponseType(typeof(GetKsefInvoicePreviewResult), Microsoft.AspNetCore.Http.StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(string), Microsoft.AspNetCore.Http.StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Preview(int id, CancellationToken cancellationToken)
     {
         var result = await mediator.Send(new GetKsefInvoicePreviewQuery(id), cancellationToken);
         if (!result.Success)
         {
-            return Json(new { success = false, message = result.ErrorMessage });
+            return BadRequest(result.ErrorMessage ?? "Nie udało się pobrać podglądu faktury.");
         }
 
-        return Json(new
-        {
-            success = true,
-            invoiceNumber = result.InvoiceNumber,
-            date = result.Date,
-            sellerName = result.SellerName,
-            sellerNip = result.SellerNip,
-            sellerAddress = result.SellerAddress,
-            buyerName = result.BuyerName,
-            buyerNip = result.BuyerNip,
-            buyerAddress = result.BuyerAddress,
-            totalAmount = result.TotalAmount,
-            items = result.Items
-        });
+        return Ok(result);
     }
 }

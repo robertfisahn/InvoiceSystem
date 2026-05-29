@@ -10,9 +10,11 @@ namespace InvoiceSystem.Web.Features.Ksef.Configuration.TestKsefConnection;
 public sealed class TestKsefConnectionController(IMediator mediator) : Controller
 {
     [HttpPost("test-connection")]
+    [Produces("application/json")]
+    [ProducesResponseType(typeof(TestKsefConnectionResult), Microsoft.AspNetCore.Http.StatusCodes.Status200OK)]
     public async Task<IActionResult> TestConnection(string nip, string apiKey, CancellationToken cancellationToken)
     {
         var result = await mediator.Send(new TestKsefConnectionCommand(nip, apiKey), cancellationToken);
-        return Json(new { success = result.Success, message = result.Message });
+        return Ok(result);
     }
 }

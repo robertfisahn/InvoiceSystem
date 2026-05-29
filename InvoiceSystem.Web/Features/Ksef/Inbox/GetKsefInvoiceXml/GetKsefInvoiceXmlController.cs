@@ -11,6 +11,9 @@ namespace InvoiceSystem.Web.Features.Ksef.Inbox.GetKsefInvoiceXml;
 public sealed class GetKsefInvoiceXmlController(IMediator mediator) : Controller
 {
     [HttpGet("xml/{id:int}")]
+    [Produces("application/xml")]
+    [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> GetXml(int id, CancellationToken cancellationToken)
     {
         var result = await mediator.Send(new GetKsefInvoiceXmlQuery(id), cancellationToken);
