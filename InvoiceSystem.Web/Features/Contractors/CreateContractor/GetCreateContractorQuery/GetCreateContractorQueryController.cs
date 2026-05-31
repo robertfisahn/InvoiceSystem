@@ -1,41 +1,27 @@
 using System;
-using InvoiceSystem.Web.Features.Invoices.Import;
+using System.Threading;
+using System.Threading.Tasks;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Caching.Memory;
 
 namespace InvoiceSystem.Web.Features.Contractors.CreateContractor.GetCreateContractorQuery;
 
 [Route("contractors/create")]
 [ApiExplorerSettings(IgnoreApi = true)]
-public sealed class GetCreateContractorQueryController(IMemoryCache cache) : Controller
+public sealed class GetCreateContractorQueryController(IMediator mediator) : Controller
 {
     [HttpGet]
-    public IActionResult Index([FromQuery] string? sessionId)
+    public async Task<IActionResult> Index([FromQuery] string? sessionId, CancellationToken cancellationToken)
     {
-        var command = new CreateContractorCommand.CreateContractorCommand();
-
-        if (!string.IsNullOrWhiteSpace(sessionId))
+        try
         {
-            var cacheKey = $"ocr-session-{sessionId}";
-            if (cache.TryGetValue<OcrSessionData>(cacheKey, out var sessionData) && sessionData is not null)
-            {
-                command = new CreateContractorCommand.CreateContractorCommand
-                {
-                    SessionId = sessionId,
-                    Name = sessionData.BuyerName,
-                    TaxId = sessionData.BuyerTaxId,
-                    Address = sessionData.BuyerAddress
-                };
-                
-                ViewBag.WarningMessage = $"Brak kontrahenta z NIP: {sessionData.BuyerTaxId} w bazie danych. Dane zostały wyodrębnione przez AI. Zweryfikuj i zapisz kontrahenta.";
-            }
-            else
-            {
-                TempData["ErrorMessage"] = "Sesja analizy OCR wygasła lub jest nieprawidłowa.";
-                return RedirectToAction("Index", "ImportInvoice");
-            }
+            var viewModel = await mediator.Send(new GetCreateContractorQuery(sessionId), cancellationToken);
+            return View(viewModel);
         }
-
-        return View(command); // Resolves automatically to Index.cshtml in this directory!
+        catch (InvalidOperationException ex)
+        {
+            TempData["ErrorMessage"] = ex.Message;
+            return RedirectToAction("Index", "ImportInvoice");
+        }
     }
 }

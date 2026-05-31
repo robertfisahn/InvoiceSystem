@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using InvoiceSystem.Web.Features.Contractors.CreateContractor.GetCreateContractorQuery;
 
 namespace InvoiceSystem.Web.Features.Contractors.CreateContractor.CreateContractorCommand;
 
@@ -21,7 +22,12 @@ public sealed class CreateContractorCommandController(IMediator mediator) : Cont
             if (!result.Success)
             {
                 ModelState.AddModelError("", result.ErrorMessage ?? "Wystąpił błąd podczas zapisu kontrahenta.");
-                return View("~/Features/Contractors/CreateContractor/GetCreateContractorQuery/Index.cshtml", command);
+                
+                var warningMsg = !string.IsNullOrWhiteSpace(command.SessionId)
+                    ? $"Brak kontrahenta z NIP: {command.TaxId} w bazie danych. Dane zostały wyodrębnione przez AI. Zweryfikuj i zapisz kontrahenta."
+                    : null;
+                var errorVm = CreateContractorViewModel.From(command, warningMsg);
+                return View("~/Features/Contractors/CreateContractor/GetCreateContractorQuery/Index.cshtml", errorVm);
             }
 
             if (!string.IsNullOrWhiteSpace(command.SessionId) && !string.IsNullOrWhiteSpace(result.CreateInvoiceCommandJson))
@@ -42,6 +48,10 @@ public sealed class CreateContractorCommandController(IMediator mediator) : Cont
             }
         }
 
-        return View("~/Features/Contractors/CreateContractor/GetCreateContractorQuery/Index.cshtml", command);
+        var warningMessage = !string.IsNullOrWhiteSpace(command.SessionId)
+            ? $"Brak kontrahenta z NIP: {command.TaxId} w bazie danych. Dane zostały wyodrębnione przez AI. Zweryfikuj i zapisz kontrahenta."
+            : null;
+        var viewModel = CreateContractorViewModel.From(command, warningMessage);
+        return View("~/Features/Contractors/CreateContractor/GetCreateContractorQuery/Index.cshtml", viewModel);
     }
 }

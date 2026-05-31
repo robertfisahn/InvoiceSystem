@@ -1,7 +1,7 @@
-@model InvoiceSystem.Web.Features.Contractors.CreateContractor.CreateContractorCommand.CreateContractorCommand
+@model InvoiceSystem.Web.Features.Contractors.CreateContractor.GetCreateContractorQuery.CreateContractorViewModel
 @{
     ViewData["Title"] = "Dodaj Nowego Kontrahenta";
-    var warningMessage = ViewBag.WarningMessage as string;
+    var warningMessage = Model.WarningMessage;
     var isOcrFlow = !string.IsNullOrWhiteSpace(Model.SessionId);
 }
 
