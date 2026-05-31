@@ -2,7 +2,7 @@ using FluentValidation;
 
 namespace InvoiceSystem.Web.Features.Invoices.GetInvoiceDetails;
 
-public class GetInvoiceDetailsValidator : AbstractValidator<GetInvoiceDetailsQuery>
+public sealed class GetInvoiceDetailsValidator : AbstractValidator<GetInvoiceDetailsQuery>
 {
     public GetInvoiceDetailsValidator()
     {
