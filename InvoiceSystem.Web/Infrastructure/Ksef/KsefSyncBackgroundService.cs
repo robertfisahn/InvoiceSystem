@@ -109,6 +109,7 @@ public sealed class KsefSyncBackgroundService : BackgroundService
                 var incomingInvoices = await ksefClient.SyncInvoicesAsync(sessionToken, syncFrom, cancellationToken);
 
                 int newCount = 0;
+                bool hasErrors = false;
                 foreach (var dto in incomingInvoices)
                 {
                     // Avoid importing duplicates
@@ -119,8 +120,8 @@ public sealed class KsefSyncBackgroundService : BackgroundService
                     {
                         try
                         {
-                            // Wait briefly (250ms) to avoid aggressive crawling
-                            await Task.Delay(250, cancellationToken);
+                            // Wait 1000ms between calls to avoid aggressive crawling
+                            await Task.Delay(1000, cancellationToken);
 
                             // Download individual XML content for caching and save it immediately
                             var rawXml = await ksefClient.DownloadInvoiceXmlAsync(sessionToken, dto.KsefNumber, cancellationToken);
@@ -140,6 +141,12 @@ public sealed class KsefSyncBackgroundService : BackgroundService
                             newCount++;
                             _logger.LogInformation("Successfully imported new KSeF invoice: {KsefNumber}", dto.KsefNumber);
                         }
+                        catch (System.Net.Http.HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
+                        {
+                            _logger.LogError(ex, "KSeF API Rate Limit exceeded (429) during background sync while syncing invoice {KsefNumber}. Aborting the remaining sync queue to prevent permanent blocking.", dto.KsefNumber);
+                            hasErrors = true;
+                            break; // abort the queue immediately
+                        }
                         catch (Exception ex)
                         {
                             try
@@ -147,7 +154,7 @@ public sealed class KsefSyncBackgroundService : BackgroundService
                                 _logger.LogError(ex, "Failed to download XML or save incoming invoice {KsefNumber}", dto.KsefNumber);
                             }
                             catch {}
-                            // Continue to the next invoice so we don't abort the whole synchronization
+                            hasErrors = true;
                         }
                     }
                 }
@@ -188,10 +195,16 @@ public sealed class KsefSyncBackgroundService : BackgroundService
                 // 4. Close session
                 await ksefClient.CloseSessionAsync(sessionToken, cancellationToken);
 
-                setting.LastSyncDate = DateTime.UtcNow;
+                if (!hasErrors)
+                {
+                    setting.LastSyncDate = DateTime.UtcNow;
+                    _logger.LogInformation("KSeF sync complete for NIP: {Nip}. Added {Count} new invoices.", setting.Nip, newCount);
+                }
+                else
+                {
+                    _logger.LogWarning("KSeF sync completed with errors or was aborted for NIP: {Nip}. Added {Count} new invoices. LastSyncDate was NOT updated.", setting.Nip, newCount);
+                }
                 await dbContext.SaveChangesAsync(cancellationToken);
-
-                _logger.LogInformation("KSeF sync complete for NIP: {Nip}. Added {Count} new invoices.", setting.Nip, newCount);
             }
             catch (Exception ex)
             {

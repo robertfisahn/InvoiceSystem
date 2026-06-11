@@ -1,4 +1,5 @@
 using System;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using InvoiceSystem.Web.Domain.Entities;
@@ -6,10 +7,11 @@ using InvoiceSystem.Web.Infrastructure.Database;
 using InvoiceSystem.Web.Infrastructure.Ksef;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace InvoiceSystem.Web.Features.Ksef.Inbox.SyncKsefInbox;
 
-public sealed class SyncKsefInboxCommandHandler(AppDbContext dbContext, IKsefClient ksefClient) 
+public sealed class SyncKsefInboxCommandHandler(AppDbContext dbContext, IKsefClient ksefClient, ILogger<SyncKsefInboxCommandHandler> logger) 
     : IRequestHandler<SyncKsefInboxCommand, SyncKsefInboxResult>
 {
     public async Task<SyncKsefInboxResult> Handle(SyncKsefInboxCommand request, CancellationToken cancellationToken)
@@ -42,6 +44,7 @@ public sealed class SyncKsefInboxCommandHandler(AppDbContext dbContext, IKsefCli
             var incomingInvoices = await ksefClient.SyncInvoicesAsync(sessionToken, syncFrom, cancellationToken);
 
             int newCount = 0;
+            bool hasErrors = false;
             foreach (var dto in incomingInvoices)
             {
                 var exists = await dbContext.KsefIncomingInvoices
@@ -51,8 +54,8 @@ public sealed class SyncKsefInboxCommandHandler(AppDbContext dbContext, IKsefCli
                 {
                     try
                     {
-                        // Wait briefly (250ms) to avoid aggressive API crawling
-                        await Task.Delay(250, cancellationToken);
+                        // Wait 1000ms between calls to avoid aggressive API crawling
+                        await Task.Delay(1000, cancellationToken);
 
                         // Download individual XML content for caching and save it immediately
                         var rawXml = await ksefClient.DownloadInvoiceXmlAsync(sessionToken, dto.KsefNumber, cancellationToken);
@@ -71,10 +74,16 @@ public sealed class SyncKsefInboxCommandHandler(AppDbContext dbContext, IKsefCli
                         await dbContext.SaveChangesAsync(cancellationToken);
                         newCount++;
                     }
+                    catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
+                    {
+                        logger.LogError(ex, "KSeF API Rate Limit exceeded (429) while syncing invoice {KsefNumber}. Aborting the remaining sync queue to prevent permanent blocking.", dto.KsefNumber);
+                        hasErrors = true;
+                        break; // abort the queue immediately
+                    }
                     catch (Exception ex)
                     {
-                        // Log individually but continue
-                        Console.WriteLine($"Failed to download XML for manual sync of {dto.KsefNumber}: {ex.Message}");
+                        logger.LogError(ex, "Failed to download XML for manual sync of invoice {KsefNumber}.", dto.KsefNumber);
+                        hasErrors = true;
                     }
                 }
             }
@@ -82,10 +91,22 @@ public sealed class SyncKsefInboxCommandHandler(AppDbContext dbContext, IKsefCli
             // 4. Close session
             await ksefClient.CloseSessionAsync(sessionToken, cancellationToken);
 
-            setting.LastSyncDate = DateTime.UtcNow;
+            if (!hasErrors)
+            {
+                setting.LastSyncDate = DateTime.UtcNow;
+            }
+            else
+            {
+                logger.LogWarning("KSeF Sync completed with errors. LastSyncDate was NOT updated to allow retrying missing invoices next time.");
+            }
             await dbContext.SaveChangesAsync(cancellationToken);
 
-            return new SyncKsefInboxResult(true, newCount, null);
+            if (hasErrors && newCount == 0)
+            {
+                return new SyncKsefInboxResult(false, 0, "Synchronizacja została przerwana z powodu błędu limitu zapytań (429) lub innego błędu sieciowego. Spróbuj ponownie później.");
+            }
+
+            return new SyncKsefInboxResult(true, newCount, hasErrors ? "Niektóre faktury nie mogły zostać pobrane ze względu na limity zapytań API. Zostaną pobrane przy kolejnej synchronizacji." : null);
         }
         catch (Exception ex)
         {

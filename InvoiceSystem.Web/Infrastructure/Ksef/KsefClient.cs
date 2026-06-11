@@ -5,6 +5,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace InvoiceSystem.Web.Infrastructure.Ksef;
 
@@ -33,9 +34,10 @@ public interface IKsefClient
     Task<string> DownloadUpoAsync(string sessionToken, string ksefNumber, CancellationToken cancellationToken = default);
 }
 
-public sealed class KsefClient(HttpClient httpClient) : IKsefClient
+public sealed class KsefClient(HttpClient httpClient, ILogger<KsefClient> logger) : IKsefClient
 {
     private readonly HttpClient _httpClient = httpClient;
+    private readonly ILogger<KsefClient> _logger = logger;
     private const string SandboxUrl = "https://api-test.ksef.mf.gov.pl/v2";
 
     public async Task<KsefChallengeResult> AuthorisationChallengeAsync(string nip, CancellationToken cancellationToken = default)
@@ -285,23 +287,43 @@ public sealed class KsefClient(HttpClient httpClient) : IKsefClient
 
     public async Task<string> DownloadInvoiceXmlAsync(string sessionToken, string ksefNumber, CancellationToken cancellationToken = default)
     {
-        var retries = 3;
+        var maxRetries = 3;
+        var retries = maxRetries;
         while (true)
         {
             var request = new HttpRequestMessage(HttpMethod.Get, $"{SandboxUrl}/invoices/ksef/{ksefNumber}");
             SetSessionAuthHeader(request, sessionToken);
 
             var response = await _httpClient.SendAsync(request, cancellationToken);
-            if ((int)response.StatusCode == 429 && retries > 0)
+            if ((int)response.StatusCode == 429)
             {
-                retries--;
-                var delayMs = 2000;
-                if (response.Headers.RetryAfter != null && response.Headers.RetryAfter.Delta.HasValue)
+                if (retries > 0)
                 {
-                    delayMs = (int)response.Headers.RetryAfter.Delta.Value.TotalMilliseconds;
+                    retries--;
+                    var delayMs = 30000; // Constant 30 seconds delay when no Retry-After is provided
+                    if (response.Headers.RetryAfter != null)
+                    {
+                        if (response.Headers.RetryAfter.Delta.HasValue)
+                        {
+                            delayMs = (int)response.Headers.RetryAfter.Delta.Value.TotalMilliseconds;
+                        }
+                        else if (response.Headers.RetryAfter.Date.HasValue)
+                        {
+                            var diff = response.Headers.RetryAfter.Date.Value - DateTimeOffset.UtcNow;
+                            delayMs = Math.Max(0, (int)diff.TotalMilliseconds);
+                        }
+                    }
+                    
+                    if (delayMs > 30000)
+                    {
+                        _logger.LogWarning("KSeF API requested a Retry-After delay of {DelayMs}ms, which exceeds our maximum wait limit of 30 seconds. Aborting retries to release the thread.", delayMs);
+                        response.EnsureSuccessStatusCode();
+                    }
+                    
+                    _logger.LogWarning("KSeF API returned 429 (Too Many Requests) for invoice {KsefNumber}. Retrying in {DelayMs}ms. Retries left: {Retries}", ksefNumber, delayMs, retries);
+                    await Task.Delay(delayMs, cancellationToken);
+                    continue;
                 }
-                await Task.Delay(delayMs, cancellationToken);
-                continue;
             }
 
             response.EnsureSuccessStatusCode();

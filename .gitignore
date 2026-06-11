@@ -6,6 +6,11 @@
 # dotenv files
 .env
 
+# Antigravity agent folders
+.agent/
+.agents/
+.antigravity/
+
 # docs
 docs 
 docs-migration-checklist.md
