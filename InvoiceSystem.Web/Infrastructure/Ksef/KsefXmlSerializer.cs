@@ -6,7 +6,7 @@ namespace InvoiceSystem.Web.Infrastructure.Ksef;
 
 public static class KsefXmlSerializer
 {
-    public static string SerializeToFa2(Invoice invoice)
+    public static string SerializeToFa2(Invoice invoice, string sellerNip)
     {
         var sb = new StringBuilder();
         sb.AppendLine("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
@@ -20,7 +20,7 @@ public static class KsefXmlSerializer
         // Podmiot1 - Sprzedawca (My)
         sb.AppendLine("    <Podmiot1>");
         sb.AppendLine("        <DanePodmiotu>");
-        sb.AppendLine("            <NIP>1234567890</NIP>");
+        sb.AppendLine($"            <NIP>{sellerNip}</NIP>");
         sb.AppendLine("            <Nazwa>InvoiceSystem Enterprise</Nazwa>");
         sb.AppendLine("        </DanePodmiotu>");
         sb.AppendLine("        <Adres>");

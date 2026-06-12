@@ -43,7 +43,7 @@ public sealed class SendInvoiceToKsefCommandHandler(AppDbContext dbContext, IKse
         try
         {
             // 1. Generate XML
-            var xmlContent = KsefXmlSerializer.SerializeToFa2(invoice);
+            var xmlContent = KsefXmlSerializer.SerializeToFa2(invoice, setting.Nip);
 
             // 2. Authorise Session
             var challenge = await ksefClient.AuthorisationChallengeAsync(setting.Nip, cancellationToken);

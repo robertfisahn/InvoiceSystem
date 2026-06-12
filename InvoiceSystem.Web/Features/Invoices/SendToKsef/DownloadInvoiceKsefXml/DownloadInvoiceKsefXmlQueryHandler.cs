@@ -24,7 +24,10 @@ public sealed class DownloadInvoiceKsefXmlQueryHandler(AppDbContext dbContext)
 
         try
         {
-            var xml = KsefXmlSerializer.SerializeToFa2(invoice);
+            var setting = await dbContext.KsefSettings.AsNoTracking().FirstOrDefaultAsync(cancellationToken);
+            var sellerNip = setting?.Nip ?? "1234567890";
+
+            var xml = KsefXmlSerializer.SerializeToFa2(invoice, sellerNip);
             return new DownloadInvoiceKsefXmlResult(true, xml, invoice.InvoiceNumber, null);
         }
         catch (Exception ex)
