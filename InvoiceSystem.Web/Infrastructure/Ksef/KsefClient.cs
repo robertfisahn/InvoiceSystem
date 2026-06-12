@@ -192,7 +192,7 @@ public sealed class KsefClient(HttpClient httpClient, ILogger<KsefClient> logger
 
     public async Task<string> SendInvoiceAsync(string sessionToken, string invoiceXml, CancellationToken cancellationToken = default)
     {
-        var request = new HttpRequestMessage(HttpMethod.Post, $"{SandboxUrl}/online/Invoice/Send");
+        var request = new HttpRequestMessage(HttpMethod.Put, $"{SandboxUrl}/online/Invoice/Send");
         SetSessionAuthHeader(request, sessionToken);
         request.Content = new StringContent(invoiceXml, Encoding.UTF8, "application/xml");
 
