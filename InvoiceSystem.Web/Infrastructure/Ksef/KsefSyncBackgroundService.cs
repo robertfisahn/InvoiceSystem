@@ -11,16 +11,10 @@ using Microsoft.Extensions.Logging;
 
 namespace InvoiceSystem.Web.Infrastructure.Ksef;
 
-public sealed class KsefSyncBackgroundService : BackgroundService
+public sealed class KsefSyncBackgroundService(IServiceProvider serviceProvider, ILogger<KsefSyncBackgroundService> logger) : BackgroundService
 {
-    private readonly IServiceProvider _serviceProvider;
-    private readonly ILogger<KsefSyncBackgroundService> _logger;
-
-    public KsefSyncBackgroundService(IServiceProvider serviceProvider, ILogger<KsefSyncBackgroundService> logger)
-    {
-        _serviceProvider = serviceProvider;
-        _logger = logger;
-    }
+    private readonly IServiceProvider _serviceProvider = serviceProvider;
+    private readonly ILogger<KsefSyncBackgroundService> _logger = logger;
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -30,10 +24,10 @@ public sealed class KsefSyncBackgroundService : BackgroundService
         }
         catch {}
 
-        // Wait 1 minute before first sync to avoid rate-limiting manual actions on startup
+        // Wait 5 seconds before first sync to speed up developer feedback loop
         try
         {
-            await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken);
+            await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
         }
         catch (TaskCanceledException)
         {

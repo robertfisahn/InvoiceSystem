@@ -41,7 +41,7 @@ public static class KsefSessionHelper
         }
 
         var setting = await dbContext.KsefSettings.FirstOrDefaultAsync(cancellationToken);
-        if (setting != null && setting.IsEnabled && !string.IsNullOrWhiteSpace(setting.Nip) && !string.IsNullOrWhiteSpace(setting.ApiKey))
+        if (setting != null && !string.IsNullOrWhiteSpace(setting.Nip) && !string.IsNullOrWhiteSpace(setting.ApiKey))
         {
             var sessionToken = await GetValidSessionTokenAsync(dbContext, ksefClient, setting, cancellationToken);
             var rawXml = await ksefClient.DownloadInvoiceXmlAsync(sessionToken, incoming.KsefNumber, cancellationToken);

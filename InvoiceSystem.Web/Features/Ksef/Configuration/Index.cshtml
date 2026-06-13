@@ -32,7 +32,7 @@
 
                         <div class="form-group mb-3">
                             <label class="form-label" for="apiKeyInput">Token Autoryzacyjny (API Key)</label>
-                            <input asp-for="ApiKey" id="apiKeyInput" type="password" class="form-control" placeholder="Wprowadź token z portalu KSeF..." required />
+                            <input asp-for="ApiKey" value="@Model.ApiKey" id="apiKeyInput" type="password" class="form-control" placeholder="Wprowadź token z portalu KSeF..." required />
                             <span asp-validation-for="ApiKey" class="text-danger small"></span>
                         </div>
 
@@ -52,7 +52,7 @@
                     </div>
                     <div class="data-card__body">
                         <div class="d-flex align-items-center justify-content-between mb-2">
-                            <span class="text-muted small">Włączona:</span>
+                            <span class="text-muted small">Automatyczna synchronizacja:</span>
                             @if (Model.IsEnabled)
                             {
                                 <span class="badge bg-success-soft text-success px-2 py-1">Aktywna</span>
@@ -133,9 +133,9 @@
             const apiKey = document.getElementById('apiKeyInput').value.trim();
             const resultDiv = document.getElementById('testResult');
             
-            if (!nip || !apiKey) {
+            if (!nip) {
                 resultDiv.className = "alert alert-danger mt-3";
-                resultDiv.innerHTML = '<i class="bi bi-exclamation-circle-fill me-2"></i> Podaj NIP i Token Autoryzacyjny przed uruchomieniem testu.';
+                resultDiv.innerHTML = '<i class="bi bi-exclamation-circle-fill me-2"></i> Podaj NIP firmy przed uruchomieniem testu.';
                 resultDiv.style.display = "block";
                 return;
             }

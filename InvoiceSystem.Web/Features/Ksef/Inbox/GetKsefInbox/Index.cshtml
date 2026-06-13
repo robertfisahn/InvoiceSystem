@@ -25,16 +25,25 @@
         <div class="data-card__body d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
             <div>
                 <h4 class="mb-1 fw-bold"><i class="bi bi-cloud-download me-2 text-primary"></i>Status skrzynki odbiorczej</h4>
-                @if (ksefEnabled && ksefConfigured)
+                @if (ksefConfigured)
                 {
-                    <p class="text-muted mb-0 small">
-                        Automatyczna synchronizacja w tle jest aktywna. Pobierane są faktury kosztowe, w których Twoja firma jest nabywcą.
-                    </p>
+                    @if (ksefEnabled)
+                    {
+                        <p class="text-muted mb-0 small">
+                            Automatyczna synchronizacja w tle jest aktywna. Pobierane są faktury kosztowe, w których Twoja firma jest nabywcą.
+                        </p>
+                    }
+                    else
+                    {
+                        <p class="text-muted mb-0 small">
+                            <i class="bi bi-info-circle me-1 text-warning"></i> Automatyczna synchronizacja w tle jest wyłączona. Możesz synchronizować dane ręcznie.
+                        </p>
+                    }
                 }
                 else
                 {
                     <p class="text-danger mb-0 small">
-                        <i class="bi bi-exclamation-circle me-1"></i> Integracja KSeF jest wyłączona lub nieskonfigurowana. Skonfiguruj NIP i Token w zakładce Konfiguracja.
+                        <i class="bi bi-exclamation-circle me-1"></i> Integracja KSeF nie jest skonfigurowana. Skonfiguruj NIP i Token w zakładce Konfiguracja.
                     </p>
                 }
             </div>

@@ -32,7 +32,9 @@ public sealed class InvoicePreviewService : IInvoicePreviewService
             InvoiceNumber = viewModel.InvoiceNumber,
             Date = viewModel.Date,
             KsefNumber = viewModel.KsefNumber,
-            KsefTransactionId = viewModel.KsefTransactionId,
+            KsefTransactionId = viewModel.KsefTransactionId?.Contains(':') == true
+                ? viewModel.KsefTransactionId.Split(':')[1]
+                : viewModel.KsefTransactionId,
             StatusText = statusText,
             StatusClass = statusClass,
             SellerName = "InvoiceSystem Enterprise",

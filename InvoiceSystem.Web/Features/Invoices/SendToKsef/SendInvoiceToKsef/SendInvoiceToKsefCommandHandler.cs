@@ -35,15 +35,15 @@ public sealed class SendInvoiceToKsefCommandHandler(AppDbContext dbContext, IKse
         }
 
         var setting = await dbContext.KsefSettings.FirstOrDefaultAsync(cancellationToken);
-        if (setting == null || !setting.IsEnabled || string.IsNullOrWhiteSpace(setting.Nip) || string.IsNullOrWhiteSpace(setting.ApiKey))
+        if (setting == null || string.IsNullOrWhiteSpace(setting.Nip) || string.IsNullOrWhiteSpace(setting.ApiKey))
         {
-            return new SendInvoiceToKsefResult(false, null, null, "Integracja z KSeF jest wyłączona lub nieskonfigurowana. Skonfiguruj NIP i Token w ustawieniach.");
+            return new SendInvoiceToKsefResult(false, null, null, "Integracja z KSeF nie jest skonfigurowana. Skonfiguruj NIP i Token w ustawieniach.");
         }
 
         try
         {
             // 1. Generate XML
-            var xmlContent = KsefXmlSerializer.SerializeToFa2(invoice, setting.Nip);
+            var xmlContent = KsefXmlSerializer.SerializeToFa3(invoice, setting.Nip);
 
             // 2. Authorise Session
             var challenge = await ksefClient.AuthorisationChallengeAsync(setting.Nip, cancellationToken);
@@ -58,12 +58,14 @@ public sealed class SendInvoiceToKsefCommandHandler(AppDbContext dbContext, IKse
             // 3. Send
             var transactionId = await ksefClient.SendInvoiceAsync(sessionToken, xmlContent, cancellationToken);
             
-            invoice.KsefTransactionId = transactionId;
+            var onlineSessionRef = sessionToken.Split('|')[4];
+            var combinedTransactionId = $"{onlineSessionRef}:{transactionId}";
+            invoice.KsefTransactionId = combinedTransactionId;
             invoice.KsefSentAt = DateTime.UtcNow;
             await dbContext.SaveChangesAsync(cancellationToken);
 
             // 4. Check status (fast processing mock response)
-            var statusResult = await ksefClient.GetInvoiceStatusAsync(sessionToken, transactionId, cancellationToken);
+            var statusResult = await ksefClient.GetInvoiceStatusAsync(sessionToken, combinedTransactionId, cancellationToken);
             if (statusResult.Status == "Processed" && !string.IsNullOrEmpty(statusResult.KsefNumber))
             {
                 invoice.KsefNumber = statusResult.KsefNumber;

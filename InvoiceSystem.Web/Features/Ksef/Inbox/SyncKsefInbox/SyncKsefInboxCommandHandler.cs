@@ -17,9 +17,9 @@ public sealed class SyncKsefInboxCommandHandler(AppDbContext dbContext, IKsefCli
     public async Task<SyncKsefInboxResult> Handle(SyncKsefInboxCommand request, CancellationToken cancellationToken)
     {
         var setting = await dbContext.KsefSettings.FirstOrDefaultAsync(cancellationToken);
-        if (setting == null || !setting.IsEnabled || string.IsNullOrWhiteSpace(setting.Nip) || string.IsNullOrWhiteSpace(setting.ApiKey))
+        if (setting == null || string.IsNullOrWhiteSpace(setting.Nip) || string.IsNullOrWhiteSpace(setting.ApiKey))
         {
-            return new SyncKsefInboxResult(false, 0, "Integracja KSeF nie jest poprawnie skonfigurowana lub włączona.");
+            return new SyncKsefInboxResult(false, 0, "Integracja KSeF nie jest poprawnie skonfigurowana.");
         }
 
         try

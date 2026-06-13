@@ -191,6 +191,24 @@ app.UseAuthorization();
 
 app.MapGet("/", () => Results.Redirect("/dashboard"));
 
+app.MapGet("/invoices-db", async (AppDbContext dbContext) => {
+    var list = await dbContext.Invoices
+        .Select(i => new { i.Id, i.InvoiceNumber, i.Status, i.KsefNumber, i.KsefTransactionId })
+        .ToListAsync();
+    return Results.Json(list);
+}).AllowAnonymous();
+
+app.MapGet("/dump/{id:int}", async (int id, AppDbContext dbContext) => {
+    var invoice = await dbContext.Invoices
+        .Include(i => i.Contractor)
+        .Include(i => i.Items)
+        .FirstOrDefaultAsync(i => i.Id == id);
+    if (invoice == null) return Results.NotFound("Not found");
+    var setting = await dbContext.KsefSettings.FirstOrDefaultAsync();
+    var xml = KsefXmlSerializer.SerializeToFa3(invoice, setting?.Nip ?? "1234567890");
+    return Results.Content(xml, "application/xml");
+}).AllowAnonymous();
+
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller}/{action=Index}/{id?}");

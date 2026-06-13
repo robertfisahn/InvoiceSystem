@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using System.Threading;
@@ -116,11 +117,6 @@ public sealed class KsefClient(HttpClient httpClient, ILogger<KsefClient> logger
                     if (statusResponse.IsSuccessStatusCode)
                     {
                         var statusJson = await statusResponse.Content.ReadAsStringAsync(cancellationToken);
-                        try
-                        {
-                            System.IO.File.WriteAllText("c:\\Users\\rober\\.gemini\\antigravity\\scratch\\InvoiceSystem\\scratch\\auth_status.txt", statusJson);
-                        }
-                        catch {}
                         using var statusDoc = JsonDocument.Parse(statusJson);
                         if (statusDoc.RootElement.TryGetProperty("status", out var statusElement))
                         {
@@ -161,7 +157,51 @@ public sealed class KsefClient(HttpClient httpClient, ILogger<KsefClient> logger
                 using var refreshDoc = JsonDocument.Parse(refreshJson);
                 var accessToken = refreshDoc.RootElement.GetProperty("accessToken").GetProperty("token").GetString() ?? string.Empty;
 
-                return $"{accessToken}|{token}";
+                // Open interactive online session
+                using var aes = Aes.Create();
+                aes.KeySize = 256;
+                aes.GenerateKey();
+                aes.GenerateIV();
+                var aesKey = aes.Key;
+                var iv = aes.IV;
+
+                var encryptedKey = KsefCryptography.EncryptSymmetricKey(aesKey);
+
+                var sessionRequestBody = new
+                {
+                    formCode = new
+                    {
+                        systemCode = "FA (3)",
+                        schemaVersion = "1-0E",
+                        value = "FA"
+                    },
+                    encryption = new
+                    {
+                        encryptedSymmetricKey = Convert.ToBase64String(encryptedKey),
+                        initializationVector = Convert.ToBase64String(iv),
+                        publicKeyId = KsefCryptography.GetPublicKeyId()
+                    }
+                };
+
+                var sessionRequest = new HttpRequestMessage(HttpMethod.Post, $"{SandboxUrl}/sessions/online")
+                {
+                    Content = new StringContent(JsonSerializer.Serialize(sessionRequestBody), Encoding.UTF8, "application/json")
+                };
+                sessionRequest.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
+
+                var sessionResponse = await _httpClient.SendAsync(sessionRequest, cancellationToken);
+                if (!sessionResponse.IsSuccessStatusCode)
+                {
+                    var errorBody = await sessionResponse.Content.ReadAsStringAsync(cancellationToken);
+                    _logger.LogError("KSeF InitSession failed. Status: {Status}, Body: {Body}", sessionResponse.StatusCode, errorBody);
+                    throw new HttpRequestException($"Błąd otwierania sesji KSeF: {sessionResponse.StatusCode} - {errorBody}");
+                }
+
+                var sessionJson = await sessionResponse.Content.ReadAsStringAsync(cancellationToken);
+                using var sessionDoc = JsonDocument.Parse(sessionJson);
+                var onlineSessionRef = sessionDoc.RootElement.GetProperty("referenceNumber").GetString() ?? string.Empty;
+
+                return $"{accessToken}|{token}|{Convert.ToBase64String(aesKey)}|{Convert.ToBase64String(iv)}|{onlineSessionRef}";
             }
 
             return token;
@@ -172,8 +212,35 @@ public sealed class KsefClient(HttpClient httpClient, ILogger<KsefClient> logger
 
     public async Task CloseSessionAsync(string sessionToken, CancellationToken cancellationToken = default)
     {
+        var parts = sessionToken.Split('|');
+        var accessToken = parts[0];
+
+        // 1. Close online session if reference exists
+        if (parts.Length >= 5 && !string.IsNullOrEmpty(parts[4]))
+        {
+            var onlineSessionRef = parts[4];
+            try
+            {
+                var closeRequest = new HttpRequestMessage(HttpMethod.Post, $"{SandboxUrl}/sessions/online/{onlineSessionRef}/close");
+                closeRequest.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
+                
+                var closeResponse = await _httpClient.SendAsync(closeRequest, cancellationToken);
+                if (!closeResponse.IsSuccessStatusCode)
+                {
+                    var errorContent = await closeResponse.Content.ReadAsStringAsync(cancellationToken);
+                    _logger.LogWarning("Failed to close KSeF online session {SessionRef}. Status: {Status}, Body: {Body}", 
+                        onlineSessionRef, closeResponse.StatusCode, errorContent);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to close KSeF online session {SessionRef}", onlineSessionRef);
+            }
+        }
+
+        // 2. Terminate auth session
         var request = new HttpRequestMessage(HttpMethod.Delete, $"{SandboxUrl}/auth/sessions/current");
-        SetSessionAuthHeader(request, sessionToken);
+        request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
 
         var response = await _httpClient.SendAsync(request, cancellationToken);
         response.EnsureSuccessStatusCode();
@@ -190,24 +257,106 @@ public sealed class KsefClient(HttpClient httpClient, ILogger<KsefClient> logger
         request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", tokenToUse);
     }
 
+    private record ParsedSessionToken(string AccessToken, byte[]? AesKey, byte[]? Iv, string OnlineSessionRef);
+
+    private ParsedSessionToken ParseSessionToken(string sessionToken)
+    {
+        var parts = sessionToken.Split('|');
+        var accessToken = parts[0];
+        
+        if (parts.Length >= 5)
+        {
+            return new ParsedSessionToken(
+                accessToken,
+                Convert.FromBase64String(parts[2]),
+                Convert.FromBase64String(parts[3]),
+                parts[4]
+            );
+        }
+        
+        return new ParsedSessionToken(accessToken, null, null, string.Empty);
+    }
+
     public async Task<string> SendInvoiceAsync(string sessionToken, string invoiceXml, CancellationToken cancellationToken = default)
     {
-        var request = new HttpRequestMessage(HttpMethod.Put, $"{SandboxUrl}/online/Invoice/Send");
-        SetSessionAuthHeader(request, sessionToken);
-        request.Content = new StringContent(invoiceXml, Encoding.UTF8, "application/xml");
+        var parsed = ParseSessionToken(sessionToken);
+        if (parsed.AesKey == null || parsed.Iv == null || string.IsNullOrEmpty(parsed.OnlineSessionRef))
+        {
+            throw new InvalidOperationException("Active session is not fully initialized for encryption.");
+        }
+
+        var xmlBytes = Encoding.UTF8.GetBytes(invoiceXml);
+        var fileSize = xmlBytes.Length;
+
+        // Encrypt invoice xml with AES-256-CBC
+        byte[] encryptedXmlBytes;
+        using (var aes = Aes.Create())
+        {
+            aes.Key = parsed.AesKey;
+            aes.IV = parsed.Iv;
+            aes.Mode = CipherMode.CBC;
+            aes.Padding = PaddingMode.PKCS7;
+
+            using (var encryptor = aes.CreateEncryptor())
+            {
+                encryptedXmlBytes = encryptor.TransformFinalBlock(xmlBytes, 0, xmlBytes.Length);
+            }
+        }
+
+        string hashBase64;
+        using (var sha256 = SHA256.Create())
+        {
+            hashBase64 = Convert.ToBase64String(sha256.ComputeHash(xmlBytes));
+        }
+
+        string encryptedHashBase64;
+        using (var sha256 = SHA256.Create())
+        {
+            encryptedHashBase64 = Convert.ToBase64String(sha256.ComputeHash(encryptedXmlBytes));
+        }
+
+        var requestBody = new
+        {
+            invoiceHash = hashBase64,
+            invoiceSize = fileSize,
+            encryptedInvoiceHash = encryptedHashBase64,
+            encryptedInvoiceSize = encryptedXmlBytes.Length,
+            encryptedInvoiceContent = Convert.ToBase64String(encryptedXmlBytes)
+        };
+
+        var request = new HttpRequestMessage(HttpMethod.Post, $"{SandboxUrl}/sessions/online/{parsed.OnlineSessionRef}/invoices");
+        request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", parsed.AccessToken);
+        request.Content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
 
         var response = await _httpClient.SendAsync(request, cancellationToken);
-        response.EnsureSuccessStatusCode();
+        if (!response.IsSuccessStatusCode)
+        {
+            var errorBody = await response.Content.ReadAsStringAsync(cancellationToken);
+            _logger.LogError("KSeF SendInvoice failed. Status: {Status}, Body: {Body}", response.StatusCode, errorBody);
+            throw new HttpRequestException($"Błąd wysyłki do KSeF: {response.StatusCode} - {errorBody}");
+        }
 
         var json = await response.Content.ReadAsStringAsync(cancellationToken);
         using var doc = JsonDocument.Parse(json);
-        return doc.RootElement.GetProperty("transactionId").GetString() ?? string.Empty;
+        return doc.RootElement.GetProperty("referenceNumber").GetString() ?? string.Empty;
     }
 
     public async Task<KsefStatusResult> GetInvoiceStatusAsync(string sessionToken, string transactionId, CancellationToken cancellationToken = default)
     {
-        var referenceNumber = KsefCryptography.ExtractReferenceNumberFromJwt(sessionToken) ?? string.Empty;
-        var request = new HttpRequestMessage(HttpMethod.Get, $"{SandboxUrl}/sessions/{referenceNumber}/invoices/{transactionId}");
+        var parts = sessionToken.Split('|');
+        var refToUse = (parts.Length >= 5 && !string.IsNullOrEmpty(parts[4]))
+            ? parts[4]
+            : (KsefCryptography.ExtractReferenceNumberFromJwt(sessionToken) ?? string.Empty);
+
+        var actualTransactionId = transactionId;
+        if (transactionId.Contains(':'))
+        {
+            var txParts = transactionId.Split(':');
+            refToUse = txParts[0];
+            actualTransactionId = txParts[1];
+        }
+
+        var request = new HttpRequestMessage(HttpMethod.Get, $"{SandboxUrl}/sessions/{refToUse}/invoices/{actualTransactionId}");
         SetSessionAuthHeader(request, sessionToken);
 
         var response = await _httpClient.SendAsync(request, cancellationToken);
@@ -226,7 +375,11 @@ public sealed class KsefClient(HttpClient httpClient, ILogger<KsefClient> logger
         var status = "Unknown";
         if (code == 200) status = "Processed";
         else if (code == 100 || code == 150) status = "Processing";
-        else if (code >= 400) status = "Failed";
+        else if (code >= 400)
+        {
+            status = "Failed";
+            _logger.LogError("KSeF invoice status polling returned failure. Full response JSON: {Json}", json);
+        }
 
         string? ksefNumber = null;
         if (doc.RootElement.TryGetProperty("ksefNumber", out var numProp))
@@ -333,8 +486,12 @@ public sealed class KsefClient(HttpClient httpClient, ILogger<KsefClient> logger
 
     public async Task<string> DownloadUpoAsync(string sessionToken, string ksefNumber, CancellationToken cancellationToken = default)
     {
-        var referenceNumber = KsefCryptography.ExtractReferenceNumberFromJwt(sessionToken) ?? string.Empty;
-        var request = new HttpRequestMessage(HttpMethod.Get, $"{SandboxUrl}/sessions/{referenceNumber}/invoices/ksef/{ksefNumber}/upo");
+        var parts = sessionToken.Split('|');
+        var refToUse = (parts.Length >= 5 && !string.IsNullOrEmpty(parts[4]))
+            ? parts[4]
+            : (KsefCryptography.ExtractReferenceNumberFromJwt(sessionToken) ?? string.Empty);
+
+        var request = new HttpRequestMessage(HttpMethod.Get, $"{SandboxUrl}/sessions/{refToUse}/invoices/ksef/{ksefNumber}/upo");
         SetSessionAuthHeader(request, sessionToken);
 
         var response = await _httpClient.SendAsync(request, cancellationToken);
