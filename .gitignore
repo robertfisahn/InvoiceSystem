@@ -5,6 +5,7 @@
 
 # dotenv files
 .env
+scratch/
 
 # Antigravity agent folders
 .agent/
