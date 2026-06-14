@@ -9,4 +9,6 @@ public sealed record ContractorDto(
     int Id,
     string Name,
     string TaxId,
-    string Address);
+    string Address,
+    string? LatestVatStatus,
+    DateTime? LatestVerificationDate);

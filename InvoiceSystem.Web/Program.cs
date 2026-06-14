@@ -2,6 +2,8 @@ using InvoiceSystem.Web.Domain.Entities;
 using InvoiceSystem.Web.Infrastructure.Database;
 using InvoiceSystem.Web.Infrastructure.Ksef;
 using InvoiceSystem.Web.Infrastructure.Configuration;
+using InvoiceSystem.Web.Infrastructure.Soap;
+using SoapCore;
 using InvoiceSystem.Web.Infrastructure.Behaviors;
 using InvoiceSystem.Web.Infrastructure.Services.Storage;
 using InvoiceSystem.Web.Infrastructure.Services.Hash;
@@ -85,6 +87,7 @@ builder.Services.ConfigureApplicationCookie(options =>
     {
         if (context.Request.Path.StartsWithSegments("/api") || 
             context.Request.Path.StartsWithSegments("/ksef") ||
+            context.Request.Path.StartsWithSegments("/services") ||
             context.Request.Path.StartsWithSegments("/invoices/import") ||
             context.Request.Headers["X-Requested-With"] == "XMLHttpRequest" ||
             context.Request.Headers["Accept"].ToString().Contains("application/json") ||
@@ -102,6 +105,7 @@ builder.Services.ConfigureApplicationCookie(options =>
     {
         if (context.Request.Path.StartsWithSegments("/api") || 
             context.Request.Path.StartsWithSegments("/ksef") ||
+            context.Request.Path.StartsWithSegments("/services") ||
             context.Request.Path.StartsWithSegments("/invoices/import") ||
             context.Request.Headers["X-Requested-With"] == "XMLHttpRequest" ||
             context.Request.Headers["Accept"].ToString().Contains("application/json"))
@@ -149,6 +153,11 @@ builder.Services.AddScoped<IDocumentOcrService, DocumentOcrService>();
 builder.Services.AddScoped<ILlmService, LlmService>();
 builder.Services.AddScoped<IInvoicePreviewService, InvoicePreviewService>();
 
+// SOAP Services
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddSoapCore();
+builder.Services.AddScoped<IUslugaBIRzewnPubl, UslugaBIRzewnPublMock>();
+
 var app = builder.Build();
 
 // Localization middleware
@@ -186,6 +195,9 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+// Map SOAP Endpoint
+((IApplicationBuilder)app).UseSoapEndpoint<IUslugaBIRzewnPubl>("/services/regon.asmx", new SoapEncoderOptions(), SoapSerializer.DataContractSerializer);
+
 app.UseAuthentication();
 app.UseAuthorization();
 
@@ -214,3 +226,5 @@ app.MapControllerRoute(
     pattern: "{controller}/{action=Index}/{id?}");
 
 app.Run();
+
+public partial class Program { }

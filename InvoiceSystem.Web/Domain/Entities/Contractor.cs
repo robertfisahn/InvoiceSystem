@@ -8,4 +8,5 @@ public class Contractor
     public string? Address { get; set; }
     
     public ICollection<Invoice> Invoices { get; set; } = new List<Invoice>();
+    public ICollection<SoapVerificationLog> SoapVerificationLogs { get; set; } = new List<SoapVerificationLog>();
 }

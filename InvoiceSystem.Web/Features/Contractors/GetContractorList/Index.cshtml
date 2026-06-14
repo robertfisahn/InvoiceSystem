@@ -41,6 +41,7 @@
                     <th class="sortable" data-sort="name">Nazwa firmy <i class="bi bi-arrow-down-up ms-1"></i></th>
                     <th class="sortable" data-sort="nip" style="width: 200px;">NIP <i class="bi bi-arrow-down-up ms-1"></i></th>
                     <th class="sortable" data-sort="address">Adres <i class="bi bi-arrow-down-up ms-1"></i></th>
+                    <th class="text-center" style="width: 220px;">Status VAT (GUS)</th>
                 </tr>
             </thead>
             <tbody class="dx-datagrid-rows" id="tableBody">
@@ -61,13 +62,57 @@
                                 </span>
                             </td>
                             <td data-label="Adres">@item.Address</td>
+                            <td data-label="Status VAT (GUS)" class="text-center align-middle" data-vat-status="@item.LatestVatStatus">
+                                @if (string.IsNullOrWhiteSpace(item.LatestVatStatus))
+                                {
+                                    <button class="btn-primary-accent btn-sm verify-soap-btn" data-id="@item.Id" style="border-radius: 6px; padding: 4px 10px; font-size: 0.85rem; font-weight: 500;">
+                                        <i class="bi bi-shield-check me-1"></i> Weryfikuj (SOAP)
+                                    </button>
+                                }
+                                else if (item.LatestVatStatus == "ACTIVE")
+                                {
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1" style="font-size: 0.85rem; font-weight: 500;" title="Zweryfikowano: @item.LatestVerificationDate?.ToString("yyyy-MM-dd HH:mm")">
+                                        <i class="bi bi-check-circle-fill me-1"></i> VAT Aktywny
+                                    </span>
+                                    <button class="btn btn-link btn-sm p-0 ms-2 text-secondary verify-soap-btn" data-id="@item.Id" title="Zweryfikuj ponownie">
+                                        <i class="bi bi-arrow-clockwise"></i>
+                                    </button>
+                                }
+                                else if (item.LatestVatStatus == "EXEMPT")
+                                {
+                                    <span class="badge bg-warning-subtle text-warning border border-warning-subtle px-2 py-1" style="font-size: 0.85rem; font-weight: 500;" title="Zweryfikowano: @item.LatestVerificationDate?.ToString("yyyy-MM-dd HH:mm")">
+                                        <i class="bi bi-exclamation-triangle-fill me-1"></i> VAT Zwolniony
+                                    </span>
+                                    <button class="btn btn-link btn-sm p-0 ms-2 text-secondary verify-soap-btn" data-id="@item.Id" title="Zweryfikuj ponownie">
+                                        <i class="bi bi-arrow-clockwise"></i>
+                                    </button>
+                                }
+                                else if (item.LatestVatStatus == "NOT_REGISTERED" || item.LatestVatStatus == "NOT_FOUND")
+                                {
+                                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1" style="font-size: 0.85rem; font-weight: 500;" title="Zweryfikowano: @item.LatestVerificationDate?.ToString("yyyy-MM-dd HH:mm")">
+                                        <i class="bi bi-x-circle-fill me-1"></i> Niezarejestrowany
+                                    </span>
+                                    <button class="btn btn-link btn-sm p-0 ms-2 text-secondary verify-soap-btn" data-id="@item.Id" title="Zweryfikuj ponownie">
+                                        <i class="bi bi-arrow-clockwise"></i>
+                                    </button>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-2 py-1" style="font-size: 0.85rem; font-weight: 500;" title="Błąd weryfikacji. Zweryfikowano: @item.LatestVerificationDate?.ToString("yyyy-MM-dd HH:mm")">
+                                        <i class="bi bi-exclamation-circle me-1"></i> Błąd
+                                    </span>
+                                    <button class="btn btn-link btn-sm p-0 ms-2 text-secondary verify-soap-btn" data-id="@item.Id" title="Spróbuj ponownie">
+                                        <i class="bi bi-arrow-clockwise"></i>
+                                    </button>
+                                }
+                            </td>
                         </tr>
                     }
                 }
                 else
                 {
                     <tr class="dx-row">
-                        <td colspan="4" class="text-center py-5 text-muted">
+                        <td colspan="5" class="text-center py-5 text-muted">
                             <i class="bi bi-info-circle fs-3 d-block mb-2"></i>
                             Brak zarejestrowanych kontrahentów w systemie.
                         </td>
@@ -208,6 +253,113 @@
 
             $('.sortable[data-sort="id"]').addClass('active').find('i').attr('class', 'bi bi-sort-up');
             updateTable();
+
+            // Obsługa kliknięcia przycisku weryfikacji SOAP (GUS)
+            $(document).on('click', '.verify-soap-btn', function(e) {
+                e.preventDefault();
+                const $btn = $(this);
+                const contractorId = $btn.data('id');
+                const $td = $btn.closest('td');
+
+                if ($btn.hasClass('disabled')) return;
+                $btn.addClass('disabled');
+
+                const originalHtml = $btn.html();
+                $btn.html('<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> Weryfikacja...');
+
+                $.post(`/api/contractors/${contractorId}/verify-soap`)
+                    .done(function(data) {
+                        let badgeHtml = '';
+                        let checkedDate = data.checkedAt || new Date().toISOString().slice(0, 10);
+                        
+                        if (data.statusVat === 'ACTIVE') {
+                            badgeHtml = `
+                                <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1" style="font-size: 0.85rem; font-weight: 500;" title="Zweryfikowano: ${checkedDate}">
+                                    <i class="bi bi-check-circle-fill me-1"></i> VAT Aktywny
+                                </span>
+                            `;
+                        } else if (data.statusVat === 'EXEMPT') {
+                            badgeHtml = `
+                                <span class="badge bg-warning-subtle text-warning border border-warning-subtle px-2 py-1" style="font-size: 0.85rem; font-weight: 500;" title="Zweryfikowano: ${checkedDate}">
+                                    <i class="bi bi-exclamation-triangle-fill me-1"></i> VAT Zwolniony
+                                </span>
+                            `;
+                        } else if (data.statusVat === 'NOT_REGISTERED' || data.statusVat === 'NOT_FOUND') {
+                            badgeHtml = `
+                                <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1" style="font-size: 0.85rem; font-weight: 500;" title="Zweryfikowano: ${checkedDate}">
+                                    <i class="bi bi-x-circle-fill me-1"></i> Niezarejestrowany
+                                </span>
+                            `;
+                        } else {
+                            badgeHtml = `
+                                <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-2 py-1" style="font-size: 0.85rem; font-weight: 500;" title="Zweryfikowano: ${checkedDate}">
+                                    <i class="bi bi-exclamation-circle me-1"></i> Błąd
+                                </span>
+                            `;
+                        }
+
+                        badgeHtml += `
+                            <button class="btn btn-link btn-sm p-0 ms-2 text-secondary verify-soap-btn" data-id="${contractorId}" title="Zweryfikuj ponownie">
+                                <i class="bi bi-arrow-clockwise"></i>
+                            </button>
+                        `;
+
+                        $td.html(badgeHtml);
+                        $td.attr('data-vat-status', data.statusVat);
+
+                        if (data.statusVat === 'NOT_FOUND') {
+                            showNotification('warning', `Brak podmiotu o tym numerze NIP w rejestrze REGON (GUS).`);
+                        } else {
+                            showNotification('success', `Zweryfikowano w GUS: ${data.name}. Status VAT: ${data.statusVat}.`);
+                        }
+                    })
+                    .fail(function(xhr) {
+                        let errorMsg = 'Wystąpił błąd podczas weryfikacji w rejestrze GUS.';
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            errorMsg = xhr.responseJSON.message;
+                        }
+
+                        $td.html(`
+                            <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-2 py-1" style="font-size: 0.85rem; font-weight: 500;" title="${errorMsg}">
+                                <i class="bi bi-exclamation-circle me-1"></i> Błąd
+                            </span>
+                            <button class="btn btn-link btn-sm p-0 ms-2 text-secondary verify-soap-btn" data-id="${contractorId}" title="Spróbuj ponownie">
+                                <i class="bi bi-arrow-clockwise"></i>
+                            </button>
+                        `);
+
+                        showNotification('danger', errorMsg);
+                    });
+            });
+
+            function showNotification(type, message) {
+                let toastId = 'toast-' + Math.floor(Math.random() * 1000);
+                let bgClass = 'bg-danger text-white';
+                let iconClass = 'bi bi-exclamation-triangle-fill';
+                
+                if (type === 'success') {
+                    bgClass = 'bg-success text-white';
+                    iconClass = 'bi bi-check-circle-fill';
+                } else if (type === 'warning') {
+                    bgClass = 'bg-warning text-dark';
+                    iconClass = 'bi bi-exclamation-circle-fill';
+                }
+                
+                let toastHtml = `
+                    <div id="${toastId}" class="toast align-items-center ${bgClass} border-0 position-fixed bottom-0 end-0 m-3" role="alert" aria-live="assertive" aria-atomic="true" style="z-index: 1055; display: flex; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+                        <div class="toast-body d-flex align-items-center gap-2">
+                            <i class="${iconClass}"></i>
+                            <div>${message}</div>
+                        </div>
+                        <button type="button" class="btn-close ${type === 'warning' ? '' : 'btn-close-white'} me-2 m-auto" data-bs-dismiss="toast" aria-label="Close" onclick="document.getElementById('${toastId}').remove()"></button>
+                    </div>
+                `;
+                $('body').append(toastHtml);
+                setTimeout(function() {
+                    let $t = $('#' + toastId);
+                    if ($t.length) $t.fadeOut(500, function() { $(this).remove(); });
+                }, 5000);
+            }
         });
     </script>
     <style>

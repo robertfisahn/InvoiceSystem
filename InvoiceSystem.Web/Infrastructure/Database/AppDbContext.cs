@@ -13,6 +13,7 @@ public class AppDbContext : IdentityDbContext<AppUser>
     public DbSet<InvoiceItem> InvoiceItems => Set<InvoiceItem>();
     public DbSet<KsefSetting> KsefSettings => Set<KsefSetting>();
     public DbSet<KsefIncomingInvoice> KsefIncomingInvoices => Set<KsefIncomingInvoice>();
+    public DbSet<SoapVerificationLog> SoapVerificationLogs => Set<SoapVerificationLog>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -31,5 +32,11 @@ public class AppDbContext : IdentityDbContext<AppUser>
         modelBuilder.Entity<KsefIncomingInvoice>()
             .HasIndex(k => k.KsefNumber)
             .IsUnique();
+
+        modelBuilder.Entity<SoapVerificationLog>()
+            .HasOne(l => l.Contractor)
+            .WithMany(c => c.SoapVerificationLogs)
+            .HasForeignKey(l => l.ContractorId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

@@ -16,7 +16,14 @@ public sealed class GetContractorListHandler(AppDbContext db)
         return await db.Contractors
             .AsNoTracking()
             .OrderBy(c => c.Name)
-            .Select(c => new ContractorDto(c.Id, c.Name, c.TaxId ?? string.Empty, c.Address ?? string.Empty))
+            .Select(c => new ContractorDto(
+                c.Id, 
+                c.Name, 
+                c.TaxId ?? string.Empty, 
+                c.Address ?? string.Empty,
+                c.SoapVerificationLogs.OrderByDescending(l => l.Timestamp).Select(l => l.VerificationCode).FirstOrDefault(),
+                c.SoapVerificationLogs.OrderByDescending(l => l.Timestamp).Select(l => (DateTime?)l.Timestamp).FirstOrDefault()
+            ))
             .ToListAsync(cancellationToken);
     }
 }
