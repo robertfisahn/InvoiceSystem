@@ -74,7 +74,7 @@ public static class KsefXmlSerializer
         sb.AppendLine($"            <NIP>{contractorNip}</NIP>");
         sb.AppendLine($"            <Nazwa>{contractorName}</Nazwa>");
         sb.AppendLine("        </DaneIdentyfikacyjne>");
-        if (invoice.Contractor != null && !string.IsNullOrEmpty(invoice.Contractor.Address))
+        if (invoice.Contractor != null && !string.IsNullOrWhiteSpace(invoice.Contractor.Address))
         {
             var parsedAddr = ParseContractorAddress(invoice.Contractor.Address);
             sb.AppendLine("        <Adres>");
