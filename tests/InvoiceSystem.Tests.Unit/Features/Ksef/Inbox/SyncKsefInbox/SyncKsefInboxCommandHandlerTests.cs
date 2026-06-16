@@ -254,5 +254,37 @@ namespace InvoiceSystem.Tests.Unit.Features.Ksef.Inbox.SyncKsefInbox
             var saved = await db.KsefIncomingInvoices.FirstOrDefaultAsync(i => i.KsefNumber == "OK-1");
             saved.Should().NotBeNull();
         }
+
+        [Fact]
+        public async Task Handle_Should_Return_Friendly_Error_When_InitSession_Throws_KsefApiException()
+        {
+            // Arrange
+            using var db = _fixture.CreateContext();
+            var setting = new KsefSetting { Nip = "1234567890", ApiKey = "KEY-123" };
+            db.KsefSettings.Add(setting);
+            await db.SaveChangesAsync();
+
+            _ksefClient.AuthorisationChallengeAsync("1234567890", Arg.Any<CancellationToken>())
+                .Returns(new KsefChallengeResult("CHALLENGE", "TIMESTAMP"));
+
+            var mockKsefException = new KsefApiException(
+                serviceCode: "21111",
+                serviceName: "InitSession",
+                serviceCtx: "Błędne uwierzytelnienie - niepoprawny token.",
+                rawResponse: "{\"exception\": {\"serviceCode\": \"21111\", \"serviceCtx\": \"Błędne uwierzytelnienie - niepoprawny token.\", \"serviceName\": \"InitSession\"}}"
+            );
+            _ksefClient.InitSessionAsync("1234567890", "KEY-123", "CHALLENGE", "TIMESTAMP", Arg.Any<CancellationToken>())
+                .ThrowsAsync(mockKsefException);
+
+            var handler = new SyncKsefInboxCommandHandler(db, _ksefClient, _logger);
+            var command = new SyncKsefInboxCommand();
+
+            // Act
+            var result = await handler.Handle(command, CancellationToken.None);
+
+            // Assert
+            result.Success.Should().BeFalse();
+            result.ErrorMessage.Should().Contain("Błąd autoryzacji KSeF: Niepoprawny token API lub brak uprawnień");
+        }
     }
 }

@@ -15,6 +15,7 @@ scratch/
 # docs
 docs 
 docs-migration-checklist.md
+docs/testing.md
 
 # User-specific files
 *.rsuser

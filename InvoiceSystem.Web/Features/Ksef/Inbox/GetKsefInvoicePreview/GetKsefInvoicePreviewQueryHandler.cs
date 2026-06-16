@@ -53,7 +53,8 @@ public sealed class GetKsefInvoicePreviewQueryHandler(AppDbContext dbContext, IK
         }
         catch (Exception ex)
         {
-            return new GetKsefInvoicePreviewResult(false, null, null, null, null, null, null, null, null, 0, [], ex.Message);
+            var friendlyMessage = KsefSessionHelper.MapExceptionToFriendlyMessage(ex);
+            return new GetKsefInvoicePreviewResult(false, null, null, null, null, null, null, null, null, 0, [], friendlyMessage);
         }
     }
 }

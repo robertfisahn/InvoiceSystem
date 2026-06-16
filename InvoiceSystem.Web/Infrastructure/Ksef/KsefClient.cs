@@ -41,6 +41,37 @@ public sealed class KsefClient(HttpClient httpClient, ILogger<KsefClient> logger
     private readonly ILogger<KsefClient> _logger = logger;
     private const string SandboxUrl = "https://api-test.ksef.mf.gov.pl/v2";
 
+    private async Task EnsureSuccessResponseAsync(HttpResponseMessage response, string actionName, CancellationToken cancellationToken)
+    {
+        if (response.IsSuccessStatusCode)
+        {
+            return;
+        }
+
+        var content = await response.Content.ReadAsStringAsync(cancellationToken);
+        try
+        {
+            using var doc = JsonDocument.Parse(content);
+            if (doc.RootElement.TryGetProperty("exception", out var exceptionProp))
+            {
+                var serviceCode = exceptionProp.TryGetProperty("serviceCode", out var codeProp) ? codeProp.GetString() : "";
+                var serviceName = exceptionProp.TryGetProperty("serviceName", out var nameProp) ? nameProp.GetString() : "";
+                var serviceCtx = exceptionProp.TryGetProperty("serviceCtx", out var ctxProp) ? ctxProp.GetString() : "";
+
+                if (!string.IsNullOrEmpty(serviceCode) || !string.IsNullOrEmpty(serviceCtx))
+                {
+                    throw new KsefApiException(serviceCode ?? "", serviceName ?? actionName, serviceCtx ?? "Nieznany błąd", content);
+                }
+            }
+        }
+        catch (JsonException)
+        {
+            // Not valid JSON, fall back to standard HTTP error
+        }
+
+        throw new HttpRequestException($"Błąd KSeF ({actionName}): HTTP {(int)response.StatusCode} {response.ReasonPhrase}. Szczegóły: {content}");
+    }
+
     public async Task<KsefChallengeResult> AuthorisationChallengeAsync(string nip, CancellationToken cancellationToken = default)
     {
         var requestBody = new
@@ -58,7 +89,7 @@ public sealed class KsefClient(HttpClient httpClient, ILogger<KsefClient> logger
         };
 
         var response = await _httpClient.SendAsync(request, cancellationToken);
-        response.EnsureSuccessStatusCode();
+        await EnsureSuccessResponseAsync(response, "AuthorisationChallenge", cancellationToken);
 
         var json = await response.Content.ReadAsStringAsync(cancellationToken);
         using var doc = JsonDocument.Parse(json);
@@ -90,7 +121,7 @@ public sealed class KsefClient(HttpClient httpClient, ILogger<KsefClient> logger
         };
 
         var response = await _httpClient.SendAsync(request, cancellationToken);
-        response.EnsureSuccessStatusCode();
+        await EnsureSuccessResponseAsync(response, "InitSession", cancellationToken);
 
         var json = await response.Content.ReadAsStringAsync(cancellationToken);
         using var doc = JsonDocument.Parse(json);
@@ -114,30 +145,25 @@ public sealed class KsefClient(HttpClient httpClient, ILogger<KsefClient> logger
                     statusRequest.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
                     var statusResponse = await _httpClient.SendAsync(statusRequest, cancellationToken);
-                    if (statusResponse.IsSuccessStatusCode)
-                    {
-                        var statusJson = await statusResponse.Content.ReadAsStringAsync(cancellationToken);
-                        using var statusDoc = JsonDocument.Parse(statusJson);
-                        if (statusDoc.RootElement.TryGetProperty("status", out var statusElement))
-                        {
-                            var code = statusElement.GetProperty("code").GetInt32();
-                            var description = statusElement.TryGetProperty("description", out var descElement) 
-                                ? descElement.GetString() 
-                                : string.Empty;
+                    await EnsureSuccessResponseAsync(statusResponse, "CheckSessionStatus", cancellationToken);
 
-                            if (code == 200)
-                            {
-                                authenticated = true;
-                            }
-                            else if (code != 100)
-                            {
-                                throw new InvalidOperationException($"KSeF Authentication failed with code {code}: {description}");
-                            }
-                        }
-                    }
-                    else
+                    var statusJson = await statusResponse.Content.ReadAsStringAsync(cancellationToken);
+                    using var statusDoc = JsonDocument.Parse(statusJson);
+                    if (statusDoc.RootElement.TryGetProperty("status", out var statusElement))
                     {
-                        throw new InvalidOperationException($"KSeF status check failed with HTTP {statusResponse.StatusCode}");
+                        var code = statusElement.GetProperty("code").GetInt32();
+                        var description = statusElement.TryGetProperty("description", out var descElement) 
+                            ? descElement.GetString() 
+                            : string.Empty;
+
+                        if (code == 200)
+                        {
+                            authenticated = true;
+                        }
+                        else if (code != 100)
+                        {
+                            throw new InvalidOperationException($"KSeF Authentication failed with code {code}: {description}");
+                        }
                     }
                     retries--;
                 }
@@ -151,7 +177,7 @@ public sealed class KsefClient(HttpClient httpClient, ILogger<KsefClient> logger
                 var refreshRequest = new HttpRequestMessage(HttpMethod.Post, $"{SandboxUrl}/auth/token/redeem");
                 refreshRequest.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
                 var refreshResponse = await _httpClient.SendAsync(refreshRequest, cancellationToken);
-                refreshResponse.EnsureSuccessStatusCode();
+                await EnsureSuccessResponseAsync(refreshResponse, "RedeemToken", cancellationToken);
 
                 var refreshJson = await refreshResponse.Content.ReadAsStringAsync(cancellationToken);
                 using var refreshDoc = JsonDocument.Parse(refreshJson);
@@ -190,12 +216,7 @@ public sealed class KsefClient(HttpClient httpClient, ILogger<KsefClient> logger
                 sessionRequest.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
 
                 var sessionResponse = await _httpClient.SendAsync(sessionRequest, cancellationToken);
-                if (!sessionResponse.IsSuccessStatusCode)
-                {
-                    var errorBody = await sessionResponse.Content.ReadAsStringAsync(cancellationToken);
-                    _logger.LogError("KSeF InitSession failed. Status: {Status}, Body: {Body}", sessionResponse.StatusCode, errorBody);
-                    throw new HttpRequestException($"Błąd otwierania sesji KSeF: {sessionResponse.StatusCode} - {errorBody}");
-                }
+                await EnsureSuccessResponseAsync(sessionResponse, "OpenSession", cancellationToken);
 
                 var sessionJson = await sessionResponse.Content.ReadAsStringAsync(cancellationToken);
                 using var sessionDoc = JsonDocument.Parse(sessionJson);
@@ -243,7 +264,7 @@ public sealed class KsefClient(HttpClient httpClient, ILogger<KsefClient> logger
         request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
 
         var response = await _httpClient.SendAsync(request, cancellationToken);
-        response.EnsureSuccessStatusCode();
+        await EnsureSuccessResponseAsync(response, "CloseSession", cancellationToken);
     }
 
     private void SetSessionAuthHeader(HttpRequestMessage request, string sessionToken)
@@ -329,12 +350,7 @@ public sealed class KsefClient(HttpClient httpClient, ILogger<KsefClient> logger
         request.Content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
 
         var response = await _httpClient.SendAsync(request, cancellationToken);
-        if (!response.IsSuccessStatusCode)
-        {
-            var errorBody = await response.Content.ReadAsStringAsync(cancellationToken);
-            _logger.LogError("KSeF SendInvoice failed. Status: {Status}, Body: {Body}", response.StatusCode, errorBody);
-            throw new HttpRequestException($"Błąd wysyłki do KSeF: {response.StatusCode} - {errorBody}");
-        }
+        await EnsureSuccessResponseAsync(response, "SendInvoice", cancellationToken);
 
         var json = await response.Content.ReadAsStringAsync(cancellationToken);
         using var doc = JsonDocument.Parse(json);
@@ -360,10 +376,7 @@ public sealed class KsefClient(HttpClient httpClient, ILogger<KsefClient> logger
         SetSessionAuthHeader(request, sessionToken);
 
         var response = await _httpClient.SendAsync(request, cancellationToken);
-        if (!response.IsSuccessStatusCode)
-        {
-            return new KsefStatusResult("Failed", null, $"HTTP Error {response.StatusCode}");
-        }
+        await EnsureSuccessResponseAsync(response, "CheckInvoiceStatus", cancellationToken);
 
         var json = await response.Content.ReadAsStringAsync(cancellationToken);
         using var doc = JsonDocument.Parse(json);
@@ -410,7 +423,7 @@ public sealed class KsefClient(HttpClient httpClient, ILogger<KsefClient> logger
         SetSessionAuthHeader(request, sessionToken);
 
         var response = await _httpClient.SendAsync(request, cancellationToken);
-        response.EnsureSuccessStatusCode();
+        await EnsureSuccessResponseAsync(response, "SyncInvoices", cancellationToken);
 
         var json = await response.Content.ReadAsStringAsync(cancellationToken);
         using var doc = JsonDocument.Parse(json);
@@ -470,7 +483,7 @@ public sealed class KsefClient(HttpClient httpClient, ILogger<KsefClient> logger
                     if (delayMs > 30000)
                     {
                         _logger.LogWarning("KSeF API requested a Retry-After delay of {DelayMs}ms, which exceeds our maximum wait limit of 30 seconds. Aborting retries to release the thread.", delayMs);
-                        response.EnsureSuccessStatusCode();
+                        await EnsureSuccessResponseAsync(response, "DownloadInvoiceXml", cancellationToken);
                     }
                     
                     _logger.LogWarning("KSeF API returned 429 (Too Many Requests) for invoice {KsefNumber}. Retrying in {DelayMs}ms. Retries left: {Retries}", ksefNumber, delayMs, retries);
@@ -479,7 +492,7 @@ public sealed class KsefClient(HttpClient httpClient, ILogger<KsefClient> logger
                 }
             }
 
-            response.EnsureSuccessStatusCode();
+            await EnsureSuccessResponseAsync(response, "DownloadInvoiceXml", cancellationToken);
             return await response.Content.ReadAsStringAsync(cancellationToken);
         }
     }
@@ -495,7 +508,7 @@ public sealed class KsefClient(HttpClient httpClient, ILogger<KsefClient> logger
         SetSessionAuthHeader(request, sessionToken);
 
         var response = await _httpClient.SendAsync(request, cancellationToken);
-        response.EnsureSuccessStatusCode();
+        await EnsureSuccessResponseAsync(response, "DownloadUpo", cancellationToken);
 
         return await response.Content.ReadAsStringAsync(cancellationToken);
     }

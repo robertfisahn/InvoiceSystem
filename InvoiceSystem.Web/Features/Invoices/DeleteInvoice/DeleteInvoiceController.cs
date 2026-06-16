@@ -11,8 +11,15 @@ public sealed class DeleteInvoiceController(IMediator mediator) : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Index(int id)
     {
-        await mediator.Send(new DeleteInvoiceCommand(id));
-        TempData["SuccessMessage"] = "Faktura została usunięta.";
+        try
+        {
+            await mediator.Send(new DeleteInvoiceCommand(id));
+            TempData["SuccessMessage"] = "Faktura została usunięta.";
+        }
+        catch (System.InvalidOperationException ex)
+        {
+            TempData["ErrorMessage"] = ex.Message;
+        }
         return RedirectToAction("Index", "GetInvoiceList");
     }
 }

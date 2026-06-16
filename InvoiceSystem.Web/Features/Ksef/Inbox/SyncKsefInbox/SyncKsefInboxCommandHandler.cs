@@ -110,7 +110,8 @@ public sealed class SyncKsefInboxCommandHandler(AppDbContext dbContext, IKsefCli
         }
         catch (Exception ex)
         {
-            return new SyncKsefInboxResult(false, 0, ex.Message);
+            var friendlyMessage = KsefSessionHelper.MapExceptionToFriendlyMessage(ex);
+            return new SyncKsefInboxResult(false, 0, friendlyMessage);
         }
     }
 }

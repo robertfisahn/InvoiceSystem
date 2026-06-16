@@ -131,5 +131,250 @@ namespace InvoiceSystem.Tests.Unit.Features.Ksef.Configuration.TestKsefConnectio
             result.Success.Should().BeFalse();
             result.Message.Should().Be("Błąd połączenia: KSeF API is offline");
         }
+
+        [Fact]
+        public async Task Handle_Should_Return_Friendly_Error_When_Challenge_Throws_KsefApiException_With_Invalid_Nip()
+        {
+            // Arrange
+            using var db = _fixture.CreateContext();
+            var mockKsefException = new KsefApiException(
+                serviceCode: "21405",
+                serviceName: "AuthorisationChallenge",
+                serviceCtx: "Niepoprawny format identyfikatora NIP.",
+                rawResponse: "{\"exception\": {\"serviceCode\": \"21405\", \"serviceCtx\": \"Niepoprawny format identyfikatora NIP.\", \"serviceName\": \"AuthorisationChallenge\"}}"
+            );
+            _ksefClient.AuthorisationChallengeAsync("1234567890", Arg.Any<CancellationToken>())
+                .ThrowsAsync(mockKsefException);
+
+            var handler = new TestKsefConnectionCommandHandler(db, _ksefClient);
+            var command = new TestKsefConnectionCommand("1234567890", "KEY-123");
+
+            // Act
+            var result = await handler.Handle(command, CancellationToken.None);
+
+            // Assert
+            result.Success.Should().BeFalse();
+            result.Message.Should().Contain("Błąd walidacji KSeF: Niepoprawny NIP");
+        }
+
+        [Fact]
+        public async Task Handle_Should_Return_Friendly_Error_When_Challenge_Throws_429_TooManyRequests()
+        {
+            // Arrange
+            using var db = _fixture.CreateContext();
+            var mockHttpException = new System.Net.Http.HttpRequestException(
+                "Too Many Requests", 
+                null, 
+                System.Net.HttpStatusCode.TooManyRequests
+            );
+            _ksefClient.AuthorisationChallengeAsync("1234567890", Arg.Any<CancellationToken>())
+                .ThrowsAsync(mockHttpException);
+
+            var handler = new TestKsefConnectionCommandHandler(db, _ksefClient);
+            var command = new TestKsefConnectionCommand("1234567890", "KEY-123");
+
+            // Act
+            var result = await handler.Handle(command, CancellationToken.None);
+
+            // Assert
+            result.Success.Should().BeFalse();
+            result.Message.Should().Contain("Przekroczono limit żądań do KSeF (429)");
+        }
+
+        [Fact]
+        public async Task Handle_Should_Return_Friendly_Error_When_InitSession_Throws_KsefApiException_With_Invalid_Token()
+        {
+            // Arrange
+            using var db = _fixture.CreateContext();
+            _ksefClient.AuthorisationChallengeAsync("1234567890", Arg.Any<CancellationToken>())
+                .Returns(new KsefChallengeResult("CHALLENGE", "TIMESTAMP"));
+
+            var mockKsefException = new KsefApiException(
+                serviceCode: "21111",
+                serviceName: "InitSession",
+                serviceCtx: "Brak uprawnień do wykonania operacji.",
+                rawResponse: "{\"exception\": {\"serviceCode\": \"21111\", \"serviceCtx\": \"Brak uprawnień do wykonania operacji.\", \"serviceName\": \"InitSession\"}}"
+            );
+            _ksefClient.InitSessionAsync("1234567890", "KEY-123", "CHALLENGE", "TIMESTAMP", Arg.Any<CancellationToken>())
+                .ThrowsAsync(mockKsefException);
+
+            var handler = new TestKsefConnectionCommandHandler(db, _ksefClient);
+            var command = new TestKsefConnectionCommand("1234567890", "KEY-123");
+
+            // Act
+            var result = await handler.Handle(command, CancellationToken.None);
+
+            // Assert
+            result.Success.Should().BeFalse();
+            result.Message.Should().Contain("Błąd autoryzacji KSeF: Niepoprawny token API lub brak uprawnień");
+        }
+
+        [Fact]
+        public async Task Handle_Should_Return_Friendly_Error_When_InitSession_Throws_429_TooManyRequests()
+        {
+            // Arrange
+            using var db = _fixture.CreateContext();
+            _ksefClient.AuthorisationChallengeAsync("1234567890", Arg.Any<CancellationToken>())
+                .Returns(new KsefChallengeResult("CHALLENGE", "TIMESTAMP"));
+
+            var mockHttpException = new System.Net.Http.HttpRequestException(
+                "Too Many Requests", 
+                null, 
+                System.Net.HttpStatusCode.TooManyRequests
+            );
+            _ksefClient.InitSessionAsync("1234567890", "KEY-123", "CHALLENGE", "TIMESTAMP", Arg.Any<CancellationToken>())
+                .ThrowsAsync(mockHttpException);
+
+            var handler = new TestKsefConnectionCommandHandler(db, _ksefClient);
+            var command = new TestKsefConnectionCommand("1234567890", "KEY-123");
+
+            // Act
+            var result = await handler.Handle(command, CancellationToken.None);
+
+            // Assert
+            result.Success.Should().BeFalse();
+            result.Message.Should().Contain("Przekroczono limit żądań do KSeF (429)");
+        }
+
+        [Fact]
+        public async Task Handle_Should_Return_Friendly_Error_When_CheckSessionStatus_Throws_KsefApiException_With_Invalid_ReferenceNumber()
+        {
+            // Arrange
+            using var db = _fixture.CreateContext();
+            _ksefClient.AuthorisationChallengeAsync("1234567890", Arg.Any<CancellationToken>())
+                .Returns(new KsefChallengeResult("CHALLENGE", "TIMESTAMP"));
+
+            var mockKsefException = new KsefApiException(
+                serviceCode: "21304",
+                serviceName: "CheckSessionStatus",
+                serviceCtx: "Nieprawidłowy numer referencyjny.",
+                rawResponse: "{\"exception\": {\"serviceCode\": \"21304\", \"serviceCtx\": \"Nieprawidłowy numer referencyjny.\", \"serviceName\": \"CheckSessionStatus\"}}"
+            );
+            _ksefClient.InitSessionAsync("1234567890", "KEY-123", "CHALLENGE", "TIMESTAMP", Arg.Any<CancellationToken>())
+                .ThrowsAsync(mockKsefException);
+
+            var handler = new TestKsefConnectionCommandHandler(db, _ksefClient);
+            var command = new TestKsefConnectionCommand("1234567890", "KEY-123");
+
+            // Act
+            var result = await handler.Handle(command, CancellationToken.None);
+
+            // Assert
+            result.Success.Should().BeFalse();
+            result.Message.Should().Contain("Błąd KSeF: Nieprawidłowy numer referencyjny sesji");
+        }
+
+        [Fact]
+        public async Task Handle_Should_Return_Friendly_Error_When_CheckSessionStatus_Throws_410_Gone()
+        {
+            // Arrange
+            using var db = _fixture.CreateContext();
+            _ksefClient.AuthorisationChallengeAsync("1234567890", Arg.Any<CancellationToken>())
+                .Returns(new KsefChallengeResult("CHALLENGE", "TIMESTAMP"));
+
+            var mockHttpException = new System.Net.Http.HttpRequestException(
+                "Gone", 
+                null, 
+                System.Net.HttpStatusCode.Gone
+            );
+            _ksefClient.InitSessionAsync("1234567890", "KEY-123", "CHALLENGE", "TIMESTAMP", Arg.Any<CancellationToken>())
+                .ThrowsAsync(mockHttpException);
+
+            var handler = new TestKsefConnectionCommandHandler(db, _ksefClient);
+            var command = new TestKsefConnectionCommand("1234567890", "KEY-123");
+
+            // Act
+            var result = await handler.Handle(command, CancellationToken.None);
+
+            // Assert
+            result.Success.Should().BeFalse();
+            result.Message.Should().Contain("Sesja KSeF wygasła (410 Gone)");
+        }
+
+        [Fact]
+        public async Task Handle_Should_Return_Friendly_Error_When_RedeemToken_Throws_KsefApiException_With_Invalid_SessionToken()
+        {
+            // Arrange
+            using var db = _fixture.CreateContext();
+            _ksefClient.AuthorisationChallengeAsync("1234567890", Arg.Any<CancellationToken>())
+                .Returns(new KsefChallengeResult("CHALLENGE", "TIMESTAMP"));
+
+            var mockKsefException = new KsefApiException(
+                serviceCode: "21301",
+                serviceName: "RedeemToken",
+                serviceCtx: "Brak uprawnień do tokenu sesyjnego.",
+                rawResponse: "{\"exception\": {\"serviceCode\": \"21301\", \"serviceCtx\": \"Brak uprawnień do tokenu sesyjnego.\", \"serviceName\": \"RedeemToken\"}}"
+            );
+            _ksefClient.InitSessionAsync("1234567890", "KEY-123", "CHALLENGE", "TIMESTAMP", Arg.Any<CancellationToken>())
+                .ThrowsAsync(mockKsefException);
+
+            var handler = new TestKsefConnectionCommandHandler(db, _ksefClient);
+            var command = new TestKsefConnectionCommand("1234567890", "KEY-123");
+
+            // Act
+            var result = await handler.Handle(command, CancellationToken.None);
+
+            // Assert
+            result.Success.Should().BeFalse();
+            result.Message.Should().Contain("Błąd autoryzacji tokenu KSeF: Niepoprawny token sesji lub brak uprawnień");
+        }
+
+        [Fact]
+        public async Task Handle_Should_Return_Friendly_Error_When_OpenSession_Throws_KsefApiException_With_AuthError()
+        {
+            // Arrange
+            using var db = _fixture.CreateContext();
+            _ksefClient.AuthorisationChallengeAsync("1234567890", Arg.Any<CancellationToken>())
+                .Returns(new KsefChallengeResult("CHALLENGE", "TIMESTAMP"));
+
+            var mockKsefException = new KsefApiException(
+                serviceCode: "21470",
+                serviceName: "OpenSession",
+                serviceCtx: "Błąd uwierzytelniania sesji.",
+                rawResponse: "{\"exception\": {\"serviceCode\": \"21470\", \"serviceCtx\": \"Błąd uwierzytelniania sesji.\", \"serviceName\": \"OpenSession\"}}"
+            );
+            _ksefClient.InitSessionAsync("1234567890", "KEY-123", "CHALLENGE", "TIMESTAMP", Arg.Any<CancellationToken>())
+                .ThrowsAsync(mockKsefException);
+
+            var handler = new TestKsefConnectionCommandHandler(db, _ksefClient);
+            var command = new TestKsefConnectionCommand("1234567890", "KEY-123");
+
+            // Act
+            var result = await handler.Handle(command, CancellationToken.None);
+
+            // Assert
+            result.Success.Should().BeFalse();
+            result.Message.Should().Contain("Błąd otwarcia sesji KSeF: Błąd uwierzytelniania");
+        }
+
+        [Fact]
+        public async Task Handle_Should_Return_Friendly_Error_When_CloseSession_Throws_KsefApiException()
+        {
+            // Arrange
+            using var db = _fixture.CreateContext();
+            _ksefClient.AuthorisationChallengeAsync("1234567890", Arg.Any<CancellationToken>())
+                .Returns(new KsefChallengeResult("CHALLENGE", "TIMESTAMP"));
+            _ksefClient.InitSessionAsync("1234567890", "KEY-123", "CHALLENGE", "TIMESTAMP", Arg.Any<CancellationToken>())
+                .Returns("mock_token|ref|aes|iv|online_ref_999");
+
+            var mockKsefException = new KsefApiException(
+                serviceCode: "21304",
+                serviceName: "CloseSession",
+                serviceCtx: "Nieprawidłowy numer sesji.",
+                rawResponse: "{\"exception\": {\"serviceCode\": \"21304\", \"serviceCtx\": \"Nieprawidłowy numer sesji.\", \"serviceName\": \"CloseSession\"}}"
+            );
+            _ksefClient.CloseSessionAsync("mock_token|ref|aes|iv|online_ref_999", Arg.Any<CancellationToken>())
+                .ThrowsAsync(mockKsefException);
+
+            var handler = new TestKsefConnectionCommandHandler(db, _ksefClient);
+            var command = new TestKsefConnectionCommand("1234567890", "KEY-123");
+
+            // Act
+            var result = await handler.Handle(command, CancellationToken.None);
+
+            // Assert
+            result.Success.Should().BeFalse();
+            result.Message.Should().Contain("Błąd zamykania sesji KSeF");
+        }
     }
 }

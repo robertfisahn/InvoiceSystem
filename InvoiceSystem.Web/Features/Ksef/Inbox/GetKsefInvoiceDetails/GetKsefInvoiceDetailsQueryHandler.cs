@@ -41,7 +41,8 @@ public sealed class GetKsefInvoiceDetailsQueryHandler(AppDbContext dbContext, IK
         }
         catch (Exception ex)
         {
-            return new GetKsefInvoiceDetailsResult(false, incoming.Id, incoming.KsefNumber, incoming.ImportStatus, incoming.IssueDate, null, ex.Message);
+            var friendlyMessage = KsefSessionHelper.MapExceptionToFriendlyMessage(ex);
+            return new GetKsefInvoiceDetailsResult(false, incoming.Id, incoming.KsefNumber, incoming.ImportStatus, incoming.IssueDate, null, friendlyMessage);
         }
     }
 }

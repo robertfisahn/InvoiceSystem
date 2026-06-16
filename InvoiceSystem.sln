@@ -9,6 +9,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{0AB3BF05
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InvoiceSystem.Tests.Unit", "tests\InvoiceSystem.Tests.Unit\InvoiceSystem.Tests.Unit.csproj", "{A5C06548-F8D7-4EBB-AA78-2401ACC77C3D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InvoiceSystem.Tests.Integration", "tests\InvoiceSystem.Tests.Integration\InvoiceSystem.Tests.Integration.csproj", "{2C7701EC-9D21-41ED-B72C-3F20651DA676}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -43,11 +45,24 @@ Global
 		{A5C06548-F8D7-4EBB-AA78-2401ACC77C3D}.Release|x64.Build.0 = Release|Any CPU
 		{A5C06548-F8D7-4EBB-AA78-2401ACC77C3D}.Release|x86.ActiveCfg = Release|Any CPU
 		{A5C06548-F8D7-4EBB-AA78-2401ACC77C3D}.Release|x86.Build.0 = Release|Any CPU
+		{2C7701EC-9D21-41ED-B72C-3F20651DA676}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2C7701EC-9D21-41ED-B72C-3F20651DA676}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2C7701EC-9D21-41ED-B72C-3F20651DA676}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{2C7701EC-9D21-41ED-B72C-3F20651DA676}.Debug|x64.Build.0 = Debug|Any CPU
+		{2C7701EC-9D21-41ED-B72C-3F20651DA676}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{2C7701EC-9D21-41ED-B72C-3F20651DA676}.Debug|x86.Build.0 = Debug|Any CPU
+		{2C7701EC-9D21-41ED-B72C-3F20651DA676}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2C7701EC-9D21-41ED-B72C-3F20651DA676}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2C7701EC-9D21-41ED-B72C-3F20651DA676}.Release|x64.ActiveCfg = Release|Any CPU
+		{2C7701EC-9D21-41ED-B72C-3F20651DA676}.Release|x64.Build.0 = Release|Any CPU
+		{2C7701EC-9D21-41ED-B72C-3F20651DA676}.Release|x86.ActiveCfg = Release|Any CPU
+		{2C7701EC-9D21-41ED-B72C-3F20651DA676}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{A5C06548-F8D7-4EBB-AA78-2401ACC77C3D} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
+		{2C7701EC-9D21-41ED-B72C-3F20651DA676} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
 	EndGlobalSection
 EndGlobal

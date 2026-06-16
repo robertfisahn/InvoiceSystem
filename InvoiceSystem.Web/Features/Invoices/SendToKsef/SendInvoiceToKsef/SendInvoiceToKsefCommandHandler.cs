@@ -87,6 +87,86 @@ public sealed class SendInvoiceToKsefCommandHandler(AppDbContext dbContext, IKse
 
             return new SendInvoiceToKsefResult(true, null, transactionId, null);
         }
+        catch (KsefApiException ex)
+        {
+            if (ex.ServiceName == "AuthorisationChallenge" && (ex.ServiceCode == "21405" || ex.ServiceCtx.Contains("NIP", StringComparison.OrdinalIgnoreCase)))
+            {
+                return new SendInvoiceToKsefResult(false, null, null, $"Błąd walidacji KSeF: Niepoprawny NIP. Szczegóły: {ex.ServiceCtx}");
+            }
+            if (ex.ServiceName == "InitSession" && (ex.ServiceCode == "21111" || ex.ServiceCtx.Contains("token", StringComparison.OrdinalIgnoreCase) || ex.ServiceCtx.Contains("uprawni", StringComparison.OrdinalIgnoreCase)))
+            {
+                return new SendInvoiceToKsefResult(false, null, null, $"Błąd autoryzacji KSeF: Niepoprawny token API lub brak uprawnień. Szczegóły: {ex.ServiceCtx}");
+            }
+            if (ex.ServiceName == "CheckSessionStatus" && ex.ServiceCode == "21304")
+            {
+                return new SendInvoiceToKsefResult(false, null, null, $"Błąd KSeF: Nieprawidłowy numer referencyjny sesji. Szczegóły: {ex.ServiceCtx}");
+            }
+            if (ex.ServiceName == "RedeemToken")
+            {
+                if (ex.ServiceCode == "21301")
+                {
+                    return new SendInvoiceToKsefResult(false, null, null, $"Błąd autoryzacji tokenu KSeF: Niepoprawny token sesji lub brak uprawnień. Szczegóły: {ex.ServiceCtx}");
+                }
+                if (ex.ServiceCode == "21304")
+                {
+                    return new SendInvoiceToKsefResult(false, null, null, $"Błąd tokenu KSeF: Nieprawidłowy identyfikator sesji. Szczegóły: {ex.ServiceCtx}");
+                }
+                if (ex.ServiceCode == "21308")
+                {
+                    return new SendInvoiceToKsefResult(false, null, null, $"Błąd sesji KSeF: Sesja została już zakończona. Szczegóły: {ex.ServiceCtx}");
+                }
+                return new SendInvoiceToKsefResult(false, null, null, $"Błąd wymiany tokenu KSeF: {ex.ServiceCtx}");
+            }
+            if (ex.ServiceName == "OpenSession")
+            {
+                if (ex.ServiceCode == "21470")
+                {
+                    return new SendInvoiceToKsefResult(false, null, null, $"Błąd otwarcia sesji KSeF: Błąd uwierzytelniania sesji interaktywnej. Szczegóły: {ex.ServiceCtx}");
+                }
+                return new SendInvoiceToKsefResult(false, null, null, $"Błąd otwarcia sesji KSeF: {ex.ServiceCtx}");
+            }
+            if (ex.ServiceName == "SendInvoice")
+            {
+                if (ex.ServiceCode == "21405")
+                {
+                    return new SendInvoiceToKsefResult(false, null, null, $"Błąd KSeF: NIP sprzedawcy na fakturze jest niezgodny z NIP-em zalogowanej sesji. Szczegóły: {ex.ServiceCtx}");
+                }
+                return new SendInvoiceToKsefResult(false, null, null, $"Błąd wysyłki faktury do KSeF: {ex.ServiceCtx}");
+            }
+            if (ex.ServiceName == "CheckInvoiceStatus")
+            {
+                if (ex.ServiceCode == "21304")
+                {
+                    return new SendInvoiceToKsefResult(false, null, null, $"Błąd KSeF: Nieprawidłowy identyfikator transakcji podczas sprawdzania statusu wysyłki. Szczegóły: {ex.ServiceCtx}");
+                }
+                return new SendInvoiceToKsefResult(false, null, null, $"Błąd sprawdzania statusu wysyłki KSeF: {ex.ServiceCtx}");
+            }
+            if (ex.ServiceName == "DownloadUpo")
+            {
+                if (ex.ServiceCode == "21304")
+                {
+                    return new SendInvoiceToKsefResult(false, null, null, $"Błąd KSeF: Nieprawidłowy numer KSeF podczas pobierania UPO. Szczegóły: {ex.ServiceCtx}");
+                }
+                return new SendInvoiceToKsefResult(false, null, null, $"Błąd pobierania UPO z KSeF: {ex.ServiceCtx}");
+            }
+            if (ex.ServiceName == "CloseSession")
+            {
+                return new SendInvoiceToKsefResult(false, null, null, $"Błąd zamykania sesji KSeF: {ex.ServiceCtx}");
+            }
+            return new SendInvoiceToKsefResult(false, null, null, $"Błąd KSeF [{ex.ServiceCode}] w usłudze '{ex.ServiceName}': {ex.ServiceCtx}");
+        }
+        catch (System.Net.Http.HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
+        {
+            return new SendInvoiceToKsefResult(false, null, null, "Przekroczono limit żądań do KSeF (429). Spróbuj ponownie później.");
+        }
+        catch (System.Net.Http.HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Gone)
+        {
+            return new SendInvoiceToKsefResult(false, null, null, "Sesja KSeF wygasła (410 Gone). Proszę spróbować ponownie.");
+        }
+        catch (System.Net.Http.HttpRequestException ex)
+        {
+            return new SendInvoiceToKsefResult(false, null, null, $"Błąd komunikacji z KSeF: {ex.Message}");
+        }
         catch (Exception ex)
         {
             return new SendInvoiceToKsefResult(false, null, null, ex.Message);

@@ -25,6 +25,11 @@ public sealed class UpdateInvoiceCommandController(IMediator mediator) : Control
             foreach (var error in ex.Errors)
                 ModelState.AddModelError($"Command.{error.PropertyName}", error.ErrorMessage);
         }
+        catch (System.InvalidOperationException ex)
+        {
+            TempData["ErrorMessage"] = ex.Message;
+            return RedirectToAction("Index", "GetInvoiceList");
+        }
 
         var refreshViewModel = await mediator.Send(new GetInvoiceForUpdate.GetInvoiceForUpdateQuery(command.Id));
         if (refreshViewModel == null) return NotFound();

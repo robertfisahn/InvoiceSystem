@@ -119,8 +119,21 @@ builder.Services.ConfigureApplicationCookie(options =>
     };
 });
 
+var databaseProvider = builder.Configuration["DatabaseProvider"] ?? "Sqlite";
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") 
+    ?? "Data Source=InvoiceSystem.db";
+
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlite("Data Source=InvoiceSystem.db"));
+{
+    if (databaseProvider.Equals("SqlServer", StringComparison.OrdinalIgnoreCase))
+    {
+        options.UseSqlServer(connectionString);
+    }
+    else
+    {
+        options.UseSqlite(connectionString);
+    }
+});
 
 builder.Services.Configure<RazorViewEngineOptions>(options =>
 {
@@ -169,9 +182,12 @@ using (var scope = app.Services.CreateScope())
     var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<AppUser>>();
     
-    await context.Database.MigrateAsync();
-    await DataSeeder.SeedAsync(context);
-    await DataSeeder.SeedUsersAsync(userManager);
+    if (!app.Environment.IsEnvironment("IntegrationTest"))
+    {
+        await context.Database.MigrateAsync();
+        await DataSeeder.SeedAsync(context);
+        await DataSeeder.SeedUsersAsync(userManager);
+    }
 }
 
 // Configure the HTTP request pipeline.
