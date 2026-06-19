@@ -18,6 +18,9 @@ using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Authorization;
+using Polly;
+using Polly.Timeout;
+using System.Net;
 
 DotNetEnv.Env.Load();
 var builder = WebApplication.CreateBuilder(args);
@@ -158,7 +161,27 @@ builder.Services.Configure<InvoiceSystem.Web.Infrastructure.Configuration.AiSett
     builder.Configuration.GetSection(InvoiceSystem.Web.Infrastructure.Configuration.AiSettings.SectionName));
 builder.Services.AddMemoryCache();
 builder.Services.AddHttpClient();
-builder.Services.AddHttpClient<IKsefClient, KsefClient>();
+builder.Services.AddHttpClient<IKsefClient, KsefClient>()
+    .AddStandardResilienceHandler(options =>
+    {
+        // Customize retry to include HTTP 429 Too Many Requests and common transient errors
+        options.Retry.ShouldHandle = new PredicateBuilder<HttpResponseMessage>()
+            .Handle<HttpRequestException>()
+            .Handle<TimeoutRejectedException>()
+            .HandleResult(response =>
+                response.StatusCode == HttpStatusCode.InternalServerError || // 500
+                response.StatusCode == HttpStatusCode.BadGateway ||          // 502
+                response.StatusCode == HttpStatusCode.ServiceUnavailable ||  // 503
+                response.StatusCode == HttpStatusCode.GatewayTimeout ||      // 504
+                response.StatusCode == HttpStatusCode.RequestTimeout ||      // 408
+                response.StatusCode == (HttpStatusCode)429);                 // 429 Too Many Requests
+
+        // Exponential backoff configuration
+        options.Retry.BackoffType = DelayBackoffType.Exponential;
+        options.Retry.UseJitter = true;
+        options.Retry.MaxRetryAttempts = 3;
+        options.Retry.Delay = TimeSpan.FromSeconds(2);
+    });
 builder.Services.AddHostedService<KsefSyncBackgroundService>();
 builder.Services.AddScoped<IFileStorageService, FileStorageService>();
 builder.Services.AddScoped<IFileHashService, FileHashService>();
