@@ -9,7 +9,7 @@ using InvoiceSystem.Web.Infrastructure.Database;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
-namespace InvoiceSystem.Tests.Integration.Features.Contractors.VerifyContractorSoap
+namespace InvoiceSystem.Tests.Integration.Modules.Gus.Features.VerifyContractorSoap
 {
     public class VerifyContractorViaSoapApiTests : IntegrationTestBase
     {

@@ -2,7 +2,7 @@ using System.Runtime.Serialization;
 using System.ServiceModel;
 using System.Threading.Tasks;
 
-namespace InvoiceSystem.Web.Infrastructure.Soap;
+namespace InvoiceSystem.Web.Modules.Gus.Infrastructure;
 
 [ServiceContract(Name = "IUslugaBIRzewnPubl", Namespace = "http://CIS/BIR/PUBL/2014/07")]
 public interface IUslugaBIRzewnPubl

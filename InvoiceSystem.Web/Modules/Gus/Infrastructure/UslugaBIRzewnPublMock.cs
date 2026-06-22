@@ -2,7 +2,7 @@ using System.ServiceModel;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 
-namespace InvoiceSystem.Web.Infrastructure.Soap;
+namespace InvoiceSystem.Web.Modules.Gus.Infrastructure;
 
 public sealed class UslugaBIRzewnPublMock(IHttpContextAccessor httpContextAccessor) : IUslugaBIRzewnPubl
 {

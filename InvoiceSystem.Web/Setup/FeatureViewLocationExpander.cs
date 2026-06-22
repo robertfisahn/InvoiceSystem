@@ -15,7 +15,13 @@ public class FeatureViewLocationExpander : IViewLocationExpander
         {
             // Wyciągamy namespace, np. InvoiceSystem.Web.Features.Invoices.GetInvoiceList
             var @namespace = controllerActionDescriptor.ControllerTypeInfo.Namespace;
-            if (@namespace != null && @namespace.Contains(".Features."))
+            if (@namespace != null && @namespace.Contains(".Modules."))
+            {
+                var modulePath = @namespace.Substring(@namespace.IndexOf(".Modules.") + 9).Replace('.', '/');
+                yield return $"/Modules/{modulePath}/{{0}}.cshtml";
+                yield return $"/Modules/{modulePath}/{{1}}.cshtml";
+            }
+            else if (@namespace != null && @namespace.Contains(".Features."))
             {
                 // Wycinamy część po ".Features."
                 var featurePath = @namespace.Substring(@namespace.IndexOf(".Features.") + 10).Replace('.', '/');

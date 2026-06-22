@@ -9,9 +9,9 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using InvoiceSystem.Web.Infrastructure.Database;
 using InvoiceSystem.Web.Domain.Entities;
-using InvoiceSystem.Web.Infrastructure.Soap;
+using InvoiceSystem.Web.Modules.Gus.Infrastructure;
 
-namespace InvoiceSystem.Web.Features.Contractors.VerifyContractorSoap;
+namespace InvoiceSystem.Web.Modules.Gus.Features.VerifyContractorSoap;
 
 public record VerifyContractorViaSoapCommand(int ContractorId) : IRequest<VerifyContractorViaSoapResult>;
 

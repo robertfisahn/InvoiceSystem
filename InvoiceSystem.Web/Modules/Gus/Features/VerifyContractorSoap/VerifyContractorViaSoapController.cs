@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
-namespace InvoiceSystem.Web.Features.Contractors.VerifyContractorSoap;
+namespace InvoiceSystem.Web.Modules.Gus.Features.VerifyContractorSoap;
 
 [ApiController]
 [Route("api/contractors")]

@@ -2,7 +2,7 @@ using InvoiceSystem.Web.Domain.Entities;
 using InvoiceSystem.Web.Infrastructure.Database;
 using InvoiceSystem.Web.Infrastructure.Ksef;
 using InvoiceSystem.Web.Infrastructure.Configuration;
-using InvoiceSystem.Web.Infrastructure.Soap;
+using InvoiceSystem.Web.Modules.Gus.Infrastructure;
 using SoapCore;
 using InvoiceSystem.Web.Infrastructure.Behaviors;
 using InvoiceSystem.Web.Infrastructure.Services.Storage;

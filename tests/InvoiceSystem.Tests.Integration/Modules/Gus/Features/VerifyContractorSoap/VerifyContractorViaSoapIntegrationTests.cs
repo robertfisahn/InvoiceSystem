@@ -5,15 +5,15 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using InvoiceSystem.Tests.Integration.Helpers;
 using InvoiceSystem.Web.Domain.Entities;
-using InvoiceSystem.Web.Features.Contractors.VerifyContractorSoap;
+using InvoiceSystem.Web.Modules.Gus.Features.VerifyContractorSoap;
 using InvoiceSystem.Web.Infrastructure.Database;
-using InvoiceSystem.Web.Infrastructure.Soap;
+using InvoiceSystem.Web.Modules.Gus.Infrastructure;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
-namespace InvoiceSystem.Tests.Integration.Features.Contractors
+namespace InvoiceSystem.Tests.Integration.Modules.Gus.Features.VerifyContractorSoap
 {
     public class VerifyContractorViaSoapIntegrationTests : IntegrationTestBase
     {

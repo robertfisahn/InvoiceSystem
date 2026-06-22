@@ -1,11 +1,11 @@
 using System;
 using System.ServiceModel;
 using System.Threading.Tasks;
-using InvoiceSystem.Web.Infrastructure.Soap;
+using InvoiceSystem.Web.Modules.Gus.Infrastructure;
 using Microsoft.AspNetCore.Http;
 using Xunit;
 
-namespace InvoiceSystem.Tests.Unit
+namespace InvoiceSystem.Tests.Unit.Modules.Gus
 {
     public class SoapMockUnitTests
     {

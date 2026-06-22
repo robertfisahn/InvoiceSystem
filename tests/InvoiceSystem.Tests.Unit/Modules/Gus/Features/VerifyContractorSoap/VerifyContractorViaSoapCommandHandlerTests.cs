@@ -4,12 +4,12 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using InvoiceSystem.Tests.Unit.Common;
 using InvoiceSystem.Web.Domain.Entities;
-using InvoiceSystem.Web.Features.Contractors.VerifyContractorSoap;
+using InvoiceSystem.Web.Modules.Gus.Features.VerifyContractorSoap;
 using Microsoft.AspNetCore.Http;
 using NSubstitute;
 using Xunit;
 
-namespace InvoiceSystem.Tests.Unit.Features.Contractors.VerifyContractorSoap
+namespace InvoiceSystem.Tests.Unit.Modules.Gus.Features.VerifyContractorSoap
 {
     public class VerifyContractorViaSoapCommandHandlerTests : IDisposable
     {

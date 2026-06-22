@@ -8,7 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using InvoiceSystem.Web.Infrastructure.Database;
 using InvoiceSystem.Web.Infrastructure.Ksef;
-using InvoiceSystem.Web.Infrastructure.Soap;
+using InvoiceSystem.Web.Modules.Gus.Infrastructure;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
