@@ -1,4 +1,7 @@
-using InvoiceSystem.Web.Domain.Entities;
+using InvoiceSystem.Web.Modules.Auth.Domain;
+using InvoiceSystem.Web.Modules.Contractors.Domain;
+using InvoiceSystem.Web.Modules.Ksef.Domain;
+using InvoiceSystem.Web.Modules.Invoices.Domain;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 

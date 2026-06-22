@@ -1,0 +1,308 @@
+@model InvoiceSystem.Web.Modules.Ksef.Infrastructure.ParsedKsefInvoice
+@inject InvoiceSystem.Web.Modules.Invoices.Infrastructure.Preview.IInvoicePreviewService PreviewService
+@{
+    ViewData["Title"] = $"e-Faktura KSeF {Model.InvoiceNumber}";
+    var previewDto = PreviewService.MapFromKsef(Model, ViewBag.KsefNumber as string);
+}
+
+<div class="page-body">
+    <div class="invoice-actions-bar no-print">
+        @if (ViewBag.ImportStatus == InvoiceSystem.Web.Modules.Ksef.Domain.KsefImportStatus.Pending)
+        {
+            <form action="/ksef/inbox/import/@ViewBag.Id" method="post" class="actions-bar-form">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn btn-success justify-content-center fw-bold" style="display: inline-flex; align-items: center; gap: 0.5rem; height: var(--input-height); border-radius: var(--border-radius-sm);">
+                    <i class="bi bi-plus-circle"></i> Zaimportuj do systemu
+                </button>
+            </form>
+            <form action="/ksef/inbox/ignore/@ViewBag.Id" method="post" class="actions-bar-form">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn btn-outline-danger justify-content-center" style="display: inline-flex; align-items: center; gap: 0.5rem; height: var(--input-height); border-radius: var(--border-radius-sm);">
+                    <i class="bi bi-slash-circle"></i> Ignoruj
+                </button>
+            </form>
+        }
+        else if (ViewBag.ImportStatus == InvoiceSystem.Web.Modules.Ksef.Domain.KsefImportStatus.Imported)
+        {
+            <span class="badge bg-success-soft text-success px-3 py-2 d-inline-flex align-items-center gap-1 fw-bold" style="font-size: 0.85rem; border: 1px solid rgba(34, 197, 94, 0.2);">
+                <i class="bi bi-check-circle-fill"></i> Zaimportowana
+            </span>
+        }
+        else
+        {
+            <span class="badge bg-danger-soft text-danger px-3 py-2 d-inline-flex align-items-center gap-1 fw-bold" style="font-size: 0.85rem; border: 1px solid rgba(239, 68, 68, 0.2);">
+                <i class="bi bi-x-circle-fill"></i> Zignorowana
+            </span>
+        }
+        
+        <a href="/ksef/inbox/xml/@ViewBag.Id" class="btn btn-outline-secondary justify-content-center" style="display: inline-flex; align-items: center; gap: 0.5rem; height: var(--input-height); border-radius: var(--border-radius-sm);">
+            <i class="bi bi-filetype-xml"></i> Pobierz XML
+        </a>
+        
+        <button onclick="printInvoice()" class="btn-secondary-outline justify-content-center">
+            <i class="bi bi-printer"></i> Drukuj
+        </button>
+        <a href="/ksef/inbox" class="btn-primary-accent justify-content-center">
+            <i class="bi bi-arrow-left"></i> Powrót
+        </a>
+    </div>
+
+    <!-- Zoom Hint Banner for Mobile -->
+    <div class="zoom-banner no-print d-md-none text-center mb-3">
+        <i class="bi bi-zoom-in me-1"></i> Dotknij faktury, aby ją powiększyć / zmniejszyć
+    </div>
+
+    <div class="invoice-miniature-wrapper no-print-wrapper" id="invoiceWrapper">
+        @await Html.PartialAsync("~/Shared/Components/_InvoicePreview.cshtml", previewDto)
+    </div>
+</div>
+
+<style>
+    .invoice-actions-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 1.5rem;
+    }
+    
+    .invoice-actions-bar a,
+    .invoice-actions-bar button,
+    .invoice-actions-bar .actions-bar-form {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .invoice-actions-bar .actions-bar-form {
+        margin: 0;
+        padding: 0;
+        border: none;
+    }
+
+    .zoom-banner {
+        font-size: 0.8rem;
+        color: var(--accent);
+        background-color: var(--accent-soft);
+        padding: 8px 12px;
+        border-radius: 8px;
+        border: 1px dashed rgba(99, 102, 241, 0.25);
+    }
+
+    /* Wrapper that clips the miniature on mobile */
+    .invoice-miniature-wrapper {
+        width: 100%;
+        overflow: hidden;
+    }
+
+    .invoice-document {
+        background: white !important;
+        color: #1a1a1a !important;
+        padding: 4rem;
+        border-radius: 8px;
+        width: 800px;
+        max-width: 800px;
+        margin: 1rem auto;
+        font-family: 'Inter', sans-serif;
+        display: flex;
+        flex-direction: column;
+        min-height: 1130px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15) !important;
+        transform-origin: top left;
+        
+        /* Reset Bootstrap 5 table variables locally for dark mode overrides */
+        --bs-table-bg: transparent !important;
+        --bs-table-color: #1a1a1a !important;
+        --bs-table-border-color: #dee2e6 !important;
+        --bs-table-striped-color: #1a1a1a !important;
+        --bs-table-striped-bg: transparent !important;
+        --bs-table-active-bg: transparent !important;
+        --bs-table-hover-bg: transparent !important;
+    }
+    
+    @@media (max-width: 767px) {
+        .invoice-actions-bar {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .invoice-actions-bar a,
+        .invoice-actions-bar button,
+        .invoice-actions-bar .actions-bar-form {
+            flex: 1 1 calc(50% - 4px);
+            min-width: calc(50% - 4px);
+            width: auto !important;
+        }
+        .invoice-actions-bar .actions-bar-form button {
+            width: 100% !important;
+        }
+
+        /* Po kliknięciu - pełny rozmiar z przewijaniem */
+        .invoice-miniature-wrapper.zoomed {
+            overflow-x: auto;
+        }
+    }
+    
+    @@media (min-width: 768px) {
+        .invoice-document {
+            margin: 2rem auto;
+            min-height: 297mm;
+        }
+    }
+    
+    .invoice-content-wrap { flex: 1; }
+
+    .invoice-document table,
+    .invoice-document table tr,
+    .invoice-document table td,
+    .invoice-document table th { 
+        background-color: transparent !important; 
+        color: #1a1a1a !important; 
+        border-color: #dee2e6 !important; 
+    }
+
+    .invoice-footer {
+        margin-top: 3rem;
+        padding-top: 2rem;
+        text-align: center;
+        color: #9ca3af;
+        font-size: 0.75rem;
+        border-top: 1px solid #f3f4f6;
+    }
+    
+    .invoice-logo { font-weight: 800; letter-spacing: -1px; margin: 0; color: #1a1a1a; }
+    .invoice-logo span { color: #6366f1; }
+
+    /* PRINT ENGINE */
+    @@media print {
+        @@page {
+            margin: 15mm;
+            size: A4;
+        }
+
+        html, body {
+            background: white !important;
+            height: auto !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            overflow: hidden !important;
+        }
+
+        .no-print, .no-print-wrapper, .zoom-banner, .app-topbar, .app-sidebar, .page-header, .page-header-actions, .modal-backdrop, .custom-modal-backdrop {
+            display: none !important;
+        }
+
+        .invoice-miniature-wrapper {
+            overflow: visible !important;
+            width: 100% !important;
+        }
+        .invoice-miniature-wrapper .invoice-document {
+            transform: none !important;
+            margin-bottom: 0 !important;
+        }
+
+        .app-wrapper, .app-content, .content-body, .page-body {
+            background: white !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            display: block !important;
+            height: auto !important;
+            width: 100% !important;
+            overflow: hidden !important;
+        }
+
+        .invoice-document {
+            box-shadow: none !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            width: 100% !important;
+            border: none !important;
+            display: flex !important;
+            flex-direction: column !important;
+            overflow: hidden;
+        }
+
+        .invoice-footer {
+            margin-top: auto !important;
+            padding-bottom: 2mm;
+            border-top: 1px solid #eee;
+            text-align: center;
+        }
+
+        tr {
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+        }
+    }
+
+    /* Blur UI elements when printing */
+    .is-printing .app-topbar,
+    .is-printing .app-sidebar,
+    .is-printing .page-header {
+        filter: blur(8px);
+        opacity: 0.6;
+        transition: all 0.3s ease;
+    }
+</style>
+
+@section Scripts {
+    <script>
+        function printInvoice() {
+            const doc = document.getElementById('invoiceDoc');
+            doc.style.minHeight = 'auto';
+            const safetyBufferMm = 264;
+            const pxToMm = 0.2645833333;
+            const currentHeightMm = doc.scrollHeight * pxToMm;
+            const pagesCount = Math.ceil(currentHeightMm / safetyBufferMm);
+            doc.style.minHeight = (pagesCount * safetyBufferMm) + 'mm';
+            document.body.classList.add('is-printing');
+            setTimeout(() => {
+                window.print();
+                document.body.classList.remove('is-printing');
+                doc.style.minHeight = '297mm';
+            }, 300);
+        }
+
+        // ---- Miniatura: dynamiczne skalowanie faktury A4 do ekranu ----
+        const wrapper = document.getElementById('invoiceWrapper');
+        const invoiceDoc = document.getElementById('invoiceDoc');
+        const INVOICE_WIDTH = 800;
+        const SIDE_PADDING = 16;
+
+        function scaleInvoice() {
+            if (!wrapper || !invoiceDoc) return;
+
+            if (window.innerWidth >= 768) {
+                invoiceDoc.style.transform = '';
+                wrapper.style.height = '';
+                wrapper.style.cursor = '';
+                return;
+            }
+
+            if (wrapper.classList.contains('zoomed')) {
+                invoiceDoc.style.transform = 'scale(1)';
+                wrapper.style.height = '';
+                wrapper.style.cursor = 'zoom-out';
+                return;
+            }
+
+            var availableWidth = wrapper.clientWidth - SIDE_PADDING;
+            var scale = Math.min(availableWidth / INVOICE_WIDTH, 1);
+            invoiceDoc.style.transform = 'scale(' + scale + ')';
+
+            wrapper.style.height = (invoiceDoc.scrollHeight * scale) + 'px';
+            wrapper.style.cursor = 'zoom-in';
+        }
+
+        if (wrapper) {
+            wrapper.addEventListener('click', function() {
+                if (window.innerWidth >= 768) return;
+                this.classList.toggle('zoomed');
+                scaleInvoice();
+            });
+        }
+
+        scaleInvoice();
+        window.addEventListener('resize', scaleInvoice);
+    </script>
+}

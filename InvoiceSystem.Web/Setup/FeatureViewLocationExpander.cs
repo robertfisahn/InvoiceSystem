@@ -13,7 +13,7 @@ public class FeatureViewLocationExpander : IViewLocationExpander
         var controllerActionDescriptor = context.ActionContext.ActionDescriptor as Microsoft.AspNetCore.Mvc.Controllers.ControllerActionDescriptor;
         if (controllerActionDescriptor != null)
         {
-            // Wyciągamy namespace, np. InvoiceSystem.Web.Features.Invoices.GetInvoiceList
+            // Wyciągamy namespace, np. InvoiceSystem.Web.Modules.Invoices.Features.GetInvoiceList
             var @namespace = controllerActionDescriptor.ControllerTypeInfo.Namespace;
             if (@namespace != null && @namespace.Contains(".Modules."))
             {

@@ -8,7 +8,7 @@ using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using InvoiceSystem.Web.Infrastructure.Database;
-using InvoiceSystem.Web.Domain.Entities;
+using InvoiceSystem.Web.Modules.Contractors.Domain;
 using InvoiceSystem.Web.Modules.Gus.Infrastructure;
 
 namespace InvoiceSystem.Web.Modules.Gus.Features.VerifyContractorSoap;

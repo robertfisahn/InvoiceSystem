@@ -1,6 +1,6 @@
 # 🧾 InvoiceSystem — ASP.NET Core 9 Enterprise
 
-Zaawansowany system do kompleksowego zarządzania fakturami, zbudowany w architekturze **Vertical Slice Architecture (VSA)**. Aplikacja stanowi solidny fundament dla systemów klasy ERP/Back-office w ekosystemie .NET 9.
+Zaawansowany system do kompleksowego zarządzania fakturami, zbudowany w nowoczesnej architekturze **Modularnego Monolitu (Modular Monolith)** z zastosowaniem **Vertical Slice Architecture (VSA)** oraz **CQRS (MediatR)**. Aplikacja stanowi solidny fundament dla skalowalnych systemów klasy ERP/Back-office w ekosystemie .NET 9.
 
 ---
 
@@ -91,15 +91,47 @@ dotnet run --project InvoiceSystem.Web
 
 ---
 
-<details>
-<summary>📝 <strong>Zasady Pracy (VSA Workflow)</strong></summary>
+<details open>
+<summary>🏛️ <strong>Architektura Projektu</strong></summary>
 <br>
 
-Projekt ściśle przestrzega zasad:
-1. **Feature-based folders**: Każdy folder w `Features/` to niezależny moduł (Controller + Handler + View).
-2. **Primary Constructors**: Używane wszędzie tam, gdzie to możliwe.
-3. **No AutoMapper**: Mapowanie ręczne w handlerach dla pełnej kontroli.
-4. **Git Workflow**: 1 feature = 1 commit.
+Aplikacja została zaprojektowana w oparciu o cztery filary nowoczesnego inżynierii oprogramowania w .NET:
+
+1. **Modular Monolith (Modularny Monolit):**
+   Kod aplikacji podzielony jest na logiczne, niezależne i luźno powiązane moduły biznesowe zlokalizowane w folderze `Modules/` (np. `Invoices`, `Ksef`, `Contractors`, `Users`, `Dashboard`). Każdy moduł ma własny cykl życia, strukturę bazodanową i reguły biznesowe, co ułatwia ewentualne wydzielenie ich do osobnych mikroserwisów w przyszłości.
+2. **Vertical Slice Architecture (VSA):**
+   Wewnątrz każdego modułu kod zorganizowany jest wokół konkretnych funkcji biznesowych (ang. *features*), a nie warstw technicznych (Controllers, Services, Repositories). Każdy pionowy plaster zawiera wszystko, co jest potrzebne do obsłużenia danego żądania – od widoku Razor, przez model widoku, aż po logikę zapisu w bazie danych.
+3. **CQRS za pomocą MediatR:**
+   Rozdzielamy operacje zapisu (Commands) od operacji odczytu (Queries). Handlery żądań są silnie typowane, niezależne od siebie i łatwe w testowaniu jednostkowym.
+4. **Clean Architecture (Elementy):**
+   Logika domenowa (encje) jest odizolowana od zewnętrznych szczegółów technologicznych (np. bazy danych czy frameworka webowego).
+
+#### 📁 Struktura folderów w module:
+```text
+Modules/[Moduł]/
+├── Domain/           # Reguły biznesowe, encje domenowe
+├── Infrastructure/   # Konfiguracja EF Core DbContext, integracje zewnętrzne (KsefClient itp.)
+└── Features/         # Slices (Funkcjonalności pionowe)
+    └── [NazwaFunkcji]/
+        ├── [Funkcja]Command.cs             # Żądanie zapisu / Query (żądanie odczytu)
+        ├── [Funkcja]CommandHandler.cs      # Logika biznesowa wykonująca żądanie
+        ├── [Funkcja]ViewModel.cs           # Dane przesyłane do/z widoku
+        ├── [Funkcja]Controller.cs          # Punkt wejścia (MVC Action)
+        └── Index.cshtml                    # Warstwa prezentacji (Widok Razor)
+```
+</details>
+
+---
+
+<details>
+<summary>📝 <strong>Zasady Pracy (Workflow)</strong></summary>
+<br>
+
+Projekt ściśle przestrzega następujących zasad technicznych:
+1. **Module & Feature Isolation**: Zmiany w kodzie wprowadzamy zawsze wewnątrz dedykowanego modułu w katalogu `Modules/[Moduł]/Features/`. Unikamy współdzielenia kodu domenowego między modułami (komunikacja odbywa się przez MediatR / kontrakty).
+2. **Primary Constructors**: Używane domyślnie dla wstrzykiwania zależności w klasach handlerów i kontrolerów.
+3. **No AutoMapper**: Mapowanie typów encji na ViewModels/DTOs wykonujemy ręcznie w handlerach (lub za pomocą metod rozszerzających), co zapewnia pełną czytelność kodu.
+4. **Git Workflow**: Jeden commit = jedna kompletna funkcjonalność biznesowa (Feature).
 
 </details>
 

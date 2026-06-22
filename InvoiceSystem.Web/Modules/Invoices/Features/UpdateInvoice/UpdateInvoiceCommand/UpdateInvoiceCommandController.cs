@@ -1,0 +1,39 @@
+using System;
+using System.Threading.Tasks;
+using MediatR;
+using Microsoft.AspNetCore.Mvc;
+
+namespace InvoiceSystem.Web.Modules.Invoices.Features.UpdateInvoice.UpdateInvoiceCommand;
+
+[Route("invoices/update")]
+[ApiExplorerSettings(IgnoreApi = true)]
+public sealed class UpdateInvoiceCommandController(IMediator mediator) : Controller
+{
+    [HttpPost("{id}")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Index(int id, [FromForm] UpdateInvoiceCommand command)
+    {
+        if (id != command.Id) return BadRequest();
+
+        try
+        {
+            await mediator.Send(command);
+            return RedirectToAction("Index", "GetInvoiceDetails", new { id = command.Id });
+        }
+        catch (FluentValidation.ValidationException ex)
+        {
+            foreach (var error in ex.Errors)
+                ModelState.AddModelError($"Command.{error.PropertyName}", error.ErrorMessage);
+        }
+        catch (System.InvalidOperationException ex)
+        {
+            TempData["ErrorMessage"] = ex.Message;
+            return RedirectToAction("Index", "GetInvoiceList");
+        }
+
+        var refreshViewModel = await mediator.Send(new GetInvoiceForUpdate.GetInvoiceForUpdateQuery(command.Id));
+        if (refreshViewModel == null) return NotFound();
+
+        return View("~/Modules/Invoices/Features/UpdateInvoice/GetInvoiceForUpdate/Index.cshtml", refreshViewModel with { Command = command });
+    }
+}

@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
 using FluentAssertions;
-using InvoiceSystem.Web.Domain.Entities;
-using InvoiceSystem.Web.Features.Invoices.GetInvoiceDetails;
-using InvoiceSystem.Web.Infrastructure.Ksef;
-using InvoiceSystem.Web.Infrastructure.Services.Preview;
+using InvoiceSystem.Web.Modules.Auth.Domain;
+using InvoiceSystem.Web.Modules.Invoices.Domain;
+using InvoiceSystem.Web.Modules.Contractors.Domain;
+using InvoiceSystem.Web.Modules.Invoices.Features.GetInvoiceDetails;
+using InvoiceSystem.Web.Modules.Ksef.Infrastructure;
+using InvoiceSystem.Web.Modules.Invoices.Infrastructure.Preview;
 using Xunit;
 
 namespace InvoiceSystem.Tests.Unit.Infrastructure.Services

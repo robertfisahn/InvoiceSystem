@@ -7,7 +7,7 @@ using System.Text.Encodings.Web;
 using System.Threading;
 using System.Threading.Tasks;
 using InvoiceSystem.Web.Infrastructure.Database;
-using InvoiceSystem.Web.Infrastructure.Ksef;
+using InvoiceSystem.Web.Modules.Ksef.Infrastructure;
 using InvoiceSystem.Web.Modules.Gus.Infrastructure;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
@@ -196,12 +196,12 @@ namespace InvoiceSystem.Tests.Integration.Helpers
                 services.AddSingleton<IKsefClient, TestKsefClient>();
 
                 // Mock/Substitute IDocumentOcrService to avoid external downloads and Tesseract dependency
-                services.RemoveAll(typeof(InvoiceSystem.Web.Infrastructure.Services.Ocr.IDocumentOcrService));
-                services.AddSingleton<InvoiceSystem.Web.Infrastructure.Services.Ocr.IDocumentOcrService>(sp => NSubstitute.Substitute.For<InvoiceSystem.Web.Infrastructure.Services.Ocr.IDocumentOcrService>());
+                services.RemoveAll(typeof(InvoiceSystem.Web.Modules.Invoices.Infrastructure.Ocr.IDocumentOcrService));
+                services.AddSingleton<InvoiceSystem.Web.Modules.Invoices.Infrastructure.Ocr.IDocumentOcrService>(sp => NSubstitute.Substitute.For<InvoiceSystem.Web.Modules.Invoices.Infrastructure.Ocr.IDocumentOcrService>());
 
                 // Mock/Substitute ILlmService to avoid external OpenAI/Gemini API calls
-                services.RemoveAll(typeof(InvoiceSystem.Web.Infrastructure.Services.Llm.ILlmService));
-                services.AddSingleton<InvoiceSystem.Web.Infrastructure.Services.Llm.ILlmService>(sp => NSubstitute.Substitute.For<InvoiceSystem.Web.Infrastructure.Services.Llm.ILlmService>());
+                services.RemoveAll(typeof(InvoiceSystem.Web.Modules.Invoices.Infrastructure.Llm.ILlmService));
+                services.AddSingleton<InvoiceSystem.Web.Modules.Invoices.Infrastructure.Llm.ILlmService>(sp => NSubstitute.Substitute.For<InvoiceSystem.Web.Modules.Invoices.Infrastructure.Llm.ILlmService>());
 
                 if (!_isSqlServer)
                 {
