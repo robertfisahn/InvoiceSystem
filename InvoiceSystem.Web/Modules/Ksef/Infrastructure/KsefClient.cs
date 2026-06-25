@@ -69,7 +69,7 @@ public sealed class KsefClient(HttpClient httpClient, ILogger<KsefClient> logger
             // Not valid JSON, fall back to standard HTTP error
         }
 
-        throw new HttpRequestException($"Błąd KSeF ({actionName}): HTTP {(int)response.StatusCode} {response.ReasonPhrase}. Szczegóły: {content}");
+        throw new HttpRequestException($"Błąd KSeF ({actionName}): HTTP {(int)response.StatusCode} {response.ReasonPhrase}. Szczegóły: {content}", null, response.StatusCode);
     }
 
     public async Task<KsefChallengeResult> AuthorisationChallengeAsync(string nip, CancellationToken cancellationToken = default)
