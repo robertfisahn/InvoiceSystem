@@ -195,6 +195,12 @@ namespace InvoiceSystem.Tests.Integration.Helpers
                 services.RemoveAll(typeof(IKsefClient));
                 services.AddSingleton<IKsefClient, TestKsefClient>();
 
+                // Mock IKsefSyncLock to avoid test collision
+                services.RemoveAll(typeof(IKsefSyncLock));
+                var mockLock = NSubstitute.Substitute.For<IKsefSyncLock>();
+                mockLock.TryAcquireAsync(NSubstitute.Arg.Any<CancellationToken>()).Returns(Task.FromResult(true));
+                services.AddSingleton<IKsefSyncLock>(mockLock);
+
                 // Mock/Substitute IDocumentOcrService to avoid external downloads and Tesseract dependency
                 services.RemoveAll(typeof(InvoiceSystem.Web.Modules.Invoices.Infrastructure.Ocr.IDocumentOcrService));
                 services.AddSingleton<InvoiceSystem.Web.Modules.Invoices.Infrastructure.Ocr.IDocumentOcrService>(sp => NSubstitute.Substitute.For<InvoiceSystem.Web.Modules.Invoices.Infrastructure.Ocr.IDocumentOcrService>());

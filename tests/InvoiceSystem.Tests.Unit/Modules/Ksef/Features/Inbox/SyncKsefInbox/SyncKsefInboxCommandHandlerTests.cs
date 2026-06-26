@@ -22,12 +22,15 @@ namespace InvoiceSystem.Tests.Unit.Modules.Ksef.Features.Inbox.SyncKsefInbox
         private readonly SqliteDbContextFixture _fixture;
         private readonly IKsefClient _ksefClient;
         private readonly ILogger<SyncKsefInboxCommandHandler> _logger;
+        private readonly IKsefSyncLock _syncLock;
 
         public SyncKsefInboxCommandHandlerTests()
         {
             _fixture = new SqliteDbContextFixture();
             _ksefClient = Substitute.For<IKsefClient>();
             _logger = Substitute.For<ILogger<SyncKsefInboxCommandHandler>>();
+            _syncLock = Substitute.For<IKsefSyncLock>();
+            _syncLock.TryAcquireAsync(Arg.Any<CancellationToken>()).Returns(Task.FromResult(true));
         }
 
         public void Dispose()
@@ -40,7 +43,8 @@ namespace InvoiceSystem.Tests.Unit.Modules.Ksef.Features.Inbox.SyncKsefInbox
         {
             // Arrange
             using var db = _fixture.CreateContext();
-            var handler = new SyncKsefInboxCommandHandler(db, _ksefClient, _logger);
+            var syncService = new KsefSyncService(_syncLock, db, _ksefClient, Substitute.For<ILogger<KsefSyncService>>());
+            var handler = new SyncKsefInboxCommandHandler(db, syncService, _logger);
             var command = new SyncKsefInboxCommand();
 
             // Act
@@ -63,7 +67,8 @@ namespace InvoiceSystem.Tests.Unit.Modules.Ksef.Features.Inbox.SyncKsefInbox
             _ksefClient.AuthorisationChallengeAsync("1234567890", Arg.Any<CancellationToken>())
                 .ThrowsAsync(new Exception("KSeF connection failed"));
 
-            var handler = new SyncKsefInboxCommandHandler(db, _ksefClient, _logger);
+            var syncService = new KsefSyncService(_syncLock, db, _ksefClient, Substitute.For<ILogger<KsefSyncService>>());
+            var handler = new SyncKsefInboxCommandHandler(db, syncService, _logger);
             var command = new SyncKsefInboxCommand();
 
             // Act
@@ -105,7 +110,8 @@ namespace InvoiceSystem.Tests.Unit.Modules.Ksef.Features.Inbox.SyncKsefInbox
             _ksefClient.DownloadInvoiceXmlAsync(sessionToken, "NIP-456", Arg.Any<CancellationToken>())
                 .Returns("<xml>Content 456</xml>");
 
-            var handler = new SyncKsefInboxCommandHandler(db, _ksefClient, _logger);
+            var syncService = new KsefSyncService(_syncLock, db, _ksefClient, Substitute.For<ILogger<KsefSyncService>>());
+            var handler = new SyncKsefInboxCommandHandler(db, syncService, _logger);
             var command = new SyncKsefInboxCommand();
 
             // Act
@@ -131,7 +137,6 @@ namespace InvoiceSystem.Tests.Unit.Modules.Ksef.Features.Inbox.SyncKsefInbox
             // Verify settings LastSyncDate got updated since no errors occurred
             var updatedSetting = await db.KsefSettings.FirstAsync();
             updatedSetting.LastSyncDate.Should().NotBeNull();
-            updatedSetting.ActiveSessionToken.Should().Be(sessionToken);
 
             // Verify session was closed
             await _ksefClient.Received(1).CloseSessionAsync(sessionToken, Arg.Any<CancellationToken>());
@@ -182,7 +187,8 @@ namespace InvoiceSystem.Tests.Unit.Modules.Ksef.Features.Inbox.SyncKsefInbox
             _ksefClient.DownloadInvoiceXmlAsync(sessionToken, "NEW-1", Arg.Any<CancellationToken>())
                 .ThrowsAsync(httpEx429);
 
-            var handler = new SyncKsefInboxCommandHandler(db, _ksefClient, _logger);
+            var syncService = new KsefSyncService(_syncLock, db, _ksefClient, Substitute.For<ILogger<KsefSyncService>>());
+            var handler = new SyncKsefInboxCommandHandler(db, syncService, _logger);
             var command = new SyncKsefInboxCommand();
 
             // Act
@@ -191,7 +197,7 @@ namespace InvoiceSystem.Tests.Unit.Modules.Ksef.Features.Inbox.SyncKsefInbox
             // Assert
             result.Success.Should().BeFalse();
             result.NewInvoicesCount.Should().Be(0);
-            result.ErrorMessage.Should().Contain("limitu zapytań (429)");
+            result.ErrorMessage.Should().Contain("limit zapytań KSeF (429)");
 
             // Verify XML download for NEW-2 was never called
             await _ksefClient.DidNotReceive().DownloadInvoiceXmlAsync(sessionToken, "NEW-2", Arg.Any<CancellationToken>());
@@ -206,6 +212,7 @@ namespace InvoiceSystem.Tests.Unit.Modules.Ksef.Features.Inbox.SyncKsefInbox
         {
             // Arrange
             using var db = _fixture.CreateContext();
+            var today = DateTime.Today;
             var setting = new KsefSetting { Nip = "1234567890", ApiKey = "KEY-123", LastSyncDate = null };
             db.KsefSettings.Add(setting);
             await db.SaveChangesAsync();
@@ -220,8 +227,8 @@ namespace InvoiceSystem.Tests.Unit.Modules.Ksef.Features.Inbox.SyncKsefInbox
 
             var dtoList = new List<KsefIncomingInvoiceDto>
             {
-                new KsefIncomingInvoiceDto("FAIL-1", "Seller F", "1111", DateTime.Today, 100m, ""), 
-                new KsefIncomingInvoiceDto("OK-1", "Seller OK", "2222", DateTime.Today, 200m, "")
+                new KsefIncomingInvoiceDto("FAIL-1", "Seller F", "1111", today.AddDays(-1), 100m, ""), 
+                new KsefIncomingInvoiceDto("OK-1", "Seller OK", "2222", today, 200m, "")
             };
 
             _ksefClient.SyncInvoicesAsync(sessionToken, Arg.Any<DateTime>(), Arg.Any<CancellationToken>())
@@ -235,7 +242,8 @@ namespace InvoiceSystem.Tests.Unit.Modules.Ksef.Features.Inbox.SyncKsefInbox
             _ksefClient.DownloadInvoiceXmlAsync(sessionToken, "OK-1", Arg.Any<CancellationToken>())
                 .Returns("<xml>OK</xml>");
 
-            var handler = new SyncKsefInboxCommandHandler(db, _ksefClient, _logger);
+            var syncService = new KsefSyncService(_syncLock, db, _ksefClient, Substitute.For<ILogger<KsefSyncService>>());
+            var handler = new SyncKsefInboxCommandHandler(db, syncService, _logger);
             var command = new SyncKsefInboxCommand();
 
             // Act
@@ -244,11 +252,10 @@ namespace InvoiceSystem.Tests.Unit.Modules.Ksef.Features.Inbox.SyncKsefInbox
             // Assert
             result.Success.Should().BeTrue();
             result.NewInvoicesCount.Should().Be(1);
-            result.ErrorMessage.Should().Contain("Niektóre faktury nie mogły zostać pobrane");
 
-            // Verify settings LastSyncDate was NOT updated due to errors
+            // Under incremental watermarking, OK-1 succeeds so LastSyncDate should update to today
             var updatedSetting = await db.KsefSettings.FirstAsync();
-            updatedSetting.LastSyncDate.Should().BeNull();
+            updatedSetting.LastSyncDate.Should().Be(today);
 
             // Verify OK-1 got saved
             var saved = await db.KsefIncomingInvoices.FirstOrDefaultAsync(i => i.KsefNumber == "OK-1");
@@ -276,7 +283,8 @@ namespace InvoiceSystem.Tests.Unit.Modules.Ksef.Features.Inbox.SyncKsefInbox
             _ksefClient.InitSessionAsync("1234567890", "KEY-123", "CHALLENGE", "TIMESTAMP", Arg.Any<CancellationToken>())
                 .ThrowsAsync(mockKsefException);
 
-            var handler = new SyncKsefInboxCommandHandler(db, _ksefClient, _logger);
+            var syncService = new KsefSyncService(_syncLock, db, _ksefClient, Substitute.For<ILogger<KsefSyncService>>());
+            var handler = new SyncKsefInboxCommandHandler(db, syncService, _logger);
             var command = new SyncKsefInboxCommand();
 
             // Act

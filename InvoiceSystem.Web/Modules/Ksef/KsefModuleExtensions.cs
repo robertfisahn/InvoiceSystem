@@ -41,6 +41,8 @@ namespace InvoiceSystem.Web.Modules.Ksef
                     options.Retry.Delay = TimeSpan.FromSeconds(2);
                 });
 
+            services.AddSingleton<IKsefSyncLock, KsefSyncLock>();
+            services.AddScoped<IKsefSyncService, KsefSyncService>();
             services.AddHostedService<KsefSyncBackgroundService>();
 
             return services;

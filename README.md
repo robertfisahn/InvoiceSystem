@@ -85,6 +85,8 @@ dotnet run --project InvoiceSystem.Web
 | **Lista Faktur** | ✅ | Grid z danymi, filtrowanie |
 | **Nowa Faktura** | ✅ | Formularz, dynamiczne pozycje |
 | **Detale Faktury** | ✅ | Podgląd dokumentu (Paper Preview) |
+| **Integracja KSeF** | ✅ | Paczkowanie, kaskada w tle, odporność na 429 |
+| **Integracja GUS** | ✅ | Odpytywanie BIR1.1 po NIP via SOAP |
 | **Eksport PDF** | ⏳ | Planowane |
 
 </details>
@@ -98,7 +100,15 @@ dotnet run --project InvoiceSystem.Web
 Aplikacja została zaprojektowana w oparciu o cztery filary nowoczesnego inżynierii oprogramowania w .NET:
 
 1. **Modular Monolith (Modularny Monolit):**
-   Kod aplikacji podzielony jest na logiczne, niezależne i luźno powiązane moduły biznesowe zlokalizowane w folderze `Modules/` (np. `Invoices`, `Ksef`, `Contractors`, `Users`, `Dashboard`). Każdy moduł ma własny cykl życia, strukturę bazodanową i reguły biznesowe, co ułatwia ewentualne wydzielenie ich do osobnych mikroserwisów w przyszłości.
+   Kod aplikacji podzielony jest na logiczne, niezależne i luźno powiązane moduły biznesowe zlokalizowane w folderze `Modules/`. Każdy moduł ma własną dokumentację opisującą jego strukturę i reguły biznesowe:
+   
+   * [🔐 **Auth**](InvoiceSystem.Web/Modules/Auth/README.md) – Obsługa logowania, sesji oraz zabezpieczenie punktów końcowych.
+   * [🏢 **Contractors**](InvoiceSystem.Web/Modules/Contractors/README.md) – Rejestr kontrahentów i automatyczne uzupełnianie danych.
+   * [📊 **Dashboard**](InvoiceSystem.Web/Modules/Dashboard/README.md) – Pulpit menedżerski i finansowy aplikacji.
+   * [📡 **GUS**](InvoiceSystem.Web/Modules/Gus/README.md) – Integracja z bazą REGON za pomocą protokołu SOAP (BIR1.1).
+   * [🧾 **Invoices**](InvoiceSystem.Web/Modules/Invoices/README.md) – Zarządzanie fakturami, podgląd wydruku A4 oraz import z AI i OCR.
+   * [⚡ **KSeF**](InvoiceSystem.Web/Modules/Ksef/README.md) – Synchronizacja z Krajowym Systemem e-Faktur z obsługą limitów zapytań.
+
 2. **Vertical Slice Architecture (VSA):**
    Wewnątrz każdego modułu kod zorganizowany jest wokół konkretnych funkcji biznesowych (ang. *features*), a nie warstw technicznych (Controllers, Services, Repositories). Każdy pionowy plaster zawiera wszystko, co jest potrzebne do obsłużenia danego żądania – od widoku Razor, przez model widoku, aż po logikę zapisu w bazie danych.
 3. **CQRS za pomocą MediatR:**
@@ -109,6 +119,7 @@ Aplikacja została zaprojektowana w oparciu o cztery filary nowoczesnego inżyni
 #### 📁 Struktura folderów w module:
 ```text
 Modules/[Moduł]/
+├── README.md         # Dokumentacja modułu (opis, architektura, zależności)
 ├── Domain/           # Reguły biznesowe, encje domenowe
 ├── Infrastructure/   # Konfiguracja EF Core DbContext, integracje zewnętrzne (KsefClient itp.)
 └── Features/         # Slices (Funkcjonalności pionowe)
