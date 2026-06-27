@@ -100,7 +100,12 @@ dotnet run --project InvoiceSystem.Web
 Aplikacja została zaprojektowana w oparciu o cztery filary nowoczesnego inżynierii oprogramowania w .NET:
 
 1. **Modular Monolith (Modularny Monolit):**
-   Kod aplikacji podzielony jest na logiczne, niezależne i luźno powiązane moduły biznesowe zlokalizowane w folderze `Modules/`. Każdy moduł ma własną dokumentację opisującą jego strukturę i reguły biznesowe:
+   Kod aplikacji podzielony jest na logiczne, niezależne i luźno powiązane moduły biznesowe zlokalizowane w folderze `Modules/`. 
+   
+   * **Enkapsulacja DI (Dependency Injection)**: Każdy moduł posiada własny plik rejestracji usług (np. `KsefModuleExtensions.cs`, `AuthModuleExtensions.cs`). Wszystkie wewnętrzne zależności (serwisy, zadania w tle, konfiguracje) są rejestrowane wewnątrz modułu za pomocą metod rozszerzających `IServiceCollection`.
+   * **Zasada Portatywności (Plug-and-Play)**: Główny plik `Program.cs` nie zna szczegółów technicznych modułów – wywołuje jedynie ich rejestrację (np. `builder.Services.AddKsefModule()`). Ułatwia to testowanie, zapobiega bałaganowi w konfiguracji oraz pozwala na łatwą migrację – cały moduł można przenieść do innego projektu i zarejestrować jedną linijką kodu.
+   
+   Każdy moduł posiada własną dokumentację opisującą jego strukturę i reguły biznesowe:
    
    * [🔐 **Auth**](InvoiceSystem.Web/Modules/Auth/README.md) – Obsługa logowania, sesji oraz zabezpieczenie punktów końcowych.
    * [🏢 **Contractors**](InvoiceSystem.Web/Modules/Contractors/README.md) – Rejestr kontrahentów i automatyczne uzupełnianie danych.
