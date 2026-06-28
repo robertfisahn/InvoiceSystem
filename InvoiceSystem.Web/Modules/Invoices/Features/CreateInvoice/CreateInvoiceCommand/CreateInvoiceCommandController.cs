@@ -23,6 +23,10 @@ public sealed class CreateInvoiceCommandController(IMediator mediator) : Control
             foreach (var error in ex.Errors)
                 ModelState.AddModelError($"Command.{error.PropertyName}", error.ErrorMessage);
         }
+        catch (InvalidOperationException ex)
+        {
+            ModelState.AddModelError("Command.ContractorId", ex.Message);
+        }
 
         var refreshViewModel = await mediator.Send(new GetCreateInvoiceQuery.GetCreateInvoiceQuery());
         return View("~/Modules/Invoices/Features/CreateInvoice/GetCreateInvoiceQuery/Index.cshtml", refreshViewModel with { Command = command });

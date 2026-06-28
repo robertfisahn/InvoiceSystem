@@ -15,6 +15,12 @@ public sealed class CreateInvoiceHandler(AppDbContext db)
 {
     public async Task<int> Handle(CreateInvoiceCommand request, CancellationToken ct)
     {
+        var contractorExists = await db.Contractors.AnyAsync(c => c.Id == request.ContractorId, ct);
+        if (!contractorExists)
+        {
+            throw new InvalidOperationException($"Kontrahent o podanym identyfikatorze (ID: {request.ContractorId}) nie istnieje.");
+        }
+
         var invoiceNumber = await GenerateInvoiceNumberAsync(request.Date, ct);
 
         var invoice = new Invoice

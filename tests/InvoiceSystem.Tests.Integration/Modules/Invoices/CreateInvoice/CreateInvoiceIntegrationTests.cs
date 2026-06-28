@@ -68,7 +68,7 @@ namespace InvoiceSystem.Tests.Integration.Modules.Invoices.CreateInvoice
         }
 
         [Fact]
-        public async Task CreateInvoice_ShouldFail_WhenContractorDoesNotExistDueToDatabaseForeignKeyConstraint()
+        public async Task CreateInvoice_ShouldFail_WhenContractorDoesNotExist()
         {
             // Arrange
             using var scope = _factory.Services.CreateScope();
@@ -84,9 +84,9 @@ namespace InvoiceSystem.Tests.Integration.Modules.Invoices.CreateInvoice
             };
 
             // Act & Assert
-            // Verifies that the SQL Server database FK constraint is active and enforced at runtime
             Func<Task> act = async () => await mediator.Send(command, CancellationToken.None);
-            await act.Should().ThrowAsync<DbUpdateException>();
+            await act.Should().ThrowAsync<InvalidOperationException>()
+                .WithMessage("Kontrahent o podanym identyfikatorze (ID: 999999) nie istnieje.");
         }
     }
 }

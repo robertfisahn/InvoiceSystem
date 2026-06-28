@@ -156,5 +156,27 @@ namespace InvoiceSystem.Tests.Unit.Modules.Invoices.CreateInvoice
             inv2026!.InvoiceNumber.Should().Be("INV/2026/001"); // First invoice of 2026 in this isolated run
             inv2027!.InvoiceNumber.Should().Be("INV/2027/001"); // First invoice of 2027
         }
+
+        [Fact]
+        public async Task Handle_Should_Throw_InvalidOperationException_When_Contractor_Does_Not_Exist()
+        {
+            // Arrange
+            using var db = _fixture.CreateContext();
+            var handler = new CreateInvoiceHandler(db);
+
+            var command = new CreateInvoiceCommand
+            {
+                ContractorId = 9999, // Non-existent ID
+                Date = new DateTime(2026, 6, 14),
+                Items = new List<CreateInvoiceItemCommand> { new CreateInvoiceItemCommand("Item", 1, 10m) }
+            };
+
+            // Act
+            Func<Task> act = async () => await handler.Handle(command, CancellationToken.None);
+
+            // Assert
+            await act.Should().ThrowAsync<InvalidOperationException>()
+                .WithMessage("Kontrahent o podanym identyfikatorze (ID: 9999) nie istnieje.");
+        }
     }
 }
