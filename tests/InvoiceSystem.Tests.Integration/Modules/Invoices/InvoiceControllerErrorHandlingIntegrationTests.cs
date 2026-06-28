@@ -255,5 +255,34 @@ namespace InvoiceSystem.Tests.Integration.Modules.Invoices
             response.StatusCode.Should().Be(HttpStatusCode.Redirect);
             response.Headers.Location?.ToString().Should().Be("/invoices");
         }
+
+        [Fact]
+        public async Task CreateInvoice_ShouldReturnOkWithValidationError_WhenContractorDoesNotExist()
+        {
+            // Arrange
+            var client = CreateAuthenticatedClient(allowAutoRedirect: false);
+
+            var getResponse = await client.GetAsync("/invoices/generator");
+            var getHtml = await getResponse.Content.ReadAsStringAsync();
+            var token = ExtractAntiforgeryToken(getHtml);
+
+            var formFields = new FormUrlEncodedContent(new[]
+            {
+                new KeyValuePair<string, string>("Command.ContractorId", "99999"), // non-existent Contractor ID
+                new KeyValuePair<string, string>("Command.Date", DateTime.Today.ToString("yyyy-MM-dd")),
+                new KeyValuePair<string, string>("Command.Items[0].Name", "Valid Item"),
+                new KeyValuePair<string, string>("Command.Items[0].Quantity", "1"),
+                new KeyValuePair<string, string>("Command.Items[0].UnitPrice", "10"),
+                new KeyValuePair<string, string>("__RequestVerificationToken", token)
+            });
+
+            // Act
+            var response = await client.PostAsync("/invoices/create", formFields);
+
+            // Assert
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
+            var content = await response.Content.ReadAsStringAsync();
+            content.Should().Contain("Kontrahent o podanym identyfikatorze (ID: 99999) nie istnieje.");
+        }
     }
 }
