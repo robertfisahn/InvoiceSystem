@@ -16,9 +16,14 @@ using InvoiceSystem.Web.Modules.Gus;
 using InvoiceSystem.Web.Modules.Invoices;
 using InvoiceSystem.Web.Modules.Ksef;
 using SoapCore;
+using InvoiceSystem.Web.Infrastructure.Errors;
 
 DotNetEnv.Env.Load();
 var builder = WebApplication.CreateBuilder(args);
+
+// Exception Handling & Problem Details
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
 
 // MediatR + FluentValidation (VSA Monolith — all in one assembly)
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
@@ -122,6 +127,8 @@ using (var scope = app.Services.CreateScope())
 }
 
 // Configure the HTTP request pipeline.
+app.UseExceptionHandler("/error");
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -132,7 +139,6 @@ if (app.Environment.IsDevelopment())
 }
 else
 {
-    app.UseExceptionHandler("/invoices");
     app.UseHsts();
 }
 
