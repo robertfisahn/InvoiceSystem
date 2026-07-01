@@ -20,9 +20,7 @@ Lista ta będzie sukcesywnie czyszczona w dedykowanych sesjach refaktoryzacyjnyc
 * **Status**: Otwarte (Architektoniczne / Do realizacji w przyszłości)
 * **Opis**: Przygotowanie systemu pod wielu najemców (firmy). Wymaga wdrożenia izolacji danych za pomocą pola `TenantId` oraz mechanizmu Global Query Filters w EF Core. Należy również dostosować aplikację do skalowania poziomego (bezstanowość sesji w Redis, zapis plików w AWS S3 / Azure Blob Storage) oraz przenieść procesy integracji z KSeF na kolejki wiadomości (Message Queue, np. RabbitMQ/Hangfire/MassTransit) zamiast wykonywać je synchronicznie w kontrolerze MVC.
 
-### DT-010. Diagnostyka i monitoring wydajności (MediatR Pipeline Behaviors & APM)
-* **Status**: Otwarte (Do realizacji)
-* **Opis**: Wdrożenie mechanizmów pomiaru czasu wykonania handlerów MediatR (`PerformanceBehavior` przy użyciu `Stopwatch`), strukturyzowanego logowania zdarzeń oraz integracji z systemami klasy APM (Seq/ELK/OpenTelemetry) do automatycznego wykrywania wąskich gardeł i anomalii.
+
 
 ---
 
@@ -59,3 +57,7 @@ Lista ta będzie sukcesywnie czyszczona w dedykowanych sesjach refaktoryzacyjnyc
 ### 7. Globalna obsługa wyjątków w aplikacji (DT-004)
 * **Status**: Rozwiązane (30.06.2026)
 * **Opis**: Wdrożono centralny mechanizm przechwytywania błędów za pomocą `.NET 9 IExceptionHandler` (klasa `GlobalExceptionHandler`). Zwraca ustandaryzowany format *Problem Details* (JSON) dla zapytań API/KSeF oraz przyjazny widok HTML `/error` (ErrorsController + ErrorViewModel) z unikalnym Trace ID dla żądań tradycyjnych stron MVC.
+
+### 8. Diagnostyka i monitoring wydajności (DT-010)
+* **Status**: Rozwiązane (01.07.2026)
+* **Opis**: Wdrożono strukturyzowane logowanie za pomocą biblioteki Serilog z dobowym podziałem plików (Logs/log-.txt) oraz zintegrowano potok MediatR z mechanizmem `PerformanceBehavior` automatycznie monitorującym czasy wykonania każdego handlera biznesowego przy użyciu `Stopwatch`. Powyżej progu 500 ms handler raportuje automatyczne ostrzeżenie o obciążeniu.

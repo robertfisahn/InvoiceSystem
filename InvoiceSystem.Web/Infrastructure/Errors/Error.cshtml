@@ -215,13 +215,14 @@
         <h1 class="error-title">Coś poszło nie tak</h1>
         <p class="error-subtitle">
             Przepraszamy, wystąpił nieoczekiwany błąd serwera. Nasz zespół techniczny został o tym automatycznie powiadomiony.
+            W razie potrzeby możesz zapisać poniższy identyfikator błędu do celów diagnostycznych.
         </p>
 
         <div class="error-details">
             <div class="error-details-label">Komunikat o błędzie:</div>
             <div class="mb-3 text-white" style="word-break: break-all;">@Model.Message</div>
 
-            <div class="error-details-label">Trace ID (Podaj administratorowi):</div>
+            <div class="error-details-label">Trace ID (identyfikator błędu):</div>
             <div class="trace-id-container">
                 <span id="traceId">@Model.TraceId</span>
                 <button class="btn-copy" onclick="copyTraceId()" title="Kopiuj Trace ID">

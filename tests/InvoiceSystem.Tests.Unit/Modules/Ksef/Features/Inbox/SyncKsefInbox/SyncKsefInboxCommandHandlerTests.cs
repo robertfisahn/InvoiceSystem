@@ -250,7 +250,8 @@ namespace InvoiceSystem.Tests.Unit.Modules.Ksef.Features.Inbox.SyncKsefInbox
             var result = await handler.Handle(command, CancellationToken.None);
 
             // Assert
-            result.Success.Should().BeTrue();
+            result.Success.Should().BeFalse();
+            result.ErrorMessage.Should().Contain("Wystąpił błąd podczas pobierania faktury");
             result.NewInvoicesCount.Should().Be(1);
 
             // Under incremental watermarking, OK-1 succeeds so LastSyncDate should update to today
